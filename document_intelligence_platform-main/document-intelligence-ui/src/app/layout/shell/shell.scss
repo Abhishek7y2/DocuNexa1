@@ -55,6 +55,14 @@
   }
 }
 
+.shell-body {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
 .main-area {
   flex: 1;
   min-width: 0;

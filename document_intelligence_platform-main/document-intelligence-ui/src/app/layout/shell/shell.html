@@ -14,14 +14,16 @@
     </div>
   }
 
-  <app-sidebar></app-sidebar>
+  <div class="shell-body">
+    <app-sidebar></app-sidebar>
 
-  <div class="main-area">
-    <app-topbar></app-topbar>
+    <div class="main-area">
+      <app-topbar></app-topbar>
 
-    <main class="page-content">
-      <router-outlet></router-outlet>
-    </main>
+      <main class="page-content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
   </div>
   
   <app-session-warning-modal></app-session-warning-modal>
