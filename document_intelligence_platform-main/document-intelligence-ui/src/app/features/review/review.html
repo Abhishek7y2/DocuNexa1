@@ -172,7 +172,16 @@
   </section>
 
   <!-- QUEUE TABLE CARD -->
-  <section class="queue-card">
+  @if (isLoading()) {
+    <app-loading-state message="Loading verification review queue..."></app-loading-state>
+  } @else if (hasError()) {
+    <app-error-state
+      title="Unable to load review queue"
+      message="We encountered an issue fetching documents awaiting HITL verification."
+      (retry)="retryLoad()"
+    ></app-error-state>
+  } @else {
+    <section class="queue-card">
     <div class="card-header">
       <div class="header-left">
         <span class="section-tag">AUDIT TRAIL & QUEUE</span>
@@ -319,6 +328,7 @@
       }
     </div>
   </section>
+  }
 
   <!-- ACTION MODAL DIALOG -->
   @if (showActionPanel && selectedDocument) {

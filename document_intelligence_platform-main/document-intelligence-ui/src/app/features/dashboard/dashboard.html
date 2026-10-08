@@ -45,8 +45,18 @@
     </a>
   </div>
 
-  <!-- SECTION 1: "DocuNexa's Achievements" (6 Sparkline Stat Cards) -->
-  <section class="achievements-section">
+  <!-- LOADING / ERROR STATES -->
+  @if (isLoading()) {
+    <app-loading-state message="Fetching live dashboard metrics and pipeline funnel stats..."></app-loading-state>
+  } @else if (hasError()) {
+    <app-error-state
+      title="Unable to load dashboard stats"
+      message="We encountered an issue fetching real-time document workspace metrics."
+      (retry)="loadData()"
+    ></app-error-state>
+  } @else {
+    <!-- SECTION 1: "DocuNexa's Achievements" (6 Sparkline Stat Cards) -->
+    <section class="achievements-section">
     <div class="section-title-bar">
       <h2>DocuNexa's Achievements</h2>
       <span class="timestamp-label">Data as on Oct 07, 2026</span>
@@ -507,4 +517,5 @@
       </div>
     </div>
   </section>
+  }
 </div>

@@ -109,8 +109,16 @@
 
 
   <!-- Task List -->
-
-  <section class="tasks-card">
+  @if (isLoading()) {
+    <app-loading-state message="Loading assigned workflow tasks..."></app-loading-state>
+  } @else if (hasError()) {
+    <app-error-state
+      title="Unable to load tasks"
+      message="We encountered an issue fetching assigned workflow tasks."
+      (retry)="retryLoad()"
+    ></app-error-state>
+  } @else {
+    <section class="tasks-card">
 
     <div class="card-header">
 
@@ -277,6 +285,7 @@
     }
 
   </section>
+  }
 
 
   <!-- Task Detail Panel -->

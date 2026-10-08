@@ -208,8 +208,16 @@
 
 
   <!-- APPROVAL QUEUE -->
-
-  <section class="queue-card">
+  @if (isLoading()) {
+    <app-loading-state message="Loading workflow approvals queue..."></app-loading-state>
+  } @else if (hasError()) {
+    <app-error-state
+      title="Unable to load approval queue"
+      message="We encountered an issue fetching documents awaiting approval sign-off."
+      (retry)="retryLoad()"
+    ></app-error-state>
+  } @else {
+    <section class="queue-card">
 
     <div class="queue-header">
 
@@ -473,6 +481,7 @@
     </div>
 
   </section>
+  }
 
 
   <!-- APPROVAL HISTORY -->

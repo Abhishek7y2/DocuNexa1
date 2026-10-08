@@ -190,9 +190,9 @@
   </div>
 
   <!-- LOADING / ERROR / EMPTY STATES -->
-  @if (isLoading) {
+  @if (isLoading()) {
     <app-loading-state message="Loading document repository assets..."></app-loading-state>
-  } @else if (hasError) {
+  } @else if (hasError()) {
     <app-error-state
       title="Unable to load documents"
       message="We encountered an issue connecting to the document repository."

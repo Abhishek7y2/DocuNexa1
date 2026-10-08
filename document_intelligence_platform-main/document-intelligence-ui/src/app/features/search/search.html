@@ -219,7 +219,15 @@
     <!-- RESULTS -->
 
     <main class="results-panel">
-
+      @if (isLoading()) {
+        <app-loading-state message="Searching documents using hybrid RAG index..."></app-loading-state>
+      } @else if (hasError()) {
+        <app-error-state
+          title="Search execution failed"
+          message="We encountered an issue communicating with the semantic search index."
+          (retry)="retryLoad()"
+        ></app-error-state>
+      } @else {
       <div class="results-header">
 
         <div>
@@ -437,6 +445,7 @@
 
         </div>
 
+      }
       }
 
     </main>

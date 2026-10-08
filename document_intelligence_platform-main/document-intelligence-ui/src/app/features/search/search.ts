@@ -1,8 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-interface SearchDocument {
+import { LoadingState } from '../../shared/ui/loading-state/loading-state';
+import { ErrorState } from '../../shared/ui/error-state/error-state';
+import { SEARCH_SERVICE_TOKEN, MockSearchService } from '../../core/services/api-services';
+
+export interface SearchDocument {
   id: string;
   name: string;
   type: string;
@@ -20,142 +25,63 @@ interface SearchDocument {
 @Component({
   selector: 'app-search',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, LoadingState, ErrorState],
   templateUrl: './search.html',
   styleUrl: './search.scss',
+  providers: [{ provide: SEARCH_SERVICE_TOKEN, useClass: MockSearchService }],
 })
-export class Search {
-  searchTerm = '';
+export class Search implements OnInit {
+  private readonly searchService = inject(SEARCH_SERVICE_TOKEN);
 
+  searchTerm = '';
   selectedType = 'All Types';
   selectedStatus = 'All Status';
   selectedOwner = 'All Owners';
   selectedCategory = 'All Categories';
 
   hasSearched = false;
+  isLoading = signal(false);
+  hasError = signal(false);
 
-  documents: SearchDocument[] = [
-    {
-      id: 'DOC-10248',
-      name: 'Supplier Agreement - Acme Industries',
-      type: 'Supplier Contract',
-      category: 'Contract',
-      status: 'Approved',
-      owner: 'Abhishek Yadav',
-      updatedAt: '06 Oct 2026',
-      pages: 18,
-      size: '2.4 MB',
-      confidence: 98,
-      snippet:
-        'This agreement establishes the commercial terms, payment obligations, delivery conditions and responsibilities between Acme Industries and the organization.',
-      tags: ['Supplier', 'Contract', 'Commercial'],
-    },
-    {
-      id: 'DOC-10247',
-      name: 'Purchase Invoice - INV-78421',
-      type: 'Purchase Invoice',
-      category: 'Invoice',
-      status: 'Pending Review',
-      owner: 'Rahul Sharma',
-      updatedAt: '06 Oct 2026',
-      pages: 4,
-      size: '1.8 MB',
-      confidence: 91,
-      snippet:
-        'Invoice includes supplier information, purchase order reference, taxable amount, GST details and payment terms for the current transaction.',
-      tags: ['Invoice', 'GST', 'Purchase'],
-    },
-    {
-      id: 'DOC-10246',
-      name: 'Information Security Policy',
-      type: 'Internal Policy',
-      category: 'Policy',
-      status: 'Approved',
-      owner: 'Priya Mehta',
-      updatedAt: '05 Oct 2026',
-      pages: 26,
-      size: '3.1 MB',
-      confidence: 99,
-      snippet:
-        'The information security policy defines access control, data protection, incident management and employee responsibilities for organizational systems.',
-      tags: ['Security', 'Policy', 'Compliance'],
-    },
-    {
-      id: 'DOC-10245',
-      name: 'Vendor Master Agreement',
-      type: 'Supplier Contract',
-      category: 'Contract',
-      status: 'Under Review',
-      owner: 'Abhishek Yadav',
-      updatedAt: '05 Oct 2026',
-      pages: 32,
-      size: '4.7 MB',
-      confidence: 87,
-      snippet:
-        'Vendor agreement covers service levels, confidentiality, intellectual property, pricing, renewal and termination provisions.',
-      tags: ['Vendor', 'Agreement', 'SLA'],
-    },
-    {
-      id: 'DOC-10243',
-      name: 'Employee Data Handling Policy',
-      type: 'Internal Policy',
-      category: 'Policy',
-      status: 'Draft',
-      owner: 'Abhishek Yadav',
-      updatedAt: '03 Oct 2026',
-      pages: 14,
-      size: '2.8 MB',
-      confidence: 95,
-      snippet:
-        'This policy describes how employee information should be collected, stored, accessed and securely deleted across business systems.',
-      tags: ['Employee', 'Data', 'Privacy'],
-    },
-    {
-      id: 'DOC-10240',
-      name: 'Purchase Invoice - INV-78416',
-      type: 'Purchase Invoice',
-      category: 'Invoice',
-      status: 'In Approval',
-      owner: 'Neha Verma',
-      updatedAt: '05 Oct 2026',
-      pages: 5,
-      size: '1.5 MB',
-      confidence: 94,
-      snippet:
-        'Purchase invoice containing supplier billing information, line items, tax calculations and payment instructions.',
-      tags: ['Invoice', 'Finance'],
-    },
-    {
-      id: 'DOC-10237',
-      name: 'Cloud Infrastructure Contract',
-      type: 'Supplier Contract',
-      category: 'Contract',
-      status: 'Pending Approval',
-      owner: 'Rahul Sharma',
-      updatedAt: '04 Oct 2026',
-      pages: 27,
-      size: '5.2 MB',
-      confidence: 96,
-      snippet:
-        'Cloud infrastructure agreement includes availability requirements, service credits, support obligations and data security commitments.',
-      tags: ['Cloud', 'Infrastructure', 'SLA'],
-    },
-    {
-      id: 'DOC-10235',
-      name: 'Employee Benefits Policy',
-      type: 'Internal Policy',
-      category: 'Policy',
-      status: 'Approved',
-      owner: 'Abhishek Yadav',
-      updatedAt: '03 Oct 2026',
-      pages: 16,
-      size: '2.1 MB',
-      confidence: 97,
-      snippet:
-        'Policy describes employee benefits eligibility, enrollment requirements, reimbursement rules and organizational responsibilities.',
-      tags: ['HR', 'Benefits', 'Policy'],
-    },
-  ];
+  documents: SearchDocument[] = [];
+
+  ngOnInit(): void {
+    this.executeSearch('contract');
+  }
+
+  executeSearch(query = this.searchTerm): void {
+    this.isLoading.set(true);
+    this.hasError.set(false);
+    this.hasSearched = true;
+
+    this.searchService.semanticSearch(query || 'invoice').subscribe({
+      next: (results) => {
+        this.documents = results.map((r) => ({
+          id: r.docId,
+          name: r.title,
+          type: r.category,
+          category: r.category,
+          status: 'Approved',
+          owner: 'Abhishek Yadav',
+          updatedAt: '06 Oct 2026',
+          pages: 18,
+          size: '2.4 MB',
+          confidence: Math.round(r.matchScore * 100),
+          snippet: r.snippet,
+          tags: [r.category, 'Semantic Match'],
+        }));
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.hasError.set(true);
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  retryLoad(): void {
+    this.executeSearch();
+  }
 
   get filteredDocuments(): SearchDocument[] {
     const search = this.searchTerm.trim().toLowerCase();
@@ -169,9 +95,7 @@ export class Search {
         document.type.toLowerCase().includes(search) ||
         document.category.toLowerCase().includes(search) ||
         document.snippet.toLowerCase().includes(search) ||
-        document.tags.some((tag) =>
-          tag.toLowerCase().includes(search),
-        );
+        document.tags.some((tag) => tag.toLowerCase().includes(search));
 
       const matchesType =
         this.selectedType === 'All Types' ||
@@ -200,7 +124,7 @@ export class Search {
   }
 
   search(): void {
-    this.hasSearched = true;
+    this.executeSearch();
   }
 
   clearSearch(): void {
@@ -210,6 +134,7 @@ export class Search {
     this.selectedOwner = 'All Owners';
     this.selectedCategory = 'All Categories';
     this.hasSearched = false;
+    this.executeSearch('all');
   }
 
   get resultCount(): number {

@@ -1,8 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-interface TaskItem {
+import { LoadingState } from '../../shared/ui/loading-state/loading-state';
+import { ErrorState } from '../../shared/ui/error-state/error-state';
+import { REVIEW_SERVICE_TOKEN, MockReviewService } from '../../core/services/api-services';
+
+export interface TaskItem {
   id: string;
   title: string;
   description: string;
@@ -19,104 +24,61 @@ interface TaskItem {
 @Component({
   selector: 'app-tasks',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, LoadingState, ErrorState],
   templateUrl: './tasks.html',
   styleUrl: './tasks.scss',
+  providers: [{ provide: REVIEW_SERVICE_TOKEN, useClass: MockReviewService }],
 })
-export class Tasks {
+export class Tasks implements OnInit {
+  private readonly reviewService = inject(REVIEW_SERVICE_TOKEN);
+
   searchTerm = '';
   selectedStatus = 'All Status';
   selectedPriority = 'All Priority';
 
+  isLoading = signal(true);
+  hasError = signal(false);
+
   selectedTask: TaskItem | null = null;
   showTaskPanel = false;
 
-  tasks: TaskItem[] = [
-    {
-      id: 'TSK-00421',
-      title: 'Review extracted invoice fields',
-      description:
-        'Verify vendor name, invoice amount, tax details and invoice date.',
-      documentId: 'DOC-10247',
-      documentName: 'Purchase Invoice - INV-78421',
-      type: 'Review',
-      priority: 'High',
-      status: 'Pending',
-      assignedBy: 'Priya Mehta',
-      dueDate: 'Today, 08:00 PM',
-      createdAt: '06 Oct 2026 · 09:18 AM',
-    },
-    {
-      id: 'TSK-00420',
-      title: 'Approve supplier agreement',
-      description:
-        'Final approval is required after reviewer validation.',
-      documentId: 'DOC-10245',
-      documentName: 'Vendor Master Agreement',
-      type: 'Approval',
-      priority: 'High',
-      status: 'In Progress',
-      assignedBy: 'Rahul Sharma',
-      dueDate: '07 Oct 2026',
-      createdAt: '05 Oct 2026 · 03:42 PM',
-    },
-    {
-      id: 'TSK-00419',
-      title: 'Validate policy extraction',
-      description:
-        'Check extracted policy sections against the source document.',
-      documentId: 'DOC-10243',
-      documentName: 'Employee Data Handling Policy',
-      type: 'Review',
-      priority: 'Medium',
-      status: 'Pending',
-      assignedBy: 'Priya Mehta',
-      dueDate: '08 Oct 2026',
-      createdAt: '05 Oct 2026 · 11:26 AM',
-    },
-    {
-      id: 'TSK-00418',
-      title: 'Review contract changes',
-      description:
-        'Review the requested changes in the supplier contract.',
-      documentId: 'DOC-10239',
-      documentName: 'Technology Services Agreement',
-      type: 'Review',
-      priority: 'Medium',
-      status: 'Overdue',
-      assignedBy: 'Rahul Sharma',
-      dueDate: '05 Oct 2026',
-      createdAt: '04 Oct 2026 · 01:08 PM',
-    },
-    {
-      id: 'TSK-00417',
-      title: 'Confirm invoice classification',
-      description:
-        'Confirm that the uploaded document has been classified correctly.',
-      documentId: 'DOC-10241',
-      documentName: 'Purchase Invoice - INV-78415',
-      type: 'Validation',
-      priority: 'Low',
-      status: 'Completed',
-      assignedBy: 'Neha Verma',
-      dueDate: '04 Oct 2026',
-      createdAt: '04 Oct 2026 · 05:14 PM',
-    },
-    {
-      id: 'TSK-00416',
-      title: 'Review information security policy',
-      description:
-        'Perform final reader-level verification before publishing.',
-      documentId: 'DOC-10246',
-      documentName: 'Information Security Policy',
-      type: 'Review',
-      priority: 'Low',
-      status: 'Completed',
-      assignedBy: 'Priya Mehta',
-      dueDate: '03 Oct 2026',
-      createdAt: '03 Oct 2026 · 10:42 AM',
-    },
-  ];
+  tasks: TaskItem[] = [];
+
+  ngOnInit(): void {
+    this.loadTasks();
+  }
+
+  loadTasks(): void {
+    this.isLoading.set(true);
+    this.hasError.set(false);
+
+    this.reviewService.getReviewQueue().subscribe({
+      next: (queue) => {
+        this.tasks = queue.map((q) => ({
+          id: `TSK-${q.id.replace('REV-', '')}`,
+          title: `Review ${q.documentTitle}`,
+          description: 'Verify extracted metadata and resolve field anomalies.',
+          documentId: q.docId,
+          documentName: q.documentTitle,
+          type: 'Review',
+          priority: q.priority || 'High',
+          status: q.status === 'Pending Review' ? 'Pending' : (q.status as any),
+          assignedBy: 'Priya Mehta',
+          dueDate: 'Today, 08:00 PM',
+          createdAt: q.submittedAt || '06 Oct 2026',
+        }));
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.hasError.set(true);
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  retryLoad(): void {
+    this.loadTasks();
+  }
 
   get filteredTasks(): TaskItem[] {
     const search = this.searchTerm.trim().toLowerCase();
@@ -146,27 +108,19 @@ export class Tasks {
   }
 
   get pendingCount(): number {
-    return this.tasks.filter(
-      (task) => task.status === 'Pending',
-    ).length;
+    return this.tasks.filter((task) => task.status === 'Pending').length;
   }
 
   get inProgressCount(): number {
-    return this.tasks.filter(
-      (task) => task.status === 'In Progress',
-    ).length;
+    return this.tasks.filter((task) => task.status === 'In Progress').length;
   }
 
   get overdueCount(): number {
-    return this.tasks.filter(
-      (task) => task.status === 'Overdue',
-    ).length;
+    return this.tasks.filter((task) => task.status === 'Overdue').length;
   }
 
   get completedCount(): number {
-    return this.tasks.filter(
-      (task) => task.status === 'Completed',
-    ).length;
+    return this.tasks.filter((task) => task.status === 'Completed').length;
   }
 
   openTask(task: TaskItem): void {
@@ -180,35 +134,17 @@ export class Tasks {
   }
 
   startTask(): void {
-    if (!this.selectedTask) {
-      return;
-    }
-
-    const task = this.tasks.find(
-      (item) => item.id === this.selectedTask?.id,
-    );
-
-    if (!task) {
-      return;
-    }
-
+    if (!this.selectedTask) return;
+    const task = this.tasks.find((item) => item.id === this.selectedTask?.id);
+    if (!task) return;
     task.status = 'In Progress';
     this.selectedTask = task;
   }
 
   completeTask(): void {
-    if (!this.selectedTask) {
-      return;
-    }
-
-    const task = this.tasks.find(
-      (item) => item.id === this.selectedTask?.id,
-    );
-
-    if (!task) {
-      return;
-    }
-
+    if (!this.selectedTask) return;
+    const task = this.tasks.find((item) => item.id === this.selectedTask?.id);
+    if (!task) return;
     task.status = 'Completed';
     this.selectedTask = task;
   }

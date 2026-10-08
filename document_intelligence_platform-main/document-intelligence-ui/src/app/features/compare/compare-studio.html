@@ -120,7 +120,16 @@
   </div>
 
   <!-- COMPARISON TABLE / DUAL COLUMN CONTAINER -->
-  <div class="compare-container">
+  @if (isLoading()) {
+    <app-loading-state message="Comparing document versions and running clause diff analysis..."></app-loading-state>
+  } @else if (hasError()) {
+    <app-error-state
+      title="Unable to compare document versions"
+      message="We encountered an issue processing the version comparison diff."
+      (retry)="retryLoad()"
+    ></app-error-state>
+  } @else {
+    <div class="compare-container">
 
     <!-- COLUMN HEADERS -->
     <div class="column-headers-row">
@@ -230,6 +239,7 @@
     </div>
 
   </div>
+  }
 
   <!-- TOAST POPUP -->
   @if (toastMessage) {

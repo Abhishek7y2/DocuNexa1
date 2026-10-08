@@ -1,8 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-interface ReviewDocument {
+import { LoadingState } from '../../shared/ui/loading-state/loading-state';
+import { ErrorState } from '../../shared/ui/error-state/error-state';
+import { REVIEW_SERVICE_TOKEN, MockReviewService, IReviewTask } from '../../core/services/api-services';
+
+export interface ReviewDocument {
   id: string;
   name: string;
   type: string;
@@ -10,126 +15,72 @@ interface ReviewDocument {
   submittedAt: string;
   priority: 'High' | 'Medium' | 'Low';
   confidence: number;
-  status:
-    | 'Pending Review'
-    | 'In Review'
-    | 'Changes Requested'
-    | 'Approved';
+  status: string;
   pages: number;
 }
 
 @Component({
   selector: 'app-review',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, LoadingState, ErrorState],
   templateUrl: './review.html',
   styleUrl: './review.scss',
+  providers: [{ provide: REVIEW_SERVICE_TOKEN, useClass: MockReviewService }],
 })
-export class Review {
+export class Review implements OnInit {
+  private readonly reviewService = inject(REVIEW_SERVICE_TOKEN);
+
   searchTerm = '';
   selectedType = 'All Types';
   selectedPriority = 'All Priority';
   selectedStatus = 'All Status';
   activeTab: 'all' | 'pending' | 'high' | 'low-confidence' | 'approved' = 'all';
 
-  selectedDocument: ReviewDocument | null = null;
+  isLoading = signal(true);
+  hasError = signal(false);
 
+  selectedDocument: ReviewDocument | null = null;
   showActionPanel = false;
   actionType = '';
   actionComment = '';
   reviewerName = 'Abhishek Yadav';
   reviewerRole = 'Senior Verification Lead';
 
-  reviewDocuments: ReviewDocument[] = [
-    {
-      id: 'DOC-10247',
-      name: 'Purchase Invoice - INV-78421',
-      type: 'Purchase Invoice',
-      owner: 'Rahul Sharma',
-      submittedAt: '06 Oct 2026 · 09:18 AM',
-      priority: 'High',
-      confidence: 91,
-      status: 'Pending Review',
-      pages: 4,
-    },
-    {
-      id: 'DOC-10245',
-      name: 'Vendor Master Agreement',
-      type: 'Supplier Contract',
-      owner: 'Abhishek Yadav',
-      submittedAt: '05 Oct 2026 · 03:42 PM',
-      priority: 'High',
-      confidence: 87,
-      status: 'In Review',
-      pages: 32,
-    },
-    {
-      id: 'DOC-10243',
-      name: 'Employee Data Handling Policy',
-      type: 'Internal Policy',
-      owner: 'Abhishek Yadav',
-      submittedAt: '05 Oct 2026 · 11:26 AM',
-      priority: 'Medium',
-      confidence: 95,
-      status: 'Pending Review',
-      pages: 14,
-    },
-    {
-      id: 'DOC-10241',
-      name: 'Purchase Invoice - INV-78415',
-      type: 'Purchase Invoice',
-      owner: 'Neha Verma',
-      submittedAt: '04 Oct 2026 · 05:14 PM',
-      priority: 'Medium',
-      confidence: 89,
-      status: 'Pending Review',
-      pages: 3,
-    },
-    {
-      id: 'DOC-10239',
-      name: 'Technology Services Agreement',
-      type: 'Supplier Contract',
-      owner: 'Rahul Sharma',
-      submittedAt: '04 Oct 2026 · 01:08 PM',
-      priority: 'Low',
-      confidence: 97,
-      status: 'Changes Requested',
-      pages: 21,
-    },
-    {
-      id: 'DOC-10236',
-      name: 'Information Security Policy',
-      type: 'Internal Policy',
-      owner: 'Priya Mehta',
-      submittedAt: '03 Oct 2026 · 10:42 AM',
-      priority: 'Low',
-      confidence: 98,
-      status: 'Pending Review',
-      pages: 26,
-    },
-    {
-      id: 'DOC-10232',
-      name: 'Q3 Financial Audit Summary',
-      type: 'Financial Report',
-      owner: 'Arjun Kapoor',
-      submittedAt: '03 Oct 2026 · 08:30 AM',
-      priority: 'High',
-      confidence: 84,
-      status: 'Pending Review',
-      pages: 18,
-    },
-    {
-      id: 'DOC-10228',
-      name: 'SaaS SLA Agreement - Enterprise',
-      type: 'Supplier Contract',
-      owner: 'Karan Malhotra',
-      submittedAt: '02 Oct 2026 · 04:15 PM',
-      priority: 'Medium',
-      confidence: 99,
-      status: 'Approved',
-      pages: 12,
-    }
-  ];
+  reviewDocuments: ReviewDocument[] = [];
+
+  ngOnInit(): void {
+    this.loadReviewQueue();
+  }
+
+  loadReviewQueue(): void {
+    this.isLoading.set(true);
+    this.hasError.set(false);
+
+    this.reviewService.getReviewQueue().subscribe({
+      next: (queue) => {
+        this.reviewDocuments = queue.map((q) => ({
+          id: q.id,
+          name: q.documentTitle,
+          type: q.type || 'Purchase Invoice',
+          owner: q.assignee,
+          submittedAt: q.submittedAt || 'Today',
+          priority: q.priority || 'High',
+          confidence: q.confidence || 88,
+          status: q.status,
+          pages: q.pages || 4,
+        }));
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.hasError.set(true);
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  retryLoad(): void {
+    this.loadReviewQueue();
+  }
 
   get filteredDocuments(): ReviewDocument[] {
     const search = this.searchTerm.trim().toLowerCase();
@@ -252,11 +203,7 @@ export class Review {
       document.status = 'Approved';
     }
 
-    if (this.actionType === 'Reject') {
-      document.status = 'Changes Requested';
-    }
-
-    if (this.actionType === 'Request Changes') {
+    if (this.actionType === 'Reject' || this.actionType === 'Request Changes') {
       document.status = 'Changes Requested';
     }
 
