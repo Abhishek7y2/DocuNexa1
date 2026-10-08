@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 
 import { LoadingState } from '../../shared/ui/loading-state/loading-state';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
@@ -32,6 +32,7 @@ export type SortOrder = 'asc' | 'desc';
 })
 export class Documents implements OnInit {
   private readonly documentService = inject(DOCUMENT_SERVICE_TOKEN);
+  private readonly route = inject(ActivatedRoute);
 
   searchTerm = '';
   selectedType = 'All Types';
@@ -69,6 +70,20 @@ export class Documents implements OnInit {
   exportSuccessToast: string | null = null;
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      if (params['category']) {
+        this.selectedCategory = params['category'];
+      }
+      if (params['status']) {
+        this.selectedStatus = params['status'];
+      }
+      if (params['q']) {
+        this.searchTerm = params['q'];
+      }
+      if (params['filter'] && params['filter'] !== 'all') {
+        this.searchTerm = params['filter'];
+      }
+    });
     this.loadDocuments();
   }
 
