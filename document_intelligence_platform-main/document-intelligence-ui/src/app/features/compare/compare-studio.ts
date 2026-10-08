@@ -7,6 +7,11 @@ import { LoadingState } from '../../shared/ui/loading-state/loading-state';
 import { ErrorState, ErrorVariant } from '../../shared/ui/error-state/error-state';
 import { COMPARE_SERVICE_TOKEN, MockCompareService } from '../../core/services/api-services';
 
+export interface DiffChunk {
+  text: string;
+  type: 'normal' | 'added' | 'removed';
+}
+
 export interface ClauseDiff {
   id: string;
   sectionNumber: string;
@@ -15,12 +20,19 @@ export interface ClauseDiff {
   changeType: 'added' | 'removed' | 'modified' | 'unchanged';
   version1Text: string;
   version2Text: string;
+  beforeSummary: string;
+  afterSummary: string;
+  plainEnglishImpact: string;
+  legalRecommendation: string;
   pageCitationV1: string;
   pageCitationV2: string;
   riskImpact: 'High' | 'Medium' | 'Low' | 'None';
   summaryDelta?: string;
   isUncertainAlignment?: boolean;
-  status?: 'pending' | 'accepted' | 'flagged';
+  status: 'pending' | 'accepted' | 'flagged';
+  v1Chunks: DiffChunk[];
+  v2Chunks: DiffChunk[];
+  unifiedChunks: DiffChunk[];
 }
 
 export interface FieldDiff {
@@ -30,6 +42,7 @@ export interface FieldDiff {
   v2Value: string;
   status: 'Added' | 'Removed' | 'Modified';
   varianceImpact?: string;
+  plainMeaning: string;
   reviewed?: boolean;
 }
 
@@ -74,6 +87,7 @@ export class CompareStudio implements OnInit {
 
   activeFilter: 'all' | 'changed' | 'financial' | 'compliance' | 'highRisk' = 'changed';
   searchQuery = '';
+  selectedClauseId: string | null = null;
   isLoading = signal(true);
   hasError = signal(false);
   errorVariant = signal<ErrorVariant>('default');
@@ -89,6 +103,7 @@ export class CompareStudio implements OnInit {
       v2Value: 'Net 30 Days', 
       status: 'Modified', 
       varianceImpact: 'Accelerated Cash Outflow (-15 Days)',
+      plainMeaning: 'Vendor invoice payment cycle reduced from 45 days to 30 days, speeding up disbursement schedule.',
       reviewed: false
     },
     { 
@@ -98,15 +113,17 @@ export class CompareStudio implements OnInit {
       v2Value: '₹ 48,50,000.00', 
       status: 'Modified', 
       varianceImpact: '+₹ 3,50,000 (+7.78% Scope Addendum)',
+      plainMeaning: 'Contract commercial cap increased by ₹ 3.5 Lakhs due to 추가 sensor calibration deliverables.',
       reviewed: true
     },
     { 
       fieldKey: 'liabilityCap', 
       label: 'Penalty & Liability Limitation', 
       v1Value: '100% of Contract Value', 
-      v2Value: 'Uncapped Liability for Gross Negligence', 
+      v2Value: 'Uncapped for Gross Negligence', 
       status: 'Modified', 
       varianceImpact: 'Severe Risk Exposure (Uncapped)',
+      plainMeaning: 'Pre-existing 100% damage cap removed; claims resulting from negligence now face unlimited exposure.',
       reviewed: false
     },
     { 
@@ -116,6 +133,7 @@ export class CompareStudio implements OnInit {
       v2Value: 'Plot 42, Electronic City Phase 1, Bangalore', 
       status: 'Added', 
       varianceImpact: 'New Physical Jurisdiction Specified',
+      plainMeaning: 'Official corporate service address added to contract header for jurisdiction notice delivery.',
       reviewed: true
     },
   ];
@@ -167,6 +185,10 @@ export class CompareStudio implements OnInit {
     return this.availableVersions.find((v) => v.value === this.selectedV2)?.author || 'Author v2';
   }
 
+  get reviewedClausesCount(): number {
+    return this.clauses.filter((c) => c.status !== 'pending').length;
+  }
+
   onVersionChange(): void {
     const v1 = this.availableVersions.find((v) => v.value === this.selectedV1);
     const v2 = this.availableVersions.find((v) => v.value === this.selectedV2);
@@ -181,6 +203,14 @@ export class CompareStudio implements OnInit {
     this.selectedV2 = temp;
     this.onVersionChange();
     this.showToast(`Swapped comparison: Now comparing ${this.selectedV1} as baseline vs ${this.selectedV2}`);
+  }
+
+  scrollToClause(clauseId: string): void {
+    this.selectedClauseId = clauseId;
+    const element = document.getElementById(clauseId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }
 
   ngOnInit(): void {
@@ -223,6 +253,10 @@ export class CompareStudio implements OnInit {
             title: 'Scope of Equipment & Calibration Services',
             category: 'commercial',
             changeType: 'modified',
+            beforeSummary: 'Delivery in 45 days from purchase order receipt (standard shipping)',
+            afterSummary: 'Delivery in 30 days from purchase order receipt (priority dispatch + live tracking)',
+            plainEnglishImpact: 'Vendor delivery turnaround is accelerated by 15 days, with mandatory live dispatch tracking.',
+            legalRecommendation: 'Commercial terms are favorable to Company. Approve without reservation.',
             version1Text: 'Supplier shall supply precision calibration sensor units within 45 days of purchase order receipt with standard shipping.',
             version2Text: 'Supplier shall supply precision calibration sensor units within 30 days of purchase order receipt with priority dispatch and live tracking.',
             pageCitationV1: 'v1.0 Page 2, Para 4',
@@ -230,7 +264,21 @@ export class CompareStudio implements OnInit {
             riskImpact: 'Low',
             summaryDelta: 'Delivery timeline reduced from 45 to 30 days with priority dispatch requirement.',
             isUncertainAlignment: false,
-            status: 'pending',
+            status: 'accepted',
+            v1Chunks: [
+              { text: 'Supplier shall supply precision calibration sensor units within ', type: 'normal' },
+              { text: '45 days of purchase order receipt with standard shipping.', type: 'removed' },
+            ],
+            v2Chunks: [
+              { text: 'Supplier shall supply precision calibration sensor units within ', type: 'normal' },
+              { text: '30 days of purchase order receipt with priority dispatch and live tracking.', type: 'added' },
+            ],
+            unifiedChunks: [
+              { text: 'Supplier shall supply precision calibration sensor units within ', type: 'normal' },
+              { text: '45 days of purchase order receipt with standard shipping', type: 'removed' },
+              { text: '30 days of purchase order receipt with priority dispatch and live tracking', type: 'added' },
+              { text: '.', type: 'normal' },
+            ],
           },
           {
             id: 'CL-2',
@@ -238,6 +286,10 @@ export class CompareStudio implements OnInit {
             title: 'Maximum Liability & Penalty Cap',
             category: 'legal',
             changeType: 'modified',
+            beforeSummary: 'Total aggregate liability strictly capped at 100% of total fees paid',
+            afterSummary: 'Liability is UNCAPPED for gross negligence, confidentiality breach, or willful misconduct',
+            plainEnglishImpact: 'CRITICAL SHIFT: The safety cap limiting liability to 100% of contract value has been eliminated. The company is now exposed to unlimited financial liability.',
+            legalRecommendation: '🚨 HIGH RISK: Reject this clause in current form. Propose a balanced mutual liability sub-cap (e.g. 2x contract value) before signing.',
             version1Text: 'Total aggregate liability of either party under this agreement shall be capped strictly at 100% of the total contract value paid.',
             version2Text: 'Total aggregate liability shall be uncapped for any direct gross negligence, confidentiality breach, or willful misconduct.',
             pageCitationV1: 'v1.0 Page 5, Para 2',
@@ -246,6 +298,22 @@ export class CompareStudio implements OnInit {
             summaryDelta: 'Liability cap removed for gross negligence and confidentiality breach, introducing unbounded financial risk.',
             isUncertainAlignment: true, // TASK 7D Item 2: Uncertain Alignment Warning
             status: 'flagged',
+            v1Chunks: [
+              { text: 'Total aggregate liability ', type: 'normal' },
+              { text: 'of either party under this agreement ', type: 'removed' },
+              { text: 'shall be ', type: 'normal' },
+              { text: 'capped strictly at 100% of the total contract value paid.', type: 'removed' },
+            ],
+            v2Chunks: [
+              { text: 'Total aggregate liability shall be ', type: 'normal' },
+              { text: 'uncapped for any direct gross negligence, confidentiality breach, or willful misconduct.', type: 'added' },
+            ],
+            unifiedChunks: [
+              { text: 'Total aggregate liability of either party shall be ', type: 'normal' },
+              { text: 'capped strictly at 100% of the total contract value paid', type: 'removed' },
+              { text: 'uncapped for any direct gross negligence, confidentiality breach, or willful misconduct', type: 'added' },
+              { text: '.', type: 'normal' },
+            ],
           },
           {
             id: 'CL-3',
@@ -253,6 +321,10 @@ export class CompareStudio implements OnInit {
             title: 'Auto-Renewal & Advance Termination Notice',
             category: 'compliance',
             changeType: 'added',
+            beforeSummary: 'Clause did not exist in baseline version (contract ended after 12 months with no renewal)',
+            afterSummary: 'Contract auto-renews for 12 months unless 60 days advance written notice is served',
+            plainEnglishImpact: 'Evergreen renewal mechanism introduced. If the team forgets to send notice 60 days prior to year-end, the agreement automatically binds company for another 12 months.',
+            legalRecommendation: 'Acceptable standard clause. Add an automated calendar reminder 75 days before anniversary to evaluate vendor performance.',
             version1Text: '[No clause present in baseline version. Standard expiration was governed by general contract duration of 12 months.]',
             version2Text: 'This agreement shall automatically renew for successive 12-month terms unless either party serves written notice at least 60 calendar days prior to expiration.',
             pageCitationV1: 'v1.0 Page 8, Para 1',
@@ -261,6 +333,16 @@ export class CompareStudio implements OnInit {
             summaryDelta: 'New 60-day advance notice requirement and automatic 12-month renewal term added.',
             isUncertainAlignment: false,
             status: 'pending',
+            v1Chunks: [
+              { text: '[Clause did not exist in Baseline v1.0 — Fixed 12-month duration applied without auto-renewal.]', type: 'removed' },
+            ],
+            v2Chunks: [
+              { text: 'This agreement shall automatically renew for successive 12-month terms unless either party serves written notice at least 60 calendar days prior to expiration.', type: 'added' },
+            ],
+            unifiedChunks: [
+              { text: '[New Clause Inserted] ➔ ', type: 'normal' },
+              { text: 'This agreement shall automatically renew for successive 12-month terms unless either party serves written notice at least 60 calendar days prior to expiration.', type: 'added' },
+            ],
           },
           {
             id: 'CL-4',
@@ -268,6 +350,10 @@ export class CompareStudio implements OnInit {
             title: 'Data Security & Incident Reporting Window',
             category: 'compliance',
             changeType: 'modified',
+            beforeSummary: 'Breach notification within 72 hours of confirmed incident verification',
+            afterSummary: 'Breach notification within 24 hours of suspected discovery + 5-day forensic root-cause report',
+            plainEnglishImpact: 'Notification window tightened by 66% (from 72h down to 24h), and covers even suspected breaches.',
+            legalRecommendation: 'Aligns with modern European GDPR standards. Ensure IT Security Operations team is prepared for 24-hour escalation.',
             version1Text: 'Vendor shall notify Customer of any confirmed data breach incident within 72 hours of verification.',
             version2Text: 'Vendor shall notify Customer of any suspected or confirmed data breach incident within 24 hours of discovery and submit root-cause forensics within 5 business days.',
             pageCitationV1: 'v1.0 Page 11, Para 2',
@@ -276,6 +362,24 @@ export class CompareStudio implements OnInit {
             summaryDelta: 'Reporting window tightened from 72h to 24h, triggering expedited forensic audits.',
             isUncertainAlignment: false,
             status: 'pending',
+            v1Chunks: [
+              { text: 'Vendor shall notify Customer of any confirmed data breach incident within ', type: 'normal' },
+              { text: '72 hours of verification.', type: 'removed' },
+            ],
+            v2Chunks: [
+              { text: 'Vendor shall notify Customer of any ', type: 'normal' },
+              { text: 'suspected or ', type: 'added' },
+              { text: 'confirmed data breach incident within ', type: 'normal' },
+              { text: '24 hours of discovery and submit root-cause forensics within 5 business days.', type: 'added' },
+            ],
+            unifiedChunks: [
+              { text: 'Vendor shall notify Customer of any ', type: 'normal' },
+              { text: 'suspected or ', type: 'added' },
+              { text: 'confirmed data breach incident within ', type: 'normal' },
+              { text: '72 hours of verification', type: 'removed' },
+              { text: '24 hours of discovery and submit root-cause forensics within 5 business days', type: 'added' },
+              { text: '.', type: 'normal' },
+            ],
           },
         ];
         this.isLoading.set(false);
@@ -290,40 +394,6 @@ export class CompareStudio implements OnInit {
 
   retryLoad(): void {
     this.loadComparison();
-  }
-
-  // TASK 7D Item 1: Inline Word-Level Diff Renderer for Baseline (shows deletions)
-  renderV1WordDiff(v1Text: string, v2Text: string): Array<{ text: string; type: 'removed' | 'normal' }> {
-    if (v1Text.startsWith('[No clause')) {
-      return [{ text: v1Text, type: 'normal' }];
-    }
-    const v1Words = v1Text.split(' ');
-    const v2Words = new Set(v2Text.split(' ').map((w) => w.toLowerCase().replace(/[.,;:]/g, '')));
-    return v1Words.map((word) => {
-      const cleanWord = word.toLowerCase().replace(/[.,;:]/g, '');
-      const isPresent = v2Words.has(cleanWord);
-      return {
-        text: word,
-        type: isPresent ? 'normal' : 'removed',
-      };
-    });
-  }
-
-  // TASK 7D Item 1: Inline Word-Level Diff Renderer for Amendment (shows additions)
-  renderV2WordDiff(v1Text: string, v2Text: string): Array<{ text: string; type: 'added' | 'normal' }> {
-    if (v1Text.startsWith('[No clause')) {
-      return v2Text.split(' ').map((w) => ({ text: w, type: 'added' }));
-    }
-    const v1Words = new Set(v1Text.split(' ').map((w) => w.toLowerCase().replace(/[.,;:]/g, '')));
-    const v2Words = v2Text.split(' ');
-    return v2Words.map((word) => {
-      const cleanWord = word.toLowerCase().replace(/[.,;:]/g, '');
-      const isPresent = v1Words.has(cleanWord);
-      return {
-        text: word,
-        type: isPresent ? 'normal' : 'added',
-      };
-    });
   }
 
   // TASK 7D Item 3: Click Citation to Open Viewer
@@ -352,9 +422,9 @@ export class CompareStudio implements OnInit {
         (c) =>
           c.title.toLowerCase().includes(query) ||
           c.sectionNumber.includes(query) ||
-          c.version1Text.toLowerCase().includes(query) ||
-          c.version2Text.toLowerCase().includes(query) ||
-          (c.summaryDelta && c.summaryDelta.toLowerCase().includes(query))
+          c.beforeSummary.toLowerCase().includes(query) ||
+          c.afterSummary.toLowerCase().includes(query) ||
+          c.plainEnglishImpact.toLowerCase().includes(query)
       );
     }
 

@@ -219,6 +219,87 @@
     <!-- CLAUSE LEVEL CHANGES TAB -->
     @if (viewTab === 'clauses') {
       <main class="clauses-view-container">
+
+        <!-- ================================================================= -->
+        <!-- "EK BAAR MEIN SAMAJH MEIN AA JAYE" — EXECUTIVE DELTA SUMMARY MATRIX -->
+        <!-- ================================================================= -->
+        <section class="executive-summary-card">
+          <div class="summary-card-header">
+            <div class="title-with-pill">
+              <span class="live-pulse-badge">⚡ AT A GLANCE</span>
+              <h3>Executive Comparison Matrix</h3>
+            </div>
+            <p class="summary-card-sub">
+              Instant summary of all key legal and commercial shifts between <strong>{{ selectedV1 }}</strong> and <strong>{{ selectedV2 }}</strong>. Click any row to jump directly to its full redline.
+            </p>
+          </div>
+
+          <div class="matrix-table-wrapper">
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th style="width: 22%">SECTION / CLAUSE</th>
+                  <th style="width: 26%">BEFORE: BASELINE ({{ selectedV1 }})</th>
+                  <th style="width: 26%">AFTER: AMENDMENT ({{ selectedV2 }})</th>
+                  <th style="width: 14%">RISK / IMPACT</th>
+                  <th style="width: 12%; text-align: right">ACTION</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (clause of clauses; track clause.id) {
+                  <tr (click)="scrollToClause(clause.id)" [class.row-high-risk]="clause.riskImpact === 'High'">
+                    <td>
+                      <div class="clause-identity-cell">
+                        <span class="matrix-sec-pill">{{ clause.sectionNumber }}</span>
+                        <strong>{{ clause.title }}</strong>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="before-cell">
+                        <span class="tag-before">Before</span>
+                        <span>{{ clause.beforeSummary }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="after-cell">
+                        <span class="tag-after">After</span>
+                        <span>{{ clause.afterSummary }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="risk-cell">
+                        <span class="risk-badge {{ clause.riskImpact.toLowerCase() }}">
+                          {{ clause.riskImpact }} Risk
+                        </span>
+                        @if (clause.isUncertainAlignment) {
+                          <span class="uncertain-mini" title="Uncertain alignment heuristic">⚠️ Review</span>
+                        }
+                      </div>
+                    </td>
+                    <td style="text-align: right">
+                      <button type="button" class="btn-inspect-link" (click)="$event.stopPropagation(); scrollToClause(clause.id)">
+                        <span>Inspect Diff</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- VISUAL DIFF LEGEND -->
+          <div class="diff-visual-legend">
+            <span class="legend-title">VISUAL REDLINE KEY:</span>
+            <div class="legend-items">
+              <span class="legend-chip"><del class="diff-phrase-del">Red Strikethrough</del> = Removed from Baseline ({{ selectedV1 }})</span>
+              <span class="legend-chip"><ins class="diff-phrase-add">Green Underline</ins> = Added / Amended in Target ({{ selectedV2 }})</span>
+              <span class="legend-chip"><span class="chip-dot danger"></span> High Risk = Material Financial or Legal Exposure</span>
+              <span class="legend-chip"><span class="chip-dot info"></span> Plain-English Callout = Business Meaning & Counsel Advice</span>
+            </div>
+          </div>
+        </section>
+
         <!-- FILTER & SEARCH TOOLBAR -->
         <div class="clause-filter-toolbar">
           <div class="search-box">
@@ -238,7 +319,7 @@
               Changed Only ({{ clauses.length }})
             </button>
             <button type="button" class="filter-pill" [class.active]="activeFilter === 'highRisk'" (click)="setFilter('highRisk')">
-              High Risk ({{ highRiskCount }})
+              High Risk Only ({{ highRiskCount }})
             </button>
             <button type="button" class="filter-pill" [class.active]="activeFilter === 'financial'" (click)="setFilter('financial')">
               Commercial
@@ -264,7 +345,9 @@
           }
 
           @for (clause of filteredClauses; track clause.id) {
-            <div class="clause-card" [class.high-risk]="clause.riskImpact === 'High'" [class.accepted]="clause.status === 'accepted'">
+            <article [id]="clause.id" class="clause-card" [class.high-risk]="clause.riskImpact === 'High'" [class.accepted]="clause.status === 'accepted'" [class.active-highlight]="selectedClauseId === clause.id">
+              
+              <!-- CARD HEADER -->
               <div class="clause-header">
                 <div class="c-title-box">
                   <span class="sec-num">{{ clause.sectionNumber }}</span>
@@ -306,29 +389,56 @@
                 </div>
               </div>
 
-              <!-- SUMMARY DELTA CALLOUT -->
-              @if (clause.summaryDelta) {
-                <div class="summary-delta-callout">
-                  <span class="summary-icon">💡</span>
-                  <div>
-                    <span class="delta-label">Executive Shift:</span>
-                    <span class="delta-text">{{ clause.summaryDelta }}</span>
+              <!-- BEFORE VS AFTER EXECUTIVE BREAKDOWN BOX -->
+              <div class="shift-breakdown-grid">
+                <div class="shift-box before">
+                  <div class="shift-box-header">
+                    <span class="shift-tag before">⬅️ BASELINE ({{ selectedV1 }})</span>
+                  </div>
+                  <p class="shift-desc">{{ clause.beforeSummary }}</p>
+                </div>
+
+                <div class="shift-arrow-box">
+                  <span class="arrow-glyph">➔</span>
+                </div>
+
+                <div class="shift-box after">
+                  <div class="shift-box-header">
+                    <span class="shift-tag after">➡️ AMENDMENT ({{ selectedV2 }})</span>
+                  </div>
+                  <p class="shift-desc">{{ clause.afterSummary }}</p>
+                </div>
+              </div>
+
+              <!-- PLAIN-ENGLISH BUSINESS IMPACT & RECOMMENDATION CALLOUT -->
+              <div class="plain-english-callout" [class.alert-danger]="clause.riskImpact === 'High'">
+                <div class="callout-icon">💡</div>
+                <div class="callout-content">
+                  <div class="callout-meaning">
+                    <strong>Plain-English Meaning:</strong> {{ clause.plainEnglishImpact }}
+                  </div>
+                  <div class="callout-recom">
+                    <strong>Counsel Recommendation:</strong> {{ clause.legalRecommendation }}
                   </div>
                 </div>
-              }
+              </div>
 
-              <!-- INLINE WORD-LEVEL DIFFING DISPLAY (TASK 7D Item 1) -->
+              <!-- CONTINUOUS PHRASE-LEVEL REDLINE COMPARISON (TASK 7D Item 1) -->
               @if (diffViewMode === 'split') {
                 <div class="diff-comparison-grid">
                   <!-- BASELINE PANE (V1) -->
                   <div class="version-pane v1-pane">
                     <div class="pane-header">
-                      <span class="pane-tag">BASELINE ({{ selectedV1 | uppercase }})</span>
+                      <span class="pane-tag">BASELINE CONTRACT ({{ selectedV1 | uppercase }})</span>
                       <span class="pane-citation">{{ clause.pageCitationV1 }}</span>
                     </div>
                     <p class="clause-text old">
-                      @for (w of renderV1WordDiff(clause.version1Text, clause.version2Text); track w.text + $index) {
-                        <span [class.diff-del]="w.type === 'removed'">{{ w.text }} </span>
+                      @for (chunk of clause.v1Chunks; track chunk.text + $index) {
+                        @if (chunk.type === 'removed') {
+                          <del class="diff-phrase-del">{{ chunk.text }}</del>
+                        } @else {
+                          <span>{{ chunk.text }}</span>
+                        }
                       }
                     </p>
                   </div>
@@ -336,12 +446,16 @@
                   <!-- AMENDMENT PANE (V2) -->
                   <div class="version-pane v2-pane">
                     <div class="pane-header">
-                      <span class="pane-tag">AMENDMENT ({{ selectedV2 | uppercase }}) · INLINE WORD DELTA</span>
+                      <span class="pane-tag">NEW AMENDMENT ({{ selectedV2 | uppercase }})</span>
                       <span class="pane-citation">{{ clause.pageCitationV2 }}</span>
                     </div>
                     <p class="clause-text new-inline">
-                      @for (w of renderV2WordDiff(clause.version1Text, clause.version2Text); track w.text + $index) {
-                        <span [class.diff-add]="w.type === 'added'">{{ w.text }} </span>
+                      @for (chunk of clause.v2Chunks; track chunk.text + $index) {
+                        @if (chunk.type === 'added') {
+                          <ins class="diff-phrase-add">{{ chunk.text }}</ins>
+                        } @else {
+                          <span>{{ chunk.text }}</span>
+                        }
                       }
                     </p>
                   </div>
@@ -354,16 +468,13 @@
                     <span class="pane-citation">{{ clause.pageCitationV1 }} ➔ {{ clause.pageCitationV2 }}</span>
                   </div>
                   <p class="clause-text unified">
-                    @for (w of renderV1WordDiff(clause.version1Text, clause.version2Text); track 'v1-' + w.text + $index) {
-                      @if (w.type === 'removed') {
-                        <span class="diff-del">{{ w.text }} </span>
-                      }
-                    }
-                    @for (w of renderV2WordDiff(clause.version1Text, clause.version2Text); track 'v2-' + w.text + $index) {
-                      @if (w.type === 'added') {
-                        <span class="diff-add">{{ w.text }} </span>
+                    @for (chunk of clause.unifiedChunks; track chunk.text + $index) {
+                      @if (chunk.type === 'removed') {
+                        <del class="diff-phrase-del">{{ chunk.text }}</del>
+                      } @else if (chunk.type === 'added') {
+                        <ins class="diff-phrase-add">{{ chunk.text }}</ins>
                       } @else {
-                        <span>{{ w.text }} </span>
+                        <span>{{ chunk.text }}</span>
                       }
                     }
                   </p>
@@ -375,19 +486,19 @@
                 <div class="action-left">
                   <button type="button" class="btn-clause-action accept" (click)="acceptClause(clause)">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span>Accept Change</span>
+                    <span>Accept Clause</span>
                   </button>
                   <button type="button" class="btn-clause-action flag" (click)="flagClause(clause)">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                    <span>Flag for Counsel</span>
+                    <span>Flag for General Counsel</span>
                   </button>
                 </div>
                 <div class="action-right">
-                  <span class="sync-status">Verified with Neural Model v3.4</span>
+                  <span class="sync-status">Verified with Neural Model v3.4 · Status: <strong>{{ clause.status | uppercase }}</strong></span>
                 </div>
               </div>
 
-            </div>
+            </article>
           }
         </div>
       </main>
@@ -408,12 +519,11 @@
           <table class="fields-diff-table">
             <thead>
               <tr>
-                <th>FIELD ATTRIBUTE</th>
-                <th>BASELINE ({{ selectedV1 }})</th>
-                <th>AMENDMENT ({{ selectedV2 }})</th>
-                <th>BUSINESS IMPACT & VARIANCE</th>
-                <th>CHANGE TYPE</th>
-                <th>REVIEW</th>
+                <th style="width: 20%">FIELD ATTRIBUTE</th>
+                <th style="width: 18%">BASELINE ({{ selectedV1 }})</th>
+                <th style="width: 20%">AMENDMENT ({{ selectedV2 }})</th>
+                <th style="width: 28%">PLAIN BUSINESS MEANING</th>
+                <th style="width: 14%">REVIEW</th>
               </tr>
             </thead>
             <tbody>
@@ -428,17 +538,17 @@
                   <td class="old-val">{{ f.v1Value }}</td>
                   <td class="new-val">{{ f.v2Value }}</td>
                   <td>
-                    <span class="variance-badge">{{ f.varianceImpact }}</span>
-                  </td>
-                  <td>
-                    <span class="type-tag {{ f.status.toLowerCase() }}">{{ f.status }}</span>
+                    <div class="field-meaning-cell">
+                      <span class="variance-badge">{{ f.varianceImpact }}</span>
+                      <p class="meaning-text">{{ f.plainMeaning }}</p>
+                    </div>
                   </td>
                   <td>
                     <button type="button" class="btn-verify-field" [class.active]="f.reviewed" (click)="toggleFieldReview(f)">
                       @if (f.reviewed) {
                         <span>✓ Verified</span>
                       } @else {
-                        <span>Verify</span>
+                        <span>Verify Field</span>
                       }
                     </button>
                   </td>
@@ -475,19 +585,19 @@
           </div>
 
           <div class="paper-body">
-            <p class="recital">This Master Service Amendment Agreement is entered into on <span class="diff-add">+01 Nov 2026</span> <span class="diff-del">-15 Jan 2026</span> by and between <strong>Apex Industrial Solutions Pvt Ltd</strong> and <strong>Acme Corporation Global Pvt Ltd</strong>.</p>
+            <p class="recital">This Master Service Amendment Agreement is entered into on <ins class="diff-phrase-add">01 Nov 2026</ins> <del class="diff-phrase-del">15 Jan 2026</del> by and between <strong>Apex Industrial Solutions Pvt Ltd</strong> and <strong>Acme Corporation Global Pvt Ltd</strong>.</p>
             
             <h4>1. SCOPE OF SERVICES & DELIVERY TIMELINES</h4>
-            <p>1.1 Supplier shall supply precision calibration sensor units within <span class="diff-add">+30 days of purchase order receipt with priority dispatch and live tracking</span> <span class="diff-del">-45 days of PO receipt with standard shipping</span>.</p>
+            <p>1.1 Supplier shall supply precision calibration sensor units within <ins class="diff-phrase-add">30 days of purchase order receipt with priority dispatch and live tracking</ins> <del class="diff-phrase-del">45 days of PO receipt with standard shipping</del>.</p>
 
             <h4>2. LIMITATION OF LIABILITY & INDEMNIFICATION</h4>
-            <p>2.1 Total aggregate liability of either party shall be <span class="diff-add">+uncapped for any direct gross negligence, confidentiality breach, or willful misconduct</span> <span class="diff-del">-capped strictly at 100% of the total contract value paid</span> under this agreement.</p>
+            <p>2.1 Total aggregate liability of either party shall be <ins class="diff-phrase-add">uncapped for any direct gross negligence, confidentiality breach, or willful misconduct</ins> <del class="diff-phrase-del">capped strictly at 100% of the total contract value paid</del> under this agreement.</p>
 
             <h4>3. TERM, AUTO-RENEWAL & NOTICE</h4>
-            <p>3.1 <span class="diff-add">+This agreement shall automatically renew for successive 12-month terms unless either party serves written notice at least 60 calendar days prior to expiration.</span> <span class="diff-del">-[Clause 3.1 previously silent on auto-renewal; 12 months fixed duration applied]-</span></p>
+            <p>3.1 <ins class="diff-phrase-add">This agreement shall automatically renew for successive 12-month terms unless either party serves written notice at least 60 calendar days prior to expiration.</ins> <del class="diff-phrase-del">[Clause 3.1 previously silent on auto-renewal; 12 months fixed duration applied]</del></p>
 
             <h4>4. INCIDENT NOTIFICATION WINDOW</h4>
-            <p>4.1 Vendor shall notify Customer of any data breach or security anomaly within <span class="diff-add">+24 hours of discovery and submit root-cause forensics within 5 business days</span> <span class="diff-del">-72 hours of verification</span>.</p>
+            <p>4.1 Vendor shall notify Customer of any data breach or security anomaly within <ins class="diff-phrase-add">24 hours of discovery and submit root-cause forensics within 5 business days</ins> <del class="diff-phrase-del">72 hours of verification</del>.</p>
           </div>
 
           <div class="paper-footer">
@@ -559,4 +669,5 @@
     </div>
   }
 </div>
+
 

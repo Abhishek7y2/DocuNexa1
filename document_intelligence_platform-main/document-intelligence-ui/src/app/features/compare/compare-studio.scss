@@ -377,7 +377,6 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06);
     }
 
-    /* IndiHire Signature Top Colored Borders */
     &.stat-total { border-top: 3.5px solid #f59e0b; }
     &.stat-modified { border-top: 3.5px solid #4f46e5; }
     &.stat-risk { border-top: 3.5px solid #ef4444; }
@@ -498,7 +497,246 @@
 }
 
 /* ==========================================================================
-   6. CLAUSE-LEVEL CHANGES TAB & FILTER TOOLBAR
+   6. "EK BAAR MEIN SAMAJH MEIN AA JAYE" — EXECUTIVE DELTA SUMMARY MATRIX
+   ========================================================================== */
+.executive-summary-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.35rem 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+
+  .summary-card-header {
+    .title-with-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+
+      .live-pulse-badge {
+        background: #e0e7ff;
+        color: #4338ca;
+        font-weight: 800;
+        font-size: 0.7rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        letter-spacing: 0.04em;
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+    }
+
+    .summary-card-sub {
+      margin: 0.25rem 0 0 0;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+  }
+
+  .matrix-table-wrapper {
+    margin: 1rem 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+
+    thead {
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+
+      th {
+        padding: 0.75rem 1rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #64748b;
+        letter-spacing: 0.04em;
+        text-align: left;
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+        transition: background 0.15s ease;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background: #f8fafc;
+        }
+
+        &.row-high-risk {
+          background: #fffcfc;
+          border-left: 3.5px solid #ef4444;
+
+          &:hover {
+            background: #fff5f5;
+          }
+        }
+
+        td {
+          padding: 0.85rem 1rem;
+          vertical-align: middle;
+
+          .clause-identity-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            .matrix-sec-pill {
+              background: #eef2ff;
+              color: #4338ca;
+              font-weight: 800;
+              font-size: 0.75rem;
+              padding: 0.15rem 0.45rem;
+              border-radius: 4px;
+            }
+
+            strong {
+              color: #0f172a;
+              font-size: 0.84rem;
+            }
+          }
+
+          .before-cell {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.45rem;
+            color: #475569;
+            font-size: 0.8rem;
+
+            .tag-before {
+              background: #fee2e2;
+              color: #991b1b;
+              font-size: 0.65rem;
+              font-weight: 800;
+              padding: 0.1rem 0.35rem;
+              border-radius: 3px;
+              text-transform: uppercase;
+              flex-shrink: 0;
+              margin-top: 2px;
+            }
+          }
+
+          .after-cell {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.45rem;
+            color: #0f172a;
+            font-size: 0.8rem;
+            font-weight: 500;
+
+            .tag-after {
+              background: #dcfce7;
+              color: #166534;
+              font-size: 0.65rem;
+              font-weight: 800;
+              padding: 0.1rem 0.35rem;
+              border-radius: 3px;
+              text-transform: uppercase;
+              flex-shrink: 0;
+              margin-top: 2px;
+            }
+          }
+
+          .risk-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+
+            .uncertain-mini {
+              background: #fef3c7;
+              color: #b45309;
+              font-size: 0.65rem;
+              font-weight: 700;
+              padding: 0.1rem 0.35rem;
+              border-radius: 3px;
+            }
+          }
+
+          .btn-inspect-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #4f46e5;
+            font-size: 0.74rem;
+            font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+
+            &:hover {
+              background: #e0e7ff;
+              border-color: #818cf8;
+              color: #312e81;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .diff-visual-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    font-size: 0.75rem;
+    color: #475569;
+
+    .legend-title {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #64748b;
+      letter-spacing: 0.04em;
+    }
+
+    .legend-items {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+
+      .legend-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.75rem;
+
+        .chip-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          display: inline-block;
+
+          &.danger { background: #ef4444; }
+          &.info { background: #0284c7; }
+        }
+      }
+    }
+  }
+}
+
+/* ==========================================================================
+   7. CLAUSE-LEVEL FILTER TOOLBAR
    ========================================================================== */
 .clauses-view-container {
   display: flex;
@@ -612,7 +850,7 @@
 }
 
 /* ==========================================================================
-   7. CLAUSE REDLINE CARD
+   8. DETAILED CLAUSE REDLINE CARD
    ========================================================================== */
 .clause-card {
   background: #ffffff;
@@ -620,7 +858,12 @@
   border-radius: 12px;
   padding: 1.35rem 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-  transition: box-shadow 0.15s ease;
+  transition: all 0.2s ease;
+
+  &.active-highlight {
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25), 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: #6366f1;
+  }
 
   &.high-risk {
     border-left: 4.5px solid #ef4444;
@@ -766,34 +1009,102 @@
     }
   }
 
-  /* SUMMARY DELTA CALLOUT */
-  .summary-delta-callout {
+  /* BEFORE VS AFTER EXECUTIVE BREAKDOWN BOX */
+  .shift-breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.95rem 0;
+
+    .shift-box {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+
+      &.before {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+      }
+
+      &.after {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+      }
+
+      .shift-box-header {
+        .shift-tag {
+          font-size: 0.68rem;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+
+          &.before { color: #991b1b; }
+          &.after { color: #166534; }
+        }
+      }
+
+      .shift-desc {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #0f172a;
+        line-height: 1.45;
+      }
+    }
+
+    .shift-arrow-box {
+      text-align: center;
+      .arrow-glyph {
+        font-size: 1.25rem;
+        color: #94a3b8;
+        font-weight: bold;
+      }
+    }
+  }
+
+  /* PLAIN-ENGLISH BUSINESS IMPACT CALLOUT */
+  .plain-english-callout {
     display: flex;
     align-items: flex-start;
-    gap: 0.6rem;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-left: 3.5px solid #3b82f6;
+    gap: 0.65rem;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-left: 4px solid #0284c7;
     border-radius: 8px;
-    padding: 0.65rem 1rem;
+    padding: 0.75rem 1rem;
     margin: 0.85rem 0;
 
-    .summary-icon {
-      font-size: 0.95rem;
+    &.alert-danger {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      border-left: 4px solid #e11d48;
+    }
+
+    .callout-icon {
+      font-size: 1rem;
       line-height: 1.2;
     }
 
-    .delta-label {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: #1e40af;
-      margin-right: 0.35rem;
+    .callout-content {
+      .callout-meaning {
+        font-size: 0.83rem;
+        color: #0f172a;
+        line-height: 1.5;
+        margin-bottom: 0.3rem;
+
+        strong { color: #0284c7; }
+      }
+
+      .callout-recom {
+        font-size: 0.8rem;
+        color: #334155;
+        line-height: 1.45;
+
+        strong { color: #475569; }
+      }
     }
 
-    .delta-text {
-      font-size: 0.82rem;
-      color: #334155;
-      font-weight: 500;
+    &.alert-danger .callout-content .callout-meaning strong {
+      color: #e11d48;
     }
   }
 
@@ -805,21 +1116,26 @@
     margin: 0.85rem 0;
 
     .version-pane {
-      background: #fafafa;
-      border: 1px solid #e2e8f0;
       border-radius: 8px;
       padding: 1rem;
 
+      &.v1-pane {
+        background: #fdfafa;
+        border: 1px solid #fecaca;
+      }
+
       &.v2-pane {
-        background: #ffffff;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        background: #fbfdfb;
+        border: 1px solid #bbf7d0;
       }
 
       .pane-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.6rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
         .pane-tag {
           font-size: 0.68rem;
@@ -838,7 +1154,7 @@
       .clause-text {
         margin: 0;
         font-size: 0.88rem;
-        line-height: 1.6;
+        line-height: 1.7;
         color: #1e293b;
       }
     }
@@ -874,7 +1190,7 @@
     .clause-text.unified {
       margin: 0;
       font-size: 0.9rem;
-      line-height: 1.7;
+      line-height: 1.75;
       color: #1e293b;
     }
   }
@@ -898,7 +1214,7 @@
         align-items: center;
         gap: 0.35rem;
         border-radius: 6px;
-        padding: 0.35rem 0.75rem;
+        padding: 0.4rem 0.8rem;
         font-size: 0.76rem;
         font-weight: 600;
         cursor: pointer;
@@ -932,33 +1248,41 @@
       .sync-status {
         font-size: 0.72rem;
         color: #94a3b8;
+
+        strong { color: #475569; }
       }
     }
   }
 }
 
 /* ==========================================================================
-   8. WORD-LEVEL INLINE DIFF STYLING (TASK 7D Item 1)
+   9. CONTINUOUS PHRASE-LEVEL REDLINE STYLING
    ========================================================================== */
-.diff-add {
-  background: #dcfce7;
-  color: #15803d;
-  border-bottom: 2px solid #22c55e;
-  font-weight: 600;
-  padding: 0.1rem 0.25rem;
-  border-radius: 3px;
+.diff-phrase-del {
+  background: #fee2e2;
+  color: #991b1b;
+  text-decoration: line-through;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid #fecaca;
+  font-weight: 500;
+  display: inline;
 }
 
-.diff-del {
-  background: #fee2e2;
-  color: #b91c1c;
-  text-decoration: line-through;
-  padding: 0.1rem 0.25rem;
-  border-radius: 3px;
+.diff-phrase-add {
+  background: #dcfce7;
+  color: #166534;
+  text-decoration: none;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  border-bottom: 2px solid #22c55e;
+  border: 1px solid #bbf7d0;
+  font-weight: 600;
+  display: inline;
 }
 
 /* ==========================================================================
-   9. FIELD-LEVEL DIFFERENCES VIEW
+   10. FIELD-LEVEL DIFFERENCES VIEW
    ========================================================================== */
 .fields-view-container, .audit-view-container {
   display: flex;
@@ -1069,24 +1393,27 @@
           font-weight: 600;
         }
 
-        .variance-badge {
-          background: #f1f5f9;
-          color: #334155;
-          font-size: 0.75rem;
-          font-weight: 600;
-          padding: 0.25rem 0.6rem;
-          border-radius: 4px;
-        }
+        .field-meaning-cell {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
 
-        .type-tag {
-          font-size: 0.7rem;
-          padding: 0.2rem 0.55rem;
-          border-radius: 4px;
-          font-weight: 700;
+          .variance-badge {
+            background: #f1f5f9;
+            color: #334155;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            width: fit-content;
+          }
 
-          &.modified { background: #fef3c7; color: #b45309; }
-          &.added { background: #dcfce7; color: #15803d; }
-          &.removed { background: #fee2e2; color: #b91c1c; }
+          .meaning-text {
+            margin: 0;
+            font-size: 0.78rem;
+            color: #64748b;
+            line-height: 1.4;
+          }
         }
 
         .btn-verify-field {
@@ -1117,7 +1444,7 @@
 }
 
 /* ==========================================================================
-   10. FULL TEXT REDLINE VIEW (LEGAL MANUSCRIPT PAPER)
+   11. FULL TEXT REDLINE VIEW (LEGAL MANUSCRIPT PAPER)
    ========================================================================== */
 .text-view-container {
   display: flex;
@@ -1241,7 +1568,7 @@
 }
 
 /* ==========================================================================
-   11. AUDIT TRAIL VIEW
+   12. AUDIT TRAIL VIEW
    ========================================================================== */
 .audit-summary-grid {
   display: grid;
@@ -1312,12 +1639,8 @@
   }
 }
 
-.mt-3 {
-  margin-top: 1rem;
-}
-
 /* ==========================================================================
-   12. TOAST NOTIFICATION
+   13. TOAST NOTIFICATION
    ========================================================================== */
 .toast-popup {
   position: fixed;
@@ -1359,6 +1682,14 @@
   .diff-comparison-grid {
     grid-template-columns: 1fr;
   }
+
+  .shift-breakdown-grid {
+    grid-template-columns: 1fr;
+
+    .shift-arrow-box {
+      transform: rotate(90deg);
+    }
+  }
 }
 
 @media (max-width: 768px) {
@@ -1378,4 +1709,3 @@
     grid-template-columns: 1fr;
   }
 }
-
