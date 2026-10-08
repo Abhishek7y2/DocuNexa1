@@ -44,6 +44,7 @@ export const ROLE_ROUTE_ACCESS: Record<string, Role[]> = {
   '/admin/audit': ['org_admin', 'platform_operator'],
   '/admin/reports': ['org_admin'],
   '/admin/operations': ['platform_operator'],
+  '/reports': ['org_admin', 'approver', 'auditor', 'reviewer', 'platform_operator'],
 };
 
 export function hasRoleAccess(userRole: Role | undefined | null, routePath: string): boolean {

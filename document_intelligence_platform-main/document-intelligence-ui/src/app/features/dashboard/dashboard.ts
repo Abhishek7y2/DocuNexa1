@@ -1,8 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { AuthService } from '../../core/services/auth';
+import { RouterLink, Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 import { REPORT_SERVICE_TOKEN, MockReportService } from '../../core/services/api-services';
 import { LoadingState } from '../../shared/ui/loading-state/loading-state';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
@@ -40,19 +40,6 @@ export interface ConversionRatio {
   subtitle: string;
 }
 
-export interface AuditMatrixRow {
-  reviewer: string;
-  ingested: number;
-  newOcr: number;
-  dataExtracted: number;
-  highConfidence: number;
-  lowConfidence: number;
-  manualCorrections: number;
-  approved: number;
-  rejected: number;
-  escalated: number;
-}
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -61,41 +48,63 @@ export interface AuditMatrixRow {
   styleUrl: './dashboard.scss',
   providers: [{ provide: REPORT_SERVICE_TOKEN, useClass: MockReportService }],
 })
-export class Dashboard implements OnInit {
+export class Dashboard implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly reportService = inject(REPORT_SERVICE_TOKEN);
+  private readonly router = inject(Router);
 
   userName = 'User';
   greetingPrefix = 'Good morning';
+  userRole: string = 'org_admin';
 
   // Signals for state
   isLoading = signal(true);
   hasError = signal(false);
+  isRefreshing = signal(false);
 
   // Data Arrays
   categoryOverview: CategoryStat[] = [];
   reviewerRankings: ReviewerRanking[] = [];
   pipelineStages: FunnelStage[] = [];
   conversionRatios: ConversionRatio[] = [];
-  auditMatrix: AuditMatrixRow[] = [];
 
   // Filters & State
   includeTeamDocs = true;
   searchQuery = '';
+  selectedDateRange = 'Last 30 Days';
   selectedFunnelPeriod = 'Last 30 Days';
-  selectedAuditPeriod = 'Last 30 Days';
   selectedTab = 'In Review';
+  lastUpdatedTimestamp = '';
 
-  funnelPeriods = ['Today', 'Yesterday', 'Last 7 Days', 'Last 15 Days', 'Last 30 Days', 'Current FY'];
-  auditPeriods = ['Last 7 Days', 'Last 15 Days', 'Last 30 Days', 'This Month', 'Last Month'];
+  dateRangeOptions = ['Today', 'Last 7 Days', 'Last 15 Days', 'Last 30 Days', 'Current FY'];
+  funnelPeriods = ['Today', 'Last 7 Days', 'Last 30 Days'];
+
+  private refreshIntervalTimer: any = null;
 
   ngOnInit(): void {
-    const user = this.authService.getCurrentUser();
+    const user = this.authService.currentUser();
     if (user?.name) {
       this.userName = user.name.split(' ')[0];
     }
+    if (user?.role) {
+      this.userRole = user.role;
+    }
     this.updateGreetingPrefix();
     this.loadData();
+    this.updateLastUpdated();
+
+    // Prepare live-refresh polling hook (15s polling, easily replaced by WebSocket listener)
+    if (typeof window !== 'undefined') {
+      this.refreshIntervalTimer = setInterval(() => {
+        this.pollLiveUpdates();
+      }, 15000);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshIntervalTimer) {
+      clearInterval(this.refreshIntervalTimer);
+    }
   }
 
   loadData(): void {
@@ -108,14 +117,31 @@ export class Dashboard implements OnInit {
         this.reviewerRankings = stats.reviewerRankings;
         this.pipelineStages = stats.pipelineStages;
         this.conversionRatios = stats.conversionRatios;
-        this.auditMatrix = stats.auditMatrix;
         this.isLoading.set(false);
+        this.updateLastUpdated();
       },
       error: () => {
         this.hasError.set(true);
         this.isLoading.set(false);
       },
     });
+  }
+
+  pollLiveUpdates(): void {
+    this.isRefreshing.set(true);
+    setTimeout(() => {
+      this.updateLastUpdated();
+      this.isRefreshing.set(false);
+    }, 600);
+  }
+
+  refreshNow(): void {
+    this.pollLiveUpdates();
+  }
+
+  private updateLastUpdated(): void {
+    const now = new Date();
+    this.lastUpdatedTimestamp = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }
 
   private updateGreetingPrefix(): void {
@@ -129,15 +155,19 @@ export class Dashboard implements OnInit {
     }
   }
 
+  onDateRangeChange(): void {
+    this.loadData();
+  }
+
   setFunnelPeriod(period: string): void {
     this.selectedFunnelPeriod = period;
   }
 
-  setAuditPeriod(period: string): void {
-    this.selectedAuditPeriod = period;
-  }
-
   setTab(tab: string): void {
     this.selectedTab = tab;
+  }
+
+  drillDown(targetRoute: string, queryParams: Record<string, string>): void {
+    this.router.navigate([targetRoute], { queryParams });
   }
 }
