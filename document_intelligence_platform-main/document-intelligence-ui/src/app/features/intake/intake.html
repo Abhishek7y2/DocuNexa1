@@ -6,22 +6,33 @@
       <span class="eyebrow">DOCUMENT INGESTION ENGINE</span>
       <h1 class="header-title">Intake & Multi-Channel Batch Pipeline</h1>
       <p class="header-subtitle">
-        Ingest, classify, hash, scan, and process batch documents into the intelligent processing engine.
+        High-concurrency document ingestion with cryptographic SHA-256 hashing, anti-malware verification, and LayoutLMv3 OCR extraction.
       </p>
     </div>
 
-    <div class="header-stats">
-      <div class="stat-pill">
-        <span class="lbl">Ingested Today</span>
-        <strong class="val">142 Docs</strong>
+    <div class="header-right-zone">
+      <div class="header-stats">
+        <div class="stat-pill">
+          <span class="lbl">Ingested Today</span>
+          <strong class="val">142 Docs</strong>
+        </div>
+        <div class="stat-pill">
+          <span class="lbl">Active Queue</span>
+          <strong class="val blue">{{ batchQueue.length }} Docs</strong>
+        </div>
+        <div class="stat-pill">
+          <span class="lbl">Concurrency</span>
+          <strong class="val green">{{ activeUploadsCount }} / 3 Active</strong>
+        </div>
       </div>
-      <div class="stat-pill">
-        <span class="lbl">Active Queue</span>
-        <strong class="val blue">{{ batchQueue.length }} Docs</strong>
-      </div>
-      <div class="stat-pill">
-        <span class="lbl">Concurrency</span>
-        <strong class="val green">{{ activeUploadsCount }} / 3 Active</strong>
+
+      <div class="header-actions">
+        <a routerLink="/documents" class="secondary-button">
+          📁 View Repository
+        </a>
+        <a routerLink="/search" class="secondary-button">
+          ⚡ RAG Search
+        </a>
       </div>
     </div>
   </div>
@@ -33,57 +44,139 @@
     <app-error-state [variant]="errorVariant()" (retry)="retryLoad()"></app-error-state>
   } @else {
 
-  <!-- TOP KPI STAT CARDS ROW -->
+  <!-- TOP KPI STAT CARDS ROW (WITH RICH WAVE SPARKLINES) -->
   <section class="stats-grid">
+    <!-- 1. Daily Intake Volume -->
     <div class="stat-card theme-purple">
-      <div class="card-header-row">
-        <div class="card-icon-badge">📤</div>
-        <span class="card-title">Daily Intake Volume</span>
+      <div class="card-content-area">
+        <div class="card-header-row">
+          <div class="icon-bubble purple">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <span class="card-title">Daily Intake Volume</span>
+        </div>
+        <div class="card-metric-row">
+          <span class="metric-val">142 Docs</span>
+        </div>
+        <div class="card-trend-row">
+          <span class="trend-badge positive">↑ 14% vs yesterday</span>
+        </div>
       </div>
-      <div class="card-metric-row">
-        <span class="metric-val">142 Docs</span>
-      </div>
-      <div class="card-trend-row">
-        <span class="trend-badge positive">↑ 14% vs yesterday</span>
+      <div class="sparkline-bottom-container">
+        <svg viewBox="0 0 200 44" preserveAspectRatio="none" class="sparkline-vector">
+          <defs>
+            <linearGradient id="purpleGradIntake" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.30"/>
+              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,34 C35,36 50,14 85,22 C120,30 150,12 200,24 L200,44 L0,44 Z" fill="url(#purpleGradIntake)"/>
+          <path d="M0,34 C35,36 50,14 85,22 C120,30 150,12 200,24" fill="none" stroke="#8b5cf6" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
       </div>
     </div>
 
+    <!-- 2. SHA-256 Validated -->
     <div class="stat-card theme-green">
-      <div class="card-header-row">
-        <div class="card-icon-badge">⚡</div>
-        <span class="card-title">SHA-256 Validated</span>
+      <div class="card-content-area">
+        <div class="card-header-row">
+          <div class="icon-bubble green">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <polyline points="9 12 11 14 15 10"></polyline>
+            </svg>
+          </div>
+          <span class="card-title">SHA-256 Validated</span>
+        </div>
+        <div class="card-metric-row">
+          <span class="metric-val">100% Verified</span>
+        </div>
+        <div class="card-trend-row">
+          <span class="trend-badge positive">Checksum Tamper-Proof</span>
+        </div>
       </div>
-      <div class="card-metric-row">
-        <span class="metric-val">100% Verified</span>
-      </div>
-      <div class="card-trend-row">
-        <span class="trend-badge positive">Checksum Tamper-Proof</span>
+      <div class="sparkline-bottom-container">
+        <svg viewBox="0 0 200 44" preserveAspectRatio="none" class="sparkline-vector">
+          <defs>
+            <linearGradient id="greenGradIntake" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#10b981" stop-opacity="0.30"/>
+              <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,36 C40,36 70,16 110,26 C150,36 175,10 200,18 L200,44 L0,44 Z" fill="url(#greenGradIntake)"/>
+          <path d="M0,36 C40,36 70,16 110,26 C150,36 175,10 200,18" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
       </div>
     </div>
 
+    <!-- 3. Malware Quarantined -->
     <div class="stat-card theme-orange">
-      <div class="card-header-row">
-        <div class="card-icon-badge">🛡️</div>
-        <span class="card-title">Malware Quarantined</span>
+      <div class="card-content-area">
+        <div class="card-header-row">
+          <div class="icon-bubble orange">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+          <span class="card-title">Malware Quarantined</span>
+        </div>
+        <div class="card-metric-row">
+          <span class="metric-val">{{ quarantinedItems.length }} Files</span>
+        </div>
+        <div class="card-trend-row">
+          <span class="trend-badge positive">Zero Security Breaches</span>
+        </div>
       </div>
-      <div class="card-metric-row">
-        <span class="metric-val">{{ quarantinedItems.length }} Files</span>
-      </div>
-      <div class="card-trend-row">
-        <span class="trend-badge positive">Zero Security Breaches</span>
+      <div class="sparkline-bottom-container">
+        <svg viewBox="0 0 200 44" preserveAspectRatio="none" class="sparkline-vector">
+          <defs>
+            <linearGradient id="orangeGradIntake" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f97316" stop-opacity="0.30"/>
+              <stop offset="100%" stop-color="#f97316" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,38 C30,38 60,18 100,28 C140,38 170,12 200,20 L200,44 L0,44 Z" fill="url(#orangeGradIntake)"/>
+          <path d="M0,38 C30,38 60,18 100,28 C140,38 170,12 200,20" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
       </div>
     </div>
 
+    <!-- 4. Processing Speed -->
     <div class="stat-card theme-blue">
-      <div class="card-header-row">
-        <div class="card-icon-badge">⏱️</div>
-        <span class="card-title">Processing Speed</span>
+      <div class="card-content-area">
+        <div class="card-header-row">
+          <div class="icon-bubble blue">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <span class="card-title">Processing Speed</span>
+        </div>
+        <div class="card-metric-row">
+          <span class="metric-val">1.4 s/page</span>
+        </div>
+        <div class="card-trend-row">
+          <span class="trend-badge positive">↑ 0.2s SLA speed</span>
+        </div>
       </div>
-      <div class="card-metric-row">
-        <span class="metric-val">1.4 s/page</span>
-      </div>
-      <div class="card-trend-row">
-        <span class="trend-badge positive">↑ 0.2s SLA speed</span>
+      <div class="sparkline-bottom-container">
+        <svg viewBox="0 0 200 44" preserveAspectRatio="none" class="sparkline-vector">
+          <defs>
+            <linearGradient id="blueGradIntake" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.30"/>
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,32 C45,34 70,14 110,22 C150,30 180,10 200,16 L200,44 L0,44 Z" fill="url(#blueGradIntake)"/>
+          <path d="M0,32 C45,34 70,14 110,22 C150,30 180,10 200,16" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
       </div>
     </div>
   </section>
@@ -100,7 +193,7 @@
     <!-- LEFT PANEL: Intake Wizard & Batch Queue -->
     <div class="panel-card wizard-panel">
       
-      <!-- MODE SWITCHER TABS -->
+      <!-- MODE SWITCHER TABS (ENTERPRISE SEGMENTED CONTROL) -->
       <div class="mode-tabs">
         <button
           type="button"
@@ -121,7 +214,7 @@
       </div>
 
       <!-- STEP 1: Select Category Grid -->
-      <div class="wizard-section" style="padding-top: 16px;">
+      <div class="wizard-section">
         <label class="section-label">1. Target Document Category</label>
         <div class="category-grid">
           @for (item of documentTypes; track item.value) {
@@ -130,18 +223,20 @@
               [class.selected]="selectedType === item.value"
               (click)="selectType(item.value)"
             >
-              <span class="cat-icon">{{ item.icon }}</span>
+              <div class="cat-icon-box">
+                {{ item.icon }}
+              </div>
               <div class="cat-info">
                 <strong>{{ item.title }}</strong>
                 <span>{{ item.description }}</span>
               </div>
-              <span class="radio-dot" [class.active]="selectedType === item.value"></span>
+              <span class="radio-indicator" [class.checked]="selectedType === item.value"></span>
             </div>
           }
         </div>
       </div>
 
-      <!-- STEP 2: Drag & Drop Dropzone (Supports PDF, DOCX, PNG, JPG, JPEG, TIFF up to 50MB) -->
+      <!-- STEP 2: Drag & Drop Dropzone -->
       <div class="wizard-section">
         <label class="section-label">2. Drag & Drop or Select Files (Max 50 MB per file)</label>
         
@@ -153,21 +248,24 @@
           (drop)="onDrop($event)"
         >
           <div class="drop-content">
-            <div class="cloud-icon">
-              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <div class="cloud-icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
                 <path d="M12 12v9"/>
                 <path d="m16 16-4-4-4 4"/>
               </svg>
             </div>
             <p class="drop-title">
-              Drag and drop files here, or <label for="batchFileInput" class="browse-link">Browse files</label>
+              Drag and drop document files here, or
             </p>
+            <label for="batchFileInput" class="btn-browse-action">
+              📁 Browse Files
+            </label>
             <span class="drop-specs">Supported formats: .pdf, .docx, .png, .jpg, .jpeg, .tiff (Up to 50 MB each)</span>
             <input
               id="batchFileInput"
               type="file"
-              multiple
+              [multiple]="activeTab === 'batch'"
               class="hidden-file-input"
               (change)="onFilesSelected($event)"
               accept=".pdf,.docx,.png,.jpg,.jpeg,.tiff"
@@ -176,25 +274,28 @@
         </div>
       </div>
 
-      <!-- BATCH QUEUE SECTION (BRD FR-003 & UAT-02) -->
+      <!-- BATCH QUEUE SECTION (WHEN MODE IS 'BATCH') -->
       @if (activeTab === 'batch') {
         <div class="batch-queue-section">
           
           <div class="queue-header-row">
             <div>
-              <h3>Batch Upload Queue (Max Concurrency: 3 Active)</h3>
+              <div class="queue-title-badge-group">
+                <h3>Batch Upload Queue</h3>
+                <span class="concurrency-pill">Max Concurrency: 3 Active</span>
+              </div>
               <span class="queue-sub">
-                Overall Queue Progress: {{ overallQueueProgress }}% · {{ validatedQueueCount }} validated · {{ failedQueueCount }} failed
+                Overall Progress: {{ overallQueueProgress }}% · {{ validatedQueueCount }} validated · {{ failedQueueCount }} failed
               </span>
             </div>
 
             <div class="queue-actions">
               @if (failedQueueCount > 0) {
-                <button type="button" class="secondary-button" (click)="retryAllFailed()">
+                <button type="button" class="secondary-button btn-sm" (click)="retryAllFailed()">
                   🔄 Retry Failed ({{ failedQueueCount }})
                 </button>
               }
-              <button type="button" class="text-button" (click)="clearCompletedQueue()">
+              <button type="button" class="secondary-button btn-sm" (click)="clearCompletedQueue()">
                 Clear Validated
               </button>
             </div>
@@ -210,14 +311,14 @@
           @if (batchQueue.length === 0) {
             <app-empty-state
               title="Batch queue is empty"
-              message="Drop up to 10 files above to trigger automated hashing, malware scanning, and OCR ingestion."
+              message="Drop up to 10 files above to trigger automated SHA-256 hashing, malware scanning, and OCR ingestion."
             ></app-empty-state>
           } @else {
             <div class="queue-table-wrapper">
               <table class="queue-table">
                 <thead>
                   <tr>
-                    <th>File & Category</th>
+                    <th>Document & Category</th>
                     <th>Source</th>
                     <th>SHA-256 Checksum</th>
                     <th>Status & Scan</th>
@@ -230,9 +331,16 @@
                     <tr [class.row-failed]="item.status === 'Failed' || item.status === 'Quarantined'" [class.row-duplicate]="item.status === 'Duplicate'">
                       <td>
                         <div class="file-name-cell">
-                          <span class="ext-badge">{{ item.extension.replace('.', '').toUpperCase() || 'FILE' }}</span>
+                          <span
+                            class="ext-badge"
+                            [class.badge-pdf]="item.extension === '.pdf'"
+                            [class.badge-docx]="item.extension === '.docx'"
+                            [class.badge-img]="item.extension === '.png' || item.extension === '.jpg' || item.extension === '.jpeg' || item.extension === '.tiff'"
+                          >
+                            {{ item.extension.replace('.', '').toUpperCase() || 'FILE' }}
+                          </span>
                           <div>
-                            <strong class="fname">{{ item.name }}</strong>
+                            <strong class="fname" title="{{ item.name }}">{{ item.name }}</strong>
                             <span class="fsize">{{ item.formattedSize }} · {{ item.category }}</span>
                           </div>
                         </div>
@@ -256,7 +364,7 @@
                           @if (item.status === 'Hashing') {
                             <span class="hashing-text">Hashing... {{ item.checksumProgress }}%</span>
                           } @else if (item.checksum && item.checksum !== 'Calculating...') {
-                            <code class="hash-code" title="{{ item.checksum }}">{{ item.checksum.substring(0, 10) }}...{{ item.checksum.substring(item.checksum.length - 6) }}</code>
+                            <code class="hash-code" title="{{ item.checksum }}">{{ item.checksum.substring(0, 8) }}...{{ item.checksum.substring(item.checksum.length - 6) }}</code>
                             <button type="button" class="btn-copy-hash" (click)="copyHash(item.checksum, item.id)" title="Copy full SHA-256 checksum">
                               {{ copiedHashId === item.id ? '✓ Copied' : '📋 Copy' }}
                             </button>
@@ -284,7 +392,7 @@
                           <span class="scan-pill" [class.clean]="item.scanStatus === 'Clean'" [class.infected]="item.scanStatus === 'Infected'">
                             @if (item.scanStatus === 'Clean') { ✓ Clean }
                             @else if (item.scanStatus === 'Infected') { ☣️ Infected }
-                            @else { ⏳ Scan Pending }
+                            @else { ⏳ Pending }
                           </span>
                         </div>
                       </td>
@@ -300,12 +408,12 @@
 
                       <td style="text-align: right;">
                         <div class="action-cell-btns">
-                          <button type="button" class="text-button" (click)="openTimelineModal(item)" title="View lifecycle timeline">
+                          <button type="button" class="btn-table-action" (click)="openTimelineModal(item)" title="View lifecycle timeline">
                             📜 Timeline
                           </button>
 
                           @if (item.status === 'Failed' || item.status === 'Duplicate') {
-                            <button type="button" class="secondary-button" style="padding: 3px 8px; font-size: 11px;" (click)="retryQueueItem(item)">
+                            <button type="button" class="secondary-button btn-sm" (click)="retryQueueItem(item)">
                               🔄 Retry
                             </button>
                           }
@@ -322,14 +430,129 @@
         </div>
       }
 
+      <!-- SINGLE DOCUMENT UPLOAD WORKFLOW (WHEN MODE IS 'SINGLE') -->
+      @if (activeTab === 'single') {
+        <div class="single-upload-section">
+          
+          @if (singleSuccessDocId) {
+            <div class="single-success-banner">
+              <span class="success-icon">✓</span>
+              <div class="success-text">
+                <strong>Document Ingested Successfully!</strong>
+                <span>Assigned record ID <strong>{{ singleSuccessDocId }}</strong> under category <strong>{{ selectedType }}</strong>. Document is now live in the repository.</span>
+              </div>
+              <a [routerLink]="['/documents', singleSuccessDocId]" class="secondary-button btn-sm">
+                View Document Record ›
+              </a>
+            </div>
+          }
+
+          @if (errorMessage) {
+            <div class="alert-error">
+              <span>⚠️</span> {{ errorMessage }}
+            </div>
+          }
+
+          @if (selectedFile) {
+            <!-- SELECTED FILE BANNER CARD -->
+            <div class="selected-file-card">
+              <div class="file-icon-badge">
+                {{ selectedFile.name.split('.').pop()?.toUpperCase() || 'FILE' }}
+              </div>
+              <div class="file-info-col">
+                <strong class="file-name-text">{{ selectedFile.name }}</strong>
+                <span class="file-meta-text">
+                  {{ formatFileSize(selectedFile.size) }} · Ready for Processing
+                  @if (singleChecksum) {
+                    · SHA-256: <code class="hash-inline">{{ singleChecksum.substring(0, 10) }}...</code>
+                  }
+                </span>
+              </div>
+              <button type="button" class="btn-remove-selected" (click)="removeSingleFile()" title="Remove file">
+                ✕ Remove
+              </button>
+            </div>
+
+            <!-- SINGLE METADATA ATTRIBUTES (2x2 GRID) -->
+            <div class="single-fields-grid">
+              <div class="form-group">
+                <label>Document Reference / PO #</label>
+                <input
+                  type="text"
+                  [(ngModel)]="referenceNumber"
+                  placeholder="e.g. PO-2026-9941 or CTR-8812"
+                  class="enterprise-input"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Department / Business Unit</label>
+                <select [(ngModel)]="singleDepartment" class="enterprise-select">
+                  <option value="Procurement">Procurement</option>
+                  <option value="Legal & Compliance">Legal & Compliance</option>
+                  <option value="Accounts Payable">Accounts Payable</option>
+                  <option value="Operations">Operations</option>
+                  <option value="Human Resources">Human Resources</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>SLA Priority Level</label>
+                <select [(ngModel)]="singlePriority" class="enterprise-select">
+                  <option value="Standard">Standard (24h Review SLA)</option>
+                  <option value="High Priority">High Priority (4h Review SLA)</option>
+                  <option value="Critical Express">Critical Express (1h Review SLA)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Ingestion Notes / Instructions</label>
+                <input
+                  type="text"
+                  [(ngModel)]="description"
+                  placeholder="Optional instructions for OCR extraction or reviewer..."
+                  class="enterprise-input"
+                />
+              </div>
+            </div>
+
+            <!-- SINGLE FORM ACTION BUTTONS -->
+            <div class="single-actions-row">
+              <button type="button" class="secondary-button" (click)="removeSingleFile()">
+                Reset Form
+              </button>
+              <button
+                type="button"
+                class="primary-button"
+                (click)="submitSingleDocument()"
+                [disabled]="isSubmittingSingle"
+              >
+                @if (isSubmittingSingle) {
+                  <span class="spinner-sm"></span> Processing Ingestion...
+                } @else {
+                  ⚡ Ingest & Process Document
+                }
+              </button>
+            </div>
+          } @else {
+            <div class="single-empty-prompt">
+              <div class="prompt-icon">📄</div>
+              <h4>No Single Document Selected</h4>
+              <p>Select a target category and drop or browse a document above to configure metadata and trigger instant processing.</p>
+            </div>
+          }
+
+        </div>
+      }
+
     </div>
 
     <!-- RIGHT PANEL: Live Ingestion Stream & Quarantined Exceptions -->
     <div class="panel-card stream-panel">
       
       <!-- PANEL TABS & SUBMISSIONS FILTER -->
-      <div class="panel-header flex-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
-        <div style="display: flex; gap: 8px;">
+      <div class="stream-panel-header">
+        <div class="stream-tabs-group">
           <button
             type="button"
             class="tab-btn"
@@ -356,7 +579,7 @@
               [class.active]="submissionFilter === 'all'"
               (click)="submissionFilter = 'all'"
             >
-              All Submissions
+              All
             </button>
             <button
               type="button"
@@ -364,7 +587,7 @@
               [class.active]="submissionFilter === 'mine'"
               (click)="submissionFilter = 'mine'"
             >
-              My Submissions
+              Mine
             </button>
           </div>
         }
@@ -382,31 +605,42 @@
             @for (item of filteredRecentUploads; track item.id) {
               <div class="upload-item-card">
                 <div class="item-top">
-                  <div class="item-file-icon">{{ item.extension.replace('.', '').toUpperCase() }}</div>
+                  <span
+                    class="ext-badge-sm"
+                    [class.badge-pdf]="item.extension === '.pdf'"
+                    [class.badge-docx]="item.extension === '.docx'"
+                  >
+                    {{ item.extension.replace('.', '').toUpperCase() }}
+                  </span>
                   <div class="item-meta">
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                      <span class="item-id">{{ item.id }}</span>
+                    <div class="id-source-row">
+                      <a [routerLink]="['/documents', item.id]" class="item-id-link">{{ item.id }}</a>
                       <span class="source-badge-sm">{{ item.source }}</span>
                     </div>
-                    <strong class="item-name">{{ item.name }}</strong>
+                    <strong class="item-name" title="{{ item.name }}">{{ item.name }}</strong>
                   </div>
-                  <span class="status-pill completed">
+                  <span class="status-chip validated">
                     {{ item.status }}
                   </span>
                 </div>
 
                 <div class="item-details-row">
-                  <span>Type: <strong>{{ item.category }}</strong></span>
+                  <span>Category: <strong>{{ item.category }}</strong></span>
                   <span>Size: <strong>{{ item.formattedSize }}</strong></span>
-                  <span>Confidence: <strong class="text-green">{{ item.confidence }}%</strong></span>
+                  <span>Accuracy: <strong class="text-green">{{ item.confidence }}%</strong></span>
                 </div>
 
                 <div class="item-footer">
                   <div class="submitter-info">
                     <span class="avatar-dot">{{ item.submitterInitials }}</span>
-                    <span>Uploaded by {{ item.submitter }}</span>
+                    <span class="submitter-name">Uploaded by {{ item.submitter }}</span>
                   </div>
-                  <span class="time-ago">{{ item.uploadedAt }}</span>
+                  <div class="footer-right">
+                    <span class="time-ago">{{ item.uploadedAt }}</span>
+                    <a [routerLink]="['/documents', item.id]" class="stream-card-link">
+                      View ›
+                    </a>
+                  </div>
                 </div>
               </div>
             }
@@ -424,12 +658,12 @@
           @for (item of quarantinedItems; track item.id) {
             <div class="upload-item-card quarantine-card">
               <div class="item-top">
-                <div class="item-file-icon quarantine-icon">ERR</div>
+                <span class="ext-badge-sm badge-err">ERR</span>
                 <div class="item-meta">
-                  <span class="item-id text-red">{{ item.id }}</span>
+                  <span class="item-id-link text-red">{{ item.id }}</span>
                   <strong class="item-name">{{ item.name }}</strong>
                 </div>
-                <span class="status-pill quarantine-pill">
+                <span class="status-chip quarantined">
                   Quarantined
                 </span>
               </div>
@@ -440,11 +674,11 @@
 
               <div class="item-footer">
                 <span class="time-ago">{{ item.uploadedAt }}</span>
-                <div style="display: flex; gap: 6px;">
-                  <button type="button" class="secondary-button" style="padding: 3px 8px; font-size: 11px;" (click)="manualOverride(item)">
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="secondary-button btn-sm" (click)="manualOverride(item)">
                     HITL Override
                   </button>
-                  <button type="button" class="primary-button" style="padding: 3px 8px; font-size: 11px; min-height: auto;" (click)="retryQuarantine(item)">
+                  <button type="button" class="primary-button btn-sm" (click)="retryQuarantine(item)">
                     Retry OCR
                   </button>
                 </div>

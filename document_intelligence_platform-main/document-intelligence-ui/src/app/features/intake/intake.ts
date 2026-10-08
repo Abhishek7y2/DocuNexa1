@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, PLATFORM_ID, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { LoadingState } from '../../shared/ui/loading-state/loading-state';
 import { ErrorState, ErrorVariant } from '../../shared/ui/error-state/error-state';
@@ -79,7 +79,7 @@ export interface DocumentTypeOption {
 @Component({
   selector: 'app-intake',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoadingState, ErrorState, EmptyState],
+  imports: [CommonModule, FormsModule, RouterLink, LoadingState, ErrorState, EmptyState],
   templateUrl: './intake.html',
   styleUrl: './intake.scss',
   providers: [{ provide: DOCUMENT_SERVICE_TOKEN, useClass: MockDocumentService }],
@@ -101,6 +101,11 @@ export class Intake implements OnInit {
   selectedType = 'Supplier Contract';
   referenceNumber = '';
   description = '';
+  singleDepartment = 'Procurement';
+  singlePriority = 'Standard';
+  singleChecksum = '';
+  isSubmittingSingle = false;
+  singleSuccessDocId: string | null = null;
 
   selectedFile: File | null = null;
   isDragging = false;
@@ -398,16 +403,88 @@ export class Intake implements OnInit {
 
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
-      this.handleMultipleFiles(Array.from(files));
+      if (this.activeTab === 'single') {
+        this.selectSingleFile(files[0]);
+      } else {
+        this.handleMultipleFiles(Array.from(files));
+      }
     }
   }
 
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.handleMultipleFiles(Array.from(input.files));
+      if (this.activeTab === 'single') {
+        this.selectSingleFile(input.files[0]);
+      } else {
+        this.handleMultipleFiles(Array.from(input.files));
+      }
     }
     input.value = '';
+  }
+
+  selectSingleFile(file: File): void {
+    const validation = this.validateFile(file);
+    if (!validation.valid) {
+      this.errorMessage = validation.reason || 'File validation failed';
+      this.selectedFile = null;
+      return;
+    }
+    this.errorMessage = '';
+    this.selectedFile = file;
+    this.singleSuccessDocId = null;
+    this.computeSHA256(file).then(hash => {
+      this.singleChecksum = hash;
+    });
+  }
+
+  removeSingleFile(): void {
+    this.selectedFile = null;
+    this.singleChecksum = '';
+    this.errorMessage = '';
+  }
+
+  async submitSingleDocument(): Promise<void> {
+    if (!this.selectedFile) return;
+    this.isSubmittingSingle = true;
+    const file = this.selectedFile;
+    const hash = this.singleChecksum || await this.computeSHA256(file);
+    const newDocId = `DOC-${10250 + this.recentUploads.length}`;
+
+    setTimeout(() => {
+      const newItem: BatchQueueItem = {
+        id: newDocId,
+        file,
+        name: file.name,
+        size: file.size,
+        formattedSize: this.formatFileSize(file.size),
+        mimeType: file.type || 'application/pdf',
+        extension: this.validateFile(file).extension,
+        category: this.selectedType,
+        checksumProgress: 100,
+        checksum: hash,
+        uploadProgress: 100,
+        status: 'Validated',
+        scanStatus: 'Clean',
+        source: 'Web',
+        uploadedAt: 'Just now',
+        submitter: this.currentUserName,
+        submitterInitials: this.currentUserInitials,
+        confidence: 98.8,
+        attemptHistory: [
+          { attemptNumber: 1, timestamp: 'Just now', stage: 'Received', status: 'Passed', note: `Single ingestion under ${this.singleDepartment}` },
+          { attemptNumber: 1, timestamp: 'Just now', stage: 'Validated', status: 'Passed', note: 'SHA-256 and Malware scan clean' },
+        ],
+      };
+
+      this.recentUploads.unshift(newItem);
+      this.isSubmittingSingle = false;
+      this.singleSuccessDocId = newDocId;
+      this.selectedFile = null;
+      this.singleChecksum = '';
+      this.referenceNumber = '';
+      this.description = '';
+    }, 800);
   }
 
   private handleMultipleFiles(files: File[]): void {
