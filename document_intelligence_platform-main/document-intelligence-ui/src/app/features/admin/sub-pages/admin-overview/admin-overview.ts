@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -11,7 +11,7 @@ import { RouterLink } from '@angular/router';
       <div class="overview-header">
         <div>
           <h2>Organization Governance & Platform Overview</h2>
-          <p>Tenant: <strong>Acme Corporation Global</strong> · Enterprise Plan · Status: <span class="badge active">Active</span></p>
+          <p>Tenant: <strong>Acme Corporation Global</strong> · Enterprise Plan · Status: <span class="badge active">ACTIVE</span></p>
         </div>
       </div>
 
@@ -24,7 +24,7 @@ import { RouterLink } from '@angular/router';
           </div>
         </div>
         <div class="metric-card">
-          <span class="icon">📜</span>
+          <span class="icon">📋</span>
           <div>
             <span class="lbl">Document Type Schemas</span>
             <strong class="val">3 Configured</strong>
@@ -82,11 +82,11 @@ import { RouterLink } from '@angular/router';
   `,
   styles: [`
     .admin-overview-page { display: flex; flex-direction: column; gap: 1.5rem; }
-    .overview-header { h2 { margin: 0; font-size: 1.25rem; } p { margin: 0.2rem 0 0 0; color: #94a3b8; font-size: 0.85rem; } .badge.active { background: rgba(16,185,129,0.2); color: #4ade80; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.72rem; } }
+    .overview-header { h2 { margin: 0; font-size: 1.25rem; color: #0f172a; } p { margin: 0.2rem 0 0 0; color: #64748b; font-size: 0.85rem; } .badge.active { background: #dcfce7; color: #15803d; padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.72rem; font-weight: 800; } }
     .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-    .metric-card { display: flex; align-items: center; gap: 0.75rem; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 1rem; .icon { font-size: 1.4rem; } .lbl { font-size: 0.75rem; color: #94a3b8; display: block; } .val { font-size: 1.2rem; color: #f8fafc; &.green { color: #10b981; } } }
+    .metric-card { display: flex; align-items: center; gap: 0.75rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.25rem; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); .icon { font-size: 1.4rem; } .lbl { font-size: 0.75rem; color: #64748b; display: block; } .val { font-size: 1.2rem; color: #0f172a; &.green { color: #16a34a; } } }
     .quick-nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
-    .nav-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1.25rem; text-decoration: none; color: inherit; transition: all 0.2s; &:hover { border-color: #6366f1; transform: translateY(-2px); } .icon { font-size: 1.5rem; } h3 { margin: 0.5rem 0 0.35rem 0; font-size: 1rem; color: #f8fafc; } p { margin: 0; font-size: 0.8rem; color: #94a3b8; line-height: 1.4; } }
+    .nav-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; text-decoration: none; color: inherit; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); transition: all 0.2s ease; &:hover { border-color: #4f46e5; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.1); } .icon { font-size: 1.5rem; } h3 { margin: 0.5rem 0 0.35rem 0; font-size: 1rem; color: #0f172a; font-weight: 700; } p { margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4; } }
   `]
 })
 export class AdminOverview {}
