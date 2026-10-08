@@ -11,156 +11,123 @@
     </div>
   </div>
 
-  <!-- ENTERPRISE HEADER -->
-  <header class="studio-header">
-    <div class="header-left">
-      <a routerLink="/documents" class="btn-back">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        <span>Back to Repository</span>
-      </a>
-
-      <div class="doc-identity">
-        <div class="identity-badges">
-          <span class="type-badge">COMPARISON STUDIO</span>
-          <span class="doc-id-pill">{{ documentId }}</span>
-          <span class="contract-type-pill">Master Services Agreement</span>
+  <!-- CONSOLIDATED ENTERPRISE COMMAND HEADER -->
+  <header class="studio-command-header">
+    <div class="header-top-row">
+      <div class="header-identity">
+        <a routerLink="/documents" class="btn-back-compact" title="Back to Repository">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Repository</span>
+        </a>
+        <div class="title-cluster">
+          <div class="badge-row">
+            <span class="type-badge">COMPARISON STUDIO</span>
+            <span class="doc-id-pill">{{ documentId }}</span>
+            <span class="contract-pill">Master Services Agreement</span>
+          </div>
+          <h1>{{ documentTitle }}</h1>
         </div>
-        <h1>{{ documentTitle }}</h1>
-        <p class="sub">Comparing <strong>{{ selectedV1 }}</strong> against <strong>{{ selectedV2 }}</strong> · Real-time semantic clause alignment & field delta</p>
+      </div>
+
+      <div class="header-action-group">
+        <button type="button" class="btn-action-outline" (click)="exportRedlinePdfReport()" title="Export tamper-evident PDF comparison report">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Export PDF</span>
+        </button>
+        <button type="button" class="btn-action-outline" (click)="exportWordRedline()" title="Download Word DOCX with Track Changes">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Word Track Changes</span>
+        </button>
+        <button type="button" class="btn-action-primary" (click)="acknowledgeDelta()" title="Acknowledge differences and sign off on audit trail">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Acknowledge Changes</span>
+        </button>
       </div>
     </div>
 
-    <div class="header-actions">
-      <button type="button" class="btn-secondary" (click)="exportRedlinePdfReport()" title="Export tamper-evident PDF comparison report">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        <span>Export Redline PDF</span>
-      </button>
-      <button type="button" class="btn-secondary" (click)="exportWordRedline()" title="Download Word DOCX with Track Changes">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span>Word Track Changes</span>
-      </button>
-      <button type="button" class="btn-primary" (click)="acknowledgeDelta()" title="Acknowledge differences and sign off on audit trail">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Acknowledge Changes</span>
-      </button>
+    <!-- COMPARATOR & CONTROLS SUB-BAR -->
+    <div class="header-comparator-row">
+      <div class="comparator-selectors">
+        <!-- BASELINE -->
+        <div class="version-select-box">
+          <span class="v-tag baseline">BASELINE</span>
+          <div class="custom-select">
+            <select [(ngModel)]="selectedV1" (change)="onVersionChange()">
+              @for (v of availableVersions; track v.value) {
+                <option [value]="v.value">{{ v.label }}</option>
+              }
+            </select>
+            <svg class="select-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <span class="author-micro">👤 {{ authorV1 }}</span>
+        </div>
+
+        <!-- SWAP BUTTON -->
+        <button type="button" class="btn-swap-mini" (click)="swapVersions()" title="Swap comparison versions">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12M17 20l4-4M17 20l-4-4"/></svg>
+        </button>
+
+        <!-- AMENDMENT -->
+        <div class="version-select-box">
+          <span class="v-tag amendment">AMENDMENT</span>
+          <div class="custom-select">
+            <select [(ngModel)]="selectedV2" (change)="onVersionChange()">
+              @for (v of availableVersions; track v.value) {
+                <option [value]="v.value">{{ v.label }}</option>
+              }
+            </select>
+            <svg class="select-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <span class="author-micro">👤 {{ authorV2 }}</span>
+        </div>
+
+        <div class="ai-match-chip">
+          <span class="pulse-dot"></span>
+          <span>Semantic Match: <strong>98.4%</strong></span>
+        </div>
+      </div>
+
+      <div class="comparator-view-toggle">
+        <span class="toggle-text">Diff View:</span>
+        <div class="toggle-pills">
+          <button type="button" [class.active]="diffViewMode === 'split'" (click)="diffViewMode = 'split'">Split Pane</button>
+          <button type="button" [class.active]="diffViewMode === 'unified'" (click)="diffViewMode = 'unified'">Unified</button>
+        </div>
+      </div>
     </div>
   </header>
 
-  <!-- INTERACTIVE VERSION COMPARISON CONTROL BAR -->
-  <section class="version-control-bar">
-    <div class="version-selectors">
-      <!-- BASELINE VERSION -->
-      <div class="version-picker">
-        <span class="picker-label">BASELINE (SOURCE):</span>
-        <div class="select-wrapper">
-          <select [(ngModel)]="selectedV1" (change)="onVersionChange()">
-            @for (v of availableVersions; track v.value) {
-              <option [value]="v.value">{{ v.label }}</option>
-            }
-          </select>
-          <svg class="select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <span class="author-hint">👤 {{ authorV1 }}</span>
-      </div>
-
-      <!-- SWAP BUTTON -->
-      <button type="button" class="btn-swap-versions" (click)="swapVersions()" title="Swap comparison versions">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12M17 20l4-4M17 20l-4-4"/></svg>
-      </button>
-
-      <!-- AMENDMENT VERSION -->
-      <div class="version-picker">
-        <span class="picker-label">AMENDMENT (TARGET):</span>
-        <div class="select-wrapper">
-          <select [(ngModel)]="selectedV2" (change)="onVersionChange()">
-            @for (v of availableVersions; track v.value) {
-              <option [value]="v.value">{{ v.label }}</option>
-            }
-          </select>
-          <svg class="select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <span class="author-hint">👤 {{ authorV2 }}</span>
-      </div>
+  <!-- ULTRA-COMPACT HIGH-DENSITY KPI STRIP (46px height, saves 114px vertical space) -->
+  <section class="kpi-strip">
+    <div class="kpi-item stat-total">
+      <span class="kpi-icon-dot amber"></span>
+      <span class="kpi-label">TOTAL DELTAS:</span>
+      <strong class="kpi-val">{{ totalDiffsCount }} Changes</strong>
+      <span class="kpi-sub">({{ clauses.length }} Clauses · {{ fieldDiffs.length }} Fields)</span>
     </div>
+    <div class="kpi-divider"></div>
 
-    <!-- VIEW CONTROLS -->
-    <div class="version-meta-actions">
-      <div class="view-mode-toggle">
-        <span class="toggle-label">Diff Display:</span>
-        <div class="pill-group">
-          <button type="button" [class.active]="diffViewMode === 'split'" (click)="diffViewMode = 'split'">
-            Split Pane
-          </button>
-          <button type="button" [class.active]="diffViewMode === 'unified'" (click)="diffViewMode = 'unified'">
-            Unified
-          </button>
-        </div>
-      </div>
-      <div class="ai-alignment-badge" title="Semantic Clause Alignment Engine Score">
-        <span class="pulse-dot"></span>
-        <span>Semantic Match: <strong>98.4%</strong></span>
-      </div>
+    <div class="kpi-item stat-modified">
+      <span class="kpi-icon-dot indigo"></span>
+      <span class="kpi-label">MODIFIED:</span>
+      <strong class="kpi-val">{{ modifiedClausesCount }} Clauses</strong>
+      <span class="kpi-sub">SLA & Liability</span>
     </div>
-  </section>
+    <div class="kpi-divider"></div>
 
-  <!-- 4 COMPACT KPI STAT CARDS (INDIHIRE STYLE WITH COLORED TOP BORDERS) -->
-  <section class="kpi-grid">
-    <!-- Card 1: Total Changes (Amber) -->
-    <div class="stat-card stat-total">
-      <div class="stat-content">
-        <div class="stat-header">
-          <span class="stat-title">TOTAL DETECTED DELTAS</span>
-          <span class="stat-icon-wrap amber">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          </span>
-        </div>
-        <div class="stat-value">{{ totalDiffsCount }} <span class="unit">Changes</span></div>
-        <div class="stat-subtitle">
-          <span class="highlight">{{ clauses.length }}</span> Clauses · <span class="highlight">{{ fieldDiffs.length }}</span> Fields
-        </div>
-      </div>
+    <div class="kpi-item stat-risk">
+      <span class="kpi-icon-dot red"></span>
+      <span class="kpi-label">HIGH RISK:</span>
+      <strong class="kpi-val danger">{{ highRiskCount }} Critical Flag</strong>
+      <span class="kpi-sub">Uncapped Shift</span>
     </div>
+    <div class="kpi-divider"></div>
 
-    <!-- Card 2: Modified Clauses (Indigo) -->
-    <div class="stat-card stat-modified">
-      <div class="stat-content">
-        <div class="stat-header">
-          <span class="stat-title">MODIFIED CLAUSES</span>
-          <span class="stat-icon-wrap indigo">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </span>
-        </div>
-        <div class="stat-value">{{ modifiedClausesCount }} <span class="unit">Clauses</span></div>
-        <div class="stat-subtitle">Delivery SLA & Penalty Clauses</div>
-      </div>
-    </div>
-
-    <!-- Card 3: High Risk Flags (Red) -->
-    <div class="stat-card stat-risk">
-      <div class="stat-content">
-        <div class="stat-header">
-          <span class="stat-title">HIGH RISK EXPOSURES</span>
-          <span class="stat-icon-wrap red">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          </span>
-        </div>
-        <div class="stat-value danger">{{ highRiskCount }} <span class="unit">Critical Flag</span></div>
-        <div class="stat-subtitle">Uncapped Gross Negligence Shift</div>
-      </div>
-    </div>
-
-    <!-- Card 4: Commercial Delta (Emerald) -->
-    <div class="stat-card stat-financial">
-      <div class="stat-content">
-        <div class="stat-header">
-          <span class="stat-title">COMMERCIAL VARIANCE</span>
-          <span class="stat-icon-wrap emerald">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </span>
-        </div>
-        <div class="stat-value success">+₹ 3,50,000</div>
-        <div class="stat-subtitle">Net 30d (vs Net 45d Baseline)</div>
-      </div>
+    <div class="kpi-item stat-commercial">
+      <span class="kpi-icon-dot emerald"></span>
+      <span class="kpi-label">COMMERCIAL DELTA:</span>
+      <strong class="kpi-val success">+₹ 3,50,000</strong>
+      <span class="kpi-sub">(Net 30d vs 45d)</span>
     </div>
   </section>
 
@@ -172,7 +139,7 @@
       [class.active]="viewTab === 'studio'" 
       (click)="viewTab = 'studio'"
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       <span>Comparison Studio</span>
       <span class="count-badge highlight">{{ clauses.length }}</span>
     </button>
@@ -183,7 +150,7 @@
       [class.active]="viewTab === 'matrix'" 
       (click)="viewTab = 'matrix'"
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
       <span>Executive Matrix</span>
       <span class="count-badge">Overview</span>
     </button>
@@ -194,7 +161,7 @@
       [class.active]="viewTab === 'fields'" 
       (click)="viewTab = 'fields'"
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
       <span>Key Fields Delta</span>
       <span class="count-badge">{{ fieldDiffs.length }}</span>
     </button>
@@ -205,8 +172,8 @@
       [class.active]="viewTab === 'text'" 
       (click)="viewTab = 'text'"
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      <span>Full Manuscript Redline</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>Manuscript Redline</span>
     </button>
 
     <button 
@@ -215,7 +182,7 @@
       [class.active]="viewTab === 'audit'" 
       (click)="viewTab = 'audit'"
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       <span>Audit Trail & Hashes</span>
       <span class="count-badge">{{ auditRecords.length }}</span>
     </button>
@@ -311,9 +278,9 @@
                   </div>
 
                   <div class="item-preview-shift">
-                    <span class="shift-before">{{ clause.beforeSummary | slice:0:36 }}...</span>
+                    <span class="shift-before">{{ clause.beforeSummary | slice:0:34 }}...</span>
                     <span class="shift-arrow">➔</span>
-                    <span class="shift-after">{{ clause.afterSummary | slice:0:36 }}...</span>
+                    <span class="shift-after">{{ clause.afterSummary | slice:0:34 }}...</span>
                   </div>
                 </div>
               }
@@ -325,49 +292,45 @@
             @if (activeClause; as clause) {
               <article class="stage-card" [class.high-risk]="clause.riskImpact === 'High'">
                 
-                <!-- STAGE COMMAND BAR -->
-                <div class="stage-command-bar">
-                  <div class="stage-clause-identity">
-                    <div class="sec-badge">{{ clause.sectionNumber }}</div>
-                    <div class="clause-naming">
-                      <h2>{{ clause.title }}</h2>
-                      <div class="stage-tag-row">
-                        <span class="category-pill">{{ clause.category | titlecase }}</span>
-                        <span class="change-pill {{ clause.changeType }}">{{ clause.changeType | uppercase }}</span>
-                        <span class="risk-badge {{ clause.riskImpact.toLowerCase() }}">Risk: {{ clause.riskImpact }}</span>
-                        @if (clause.isUncertainAlignment) {
-                          <span class="uncertain-pill">⚠️ Low-Confidence Alignment · Reviewer Verification Required</span>
-                        }
-                      </div>
-                    </div>
+                <!-- STAGE TOP BAR: CLAUSE IDENTITY -->
+                <div class="stage-header-top">
+                  <div class="clause-main-title">
+                    <span class="sec-badge">{{ clause.sectionNumber }}</span>
+                    <h2>{{ clause.title }}</h2>
+                  </div>
+                  <div class="clause-meta-tags">
+                    <span class="category-pill">{{ clause.category | titlecase }}</span>
+                    <span class="change-pill {{ clause.changeType }}">{{ clause.changeType | uppercase }}</span>
+                    <span class="risk-badge {{ clause.riskImpact.toLowerCase() }}">Risk: {{ clause.riskImpact }}</span>
+                    @if (clause.isUncertainAlignment) {
+                      <span class="uncertain-pill">⚠️ Low-Confidence Alignment · Review Required</span>
+                    }
+                  </div>
+                </div>
+
+                <!-- STAGE ACTION TOOLBAR (SEPARATED TO PREVENT COLLISION/OVERLAPPING) -->
+                <div class="stage-action-toolbar">
+                  <div class="stepper-box">
+                    <button type="button" class="btn-step" [disabled]="selectedClauseIndex === 0" (click)="prevClause()" title="Previous clause">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                      <span>Prev</span>
+                    </button>
+                    <span class="step-indicator">Clause {{ selectedClauseIndex + 1 }} of {{ filteredClauses.length }}</span>
+                    <button type="button" class="btn-step" [disabled]="selectedClauseIndex === filteredClauses.length - 1" (click)="nextClause()" title="Next clause">
+                      <span>Next</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
                   </div>
 
-                  <!-- STEPPER & ACTION BUTTONS -->
-                  <div class="stage-actions-box">
-                    <div class="stepper-controls">
-                      <span class="step-counter">Change {{ selectedClauseIndex + 1 }} of {{ filteredClauses.length }}</span>
-                      <div class="stepper-btn-group">
-                        <button type="button" class="btn-step" [disabled]="selectedClauseIndex === 0" (click)="prevClause()" title="Previous clause">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-                          <span>Prev</span>
-                        </button>
-                        <button type="button" class="btn-step" [disabled]="selectedClauseIndex === filteredClauses.length - 1" (click)="nextClause()" title="Next clause">
-                          <span>Next</span>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div class="decision-buttons">
-                      <button type="button" class="btn-decision accept" [class.active]="clause.status === 'accepted'" (click)="acceptClause(clause)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        <span>{{ clause.status === 'accepted' ? 'Accepted' : 'Accept Change' }}</span>
-                      </button>
-                      <button type="button" class="btn-decision flag" [class.active]="clause.status === 'flagged'" (click)="flagClause(clause)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                        <span>{{ clause.status === 'flagged' ? 'Flagged' : 'Flag for Counsel' }}</span>
-                      </button>
-                    </div>
+                  <div class="decision-box">
+                    <button type="button" class="btn-decision accept" [class.active]="clause.status === 'accepted'" (click)="acceptClause(clause)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>{{ clause.status === 'accepted' ? 'Accepted' : 'Accept Change' }}</span>
+                    </button>
+                    <button type="button" class="btn-decision flag" [class.active]="clause.status === 'flagged'" (click)="flagClause(clause)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                      <span>{{ clause.status === 'flagged' ? 'Flagged' : 'Flag for Counsel' }}</span>
+                    </button>
                   </div>
                 </div>
 
@@ -785,5 +748,3 @@
     </div>
   }
 </div>
-
-
