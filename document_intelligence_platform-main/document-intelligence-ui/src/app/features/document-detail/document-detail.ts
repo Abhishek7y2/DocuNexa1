@@ -51,6 +51,7 @@ export interface CommentItem {
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     LoadingState,
     ErrorState,
     StatusBadge,

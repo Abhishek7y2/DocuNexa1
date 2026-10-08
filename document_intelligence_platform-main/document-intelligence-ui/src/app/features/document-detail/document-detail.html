@@ -5,113 +5,211 @@
     <app-error-state [variant]="errorVariant()" (retry)="retryLoad()"></app-error-state>
   } @else {
 
-  <!-- HEADER -->
-  <header class="detail-header">
-    <div class="header-left">
-      <button type="button" class="btn-back" (click)="goBack()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        <span>Back</span>
-      </button>
+  <!-- =========================================================================
+       1. TOP BREADCRUMB & CONTROL HEADER
+       ========================================================================= -->
+  <header class="detail-header-panel">
+    <div class="header-top-row">
+      <div class="header-left-col">
+        <!-- Breadcrumb / Back button -->
+        <button type="button" class="btn-back-pill" (click)="goBack()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Back to Documents</span>
+        </button>
 
-      <div class="doc-identity">
-        <span class="file-badge">PDF</span>
-        <div>
-          <div class="title-row">
-            <h1>{{ document.name }}</h1>
-            <app-status-badge [status]="document.status"></app-status-badge>
+        <div class="doc-identity-cluster">
+          <div class="file-icon-badge">PDF</div>
+          <div class="doc-text-block">
+            <div class="title-with-badge">
+              <h1 class="doc-heading">{{ document.name }}</h1>
+              <app-status-badge [status]="document.status"></app-status-badge>
+            </div>
+            <div class="doc-meta-subline">
+              <span class="meta-tag id-tag">{{ document.id }}</span>
+              <span class="meta-separator">•</span>
+              <span>{{ document.type }}</span>
+              <span class="meta-separator">•</span>
+              <span>{{ document.pages }} Pages</span>
+              <span class="meta-separator">•</span>
+              <span>{{ document.size }}</span>
+              <span class="meta-separator">•</span>
+              <span>Uploaded by <strong class="owner-name">{{ document.owner }}</strong></span>
+            </div>
           </div>
-          <span class="doc-sub">{{ document.id }} · {{ document.type }} · {{ document.pages }} pages · {{ document.size }} · Owner: {{ document.owner }}</span>
         </div>
       </div>
-    </div>
 
-    <!-- ACTION BUTTONS (TASK 7C Items 1 & 4) -->
-    <div class="header-actions">
-      <button type="button" class="btn-secondary" (click)="isCommentsDrawerOpen = !isCommentsDrawerOpen">
-        💬 Comments ({{ comments.length }})
-      </button>
+      <!-- Action Buttons -->
+      <div class="header-actions-group">
+        <button type="button" class="btn-action-ghost" (click)="isCommentsDrawerOpen = !isCommentsDrawerOpen">
+          💬 Comments <span class="action-count-bubble">{{ comments.length }}</span>
+        </button>
 
-      <!-- COMPARE STUDIO DIRECT NAVIGATION -->
-      <button type="button" class="btn-secondary" (click)="navigateToCompare()">
-        🔍 Compare in Compare Studio
-      </button>
+        <button type="button" class="btn-action-ghost" (click)="navigateToCompare()">
+          🔍 Compare Studio
+        </button>
 
-      <!-- SIGNED URL DOWNLOAD ACTION -->
-      <button type="button" class="btn-secondary" (click)="downloadViaSignedUrl()">
-        ⬇ Download via Signed URL
-      </button>
+        <button type="button" class="btn-action-ghost" (click)="downloadViaSignedUrl()">
+          ⬇ Signed Download
+        </button>
 
-      <button type="button" class="btn-primary" (click)="exportMetadataWithMasking()">
-        📤 Export Metadata
-      </button>
+        <button type="button" class="btn-action-primary" (click)="exportMetadataWithMasking()">
+          📤 Export Metadata
+        </button>
+      </div>
     </div>
   </header>
 
+  <!-- =========================================================================
+       2. KPI SUMMARY METRIC CARDS
+       ========================================================================= -->
+  <section class="detail-kpi-metrics-grid">
+    <div class="kpi-mini-card">
+      <div class="kpi-icon-bubble green">✓</div>
+      <div class="kpi-data">
+        <span class="kpi-label">Lifecycle State</span>
+        <strong class="kpi-val">{{ document.status }}</strong>
+        <span class="kpi-sub green-text">Compliant & Audited</span>
+      </div>
+    </div>
+
+    <div class="kpi-mini-card">
+      <div class="kpi-icon-bubble purple">🎯</div>
+      <div class="kpi-data">
+        <span class="kpi-label">Extraction Accuracy</span>
+        <strong class="kpi-val">96.8%</strong>
+        <span class="kpi-sub green-text">↑ High Confidence</span>
+      </div>
+    </div>
+
+    <div class="kpi-mini-card">
+      <div class="kpi-icon-bubble blue">📋</div>
+      <div class="kpi-data">
+        <span class="kpi-label">Extracted Schema</span>
+        <strong class="kpi-val">{{ extractedFields.length }} Fields</strong>
+        <span class="kpi-sub amber-text">1 Restricted Masked</span>
+      </div>
+    </div>
+
+    <div class="kpi-mini-card">
+      <div class="kpi-icon-bubble amber">🕒</div>
+      <div class="kpi-data">
+        <span class="kpi-label">Active Revision</span>
+        <strong class="kpi-val">v3.0 (Latest)</strong>
+        <span class="kpi-sub">{{ versions.length }} Historical Revisions</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SIGNED URL ACTIVE BANNER (IF TRIGGERED)
+       ========================================================================= -->
   @if (document.signedUrlExpiry) {
-    <div class="signed-url-banner">
-      <span class="lock">🔒</span>
-      <span><strong>Signed URL Active:</strong> {{ document.signedUrlExpiry }} — <a [href]="document.signedUrl" target="_blank" class="signed-link">Click to Download Original PDF Bytes</a></span>
+    <div class="signed-url-alert-banner">
+      <div class="alert-left-flex">
+        <span class="lock-icon">🔒</span>
+        <div>
+          <strong class="alert-headline">Temporary Signed URL Active (TTL 15 mins):</strong>
+          <span class="alert-desc">{{ document.signedUrlExpiry }}</span>
+        </div>
+      </div>
+      <a [href]="document.signedUrl" target="_blank" class="btn-download-signed">
+        Download Original Bytes (PDF) ›
+      </a>
     </div>
   }
 
-  <!-- MAIN DETAIL GRID -->
-  <main class="detail-grid">
+  <!-- =========================================================================
+       3. MAIN TWO-COLUMN CONTENT GRID
+       ========================================================================= -->
+  <main class="detail-main-grid">
 
-    <!-- LEFT COLUMN: EXTRACTED FIELDS & FIND ON PAGE -->
-    <section class="metadata-section">
-      <div class="section-header">
-        <h3>Extracted Schema Fields</h3>
-        <!-- IN-DOCUMENT FIND ON PAGE (TASK 7C Item 3) -->
-        <div class="find-on-page-box">
-          <span class="icon">🔍</span>
-          <input type="text" placeholder="Find on page..." class="find-input" />
+    <!-- LEFT COLUMN: EXTRACTED SCHEMA FIELDS & FIND ON PAGE -->
+    <section class="content-panel-card">
+      <div class="panel-card-header">
+        <div class="panel-header-titles">
+          <h3 class="panel-card-title">Extracted Schema Fields</h3>
+          <span class="panel-card-subtitle">AI OCR extracted attributes with confidence scores and policy masking</span>
+        </div>
+
+        <!-- In-Document Find On Page -->
+        <div class="find-on-page-wrapper">
+          <span class="search-lens">🔍</span>
+          <input type="text" placeholder="Filter extracted fields..." class="find-input-box" />
         </div>
       </div>
 
-      <div class="fields-list">
+      <div class="extracted-fields-list">
         @for (f of extractedFields; track f.label) {
-          <div class="field-item-card" [class.restricted]="f.isRestricted">
-            <div class="f-top">
-              <span class="f-lbl">{{ f.label }}</span>
-              <span class="f-conf">{{ f.confidence }} Conf</span>
+          <div class="field-entity-row" [class.field-restricted]="f.isRestricted">
+            <div class="field-meta-top">
+              <span class="field-label-text">{{ f.label }}</span>
+              <div class="field-badges-group">
+                @if (f.isRestricted) {
+                  <span class="restricted-badge-pill">🔒 Restricted</span>
+                }
+                <span class="confidence-pill" [class.high]="!f.isRestricted">{{ f.confidence }} Conf</span>
+              </div>
             </div>
-            <strong class="f-val">{{ f.value }}</strong>
+            <div class="field-value-display">
+              <strong class="value-text" [class.masked-text]="f.isRestricted">{{ f.value }}</strong>
+            </div>
           </div>
         }
       </div>
+
+      <div class="panel-card-footer">
+        <a [routerLink]="['/review', document.id]" class="btn-workbench-link">
+          Open in Review Workbench (HITL Editor) ›
+        </a>
+      </div>
     </section>
 
-    <!-- RIGHT COLUMN: VERTICAL VERSION TIMELINE (TASK 7C Item 2) -->
-    <section class="timeline-section">
-      <div class="section-header">
-        <h3>Vertical Version Timeline (BRD Section 10.1)</h3>
-        <span class="sub">Click any prior version to inspect read-only</span>
+    <!-- RIGHT COLUMN: VERTICAL VERSION TIMELINE (BRD SECTION 10.1) -->
+    <section class="content-panel-card">
+      <div class="panel-card-header">
+        <div class="panel-header-titles">
+          <h3 class="panel-card-title">Vertical Version Timeline</h3>
+          <span class="panel-card-subtitle">Immutable audit trail of document revisions and OCR transformations</span>
+        </div>
       </div>
 
-      <div class="vertical-timeline">
-        @for (v of versions; track v.version) {
-          <div class="v-timeline-item" [class.current]="v.isCurrent">
-            <div class="v-dot"></div>
-            <div class="v-card">
-              <div class="v-top">
-                <div class="v-badge-box">
-                  <span class="ver-badge">{{ v.version }}</span>
+      <div class="vertical-timeline-container">
+        @for (v of versions; track v.version; let idx = $index) {
+          <div class="timeline-revision-item" [class.current-active]="v.isCurrent">
+            <div class="timeline-indicator-node">
+              <div class="timeline-dot"></div>
+            </div>
+
+            <div class="timeline-revision-card">
+              <div class="revision-header-row">
+                <div class="revision-tag-group">
+                  <span class="version-tag-pill" [class.active-tag]="v.isCurrent">{{ v.version }}</span>
                   <app-status-badge [status]="v.status"></app-status-badge>
                 </div>
-                <span class="v-time">{{ v.date }} at {{ v.time }}</span>
-              </div>
-              <p class="v-summary">{{ v.changeSummary }}</p>
-              <div class="v-meta">
-                <span>By {{ v.uploadedBy }}</span> · <span>{{ v.size }}</span> · <span>{{ v.pages }} pages</span>
+                <span class="revision-time-stamp">{{ v.date }} • {{ v.time }}</span>
               </div>
 
-              <div class="v-actions">
+              <p class="revision-summary-text">{{ v.changeSummary }}</p>
+
+              <div class="revision-meta-footer">
+                <span class="meta-author">By <strong>{{ v.uploadedBy }}</strong></span>
+                <span class="meta-sep">•</span>
+                <span>{{ v.size }}</span>
+                <span class="meta-sep">•</span>
+                <span>{{ v.pages }} pages</span>
+              </div>
+
+              <div class="revision-action-row">
                 @if (!v.isCurrent) {
-                  <button type="button" class="btn-inspect-version" (click)="openHistoricalVersionReadOnly(v)">
+                  <button type="button" class="btn-inspect-historical" (click)="openHistoricalVersionReadOnly(v)">
                     👁️ Inspect Read-Only
                   </button>
                 } @else {
-                  <span class="current-label">★ Active Version</span>
+                  <span class="active-version-indicator">★ Currently Active Production Version</span>
                 }
               </div>
             </div>
@@ -123,27 +221,49 @@
   </main>
   }
 
-  <!-- COMMENTS DRAWER (TASK 7C Item 6) -->
+  <!-- =========================================================================
+       4. COMMENTS & CLARIFICATIONS DRAWER
+       ========================================================================= -->
   @if (isCommentsDrawerOpen) {
-    <div class="drawer-backdrop" (click)="isCommentsDrawerOpen = false"></div>
-    <aside class="comments-drawer" role="dialog">
-      <div class="drawer-header">
-        <h3>💬 Document Clarifications & Notes</h3>
-        <button type="button" class="btn-close" (click)="isCommentsDrawerOpen = false">×</button>
-      </div>
-      <div class="drawer-body">
-        <div class="add-comment-box">
-          <textarea [(ngModel)]="commentText" placeholder="Add clarification note..." rows="3" class="comment-textarea"></textarea>
-          <button type="button" class="btn-post-comment" (click)="addComment()">Post Comment</button>
+    <div class="drawer-backdrop-overlay" (click)="isCommentsDrawerOpen = false"></div>
+    <aside class="enterprise-drawer" role="dialog" aria-modal="true">
+      <div class="drawer-header-bar">
+        <div>
+          <h3 class="drawer-title">Document Notes & Clarifications</h3>
+          <span class="drawer-sub">Threaded audit notes for reviewers and approvers</span>
         </div>
-        <div class="comments-list">
+        <button type="button" class="btn-drawer-close" (click)="isCommentsDrawerOpen = false">✕</button>
+      </div>
+
+      <div class="drawer-body-content">
+        <!-- New Comment Input -->
+        <div class="comment-compose-card">
+          <textarea
+            [(ngModel)]="commentText"
+            placeholder="Add an internal reviewer note or clarification..."
+            rows="3"
+            class="comment-input-area"
+          ></textarea>
+          <div class="compose-footer">
+            <button type="button" class="btn-submit-comment" (click)="addComment()">Post Note</button>
+          </div>
+        </div>
+
+        <!-- Comments List -->
+        <div class="comments-thread-list">
           @for (c of comments; track c.id) {
-            <div class="comment-card">
-              <div class="c-top">
-                <strong>{{ c.author }} ({{ c.role }})</strong>
-                <span class="time">{{ c.timestamp }}</span>
+            <div class="comment-bubble-item">
+              <div class="comment-author-row">
+                <div class="author-info">
+                  <div class="author-avatar">{{ c.avatar }}</div>
+                  <div>
+                    <strong class="author-name">{{ c.author }}</strong>
+                    <span class="author-role-badge">{{ c.role }}</span>
+                  </div>
+                </div>
+                <span class="comment-time">{{ c.timestamp }}</span>
               </div>
-              <p>{{ c.text }}</p>
+              <p class="comment-body-text">{{ c.text }}</p>
             </div>
           }
         </div>
@@ -151,24 +271,57 @@
     </aside>
   }
 
-  <!-- READ-ONLY HISTORICAL VERSION MODAL (TASK 7C Item 2) -->
+  <!-- =========================================================================
+       5. READ-ONLY HISTORICAL VERSION MODAL
+       ========================================================================= -->
   @if (isHistoricalReadOnlyModalOpen && selectedHistoricalVersion) {
-    <div class="modal-backdrop" (click)="isHistoricalReadOnlyModalOpen = false">
-      <div class="historical-modal-card" (click)="$event.stopPropagation()">
-        <h3>🔒 Historical Version Read-Only Inspection: {{ selectedHistoricalVersion.version }}</h3>
-        <p>Viewing historical revision uploaded by <strong>{{ selectedHistoricalVersion.uploadedBy }}</strong> on {{ selectedHistoricalVersion.date }}. Original payload is immutable.</p>
-        <div class="hist-summary-box">
-          <p><strong>Change Summary:</strong> {{ selectedHistoricalVersion.changeSummary }}</p>
-          <p><strong>Status:</strong> {{ selectedHistoricalVersion.status }}</p>
+    <div class="modal-backdrop-overlay" (click)="isHistoricalReadOnlyModalOpen = false">
+      <div class="historical-dialog-card" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <h3>🔒 Read-Only Historical Revision: {{ selectedHistoricalVersion.version }}</h3>
+          <span class="dialog-sub">Revision ID: {{ document.id }}-{{ selectedHistoricalVersion.version }}</span>
         </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-primary" (click)="isHistoricalReadOnlyModalOpen = false">Close Viewer</button>
+
+        <div class="dialog-body">
+          <div class="immutable-notice">
+            <span class="notice-icon">🛡️</span>
+            <div>
+              <strong>Immutable Storage Guarantee:</strong>
+              <p>Historical versions are preserved as WORM (Write Once, Read Many) blobs for audit compliance.</p>
+            </div>
+          </div>
+
+          <div class="revision-properties-table">
+            <div class="prop-row">
+              <span class="prop-lbl">Uploaded By:</span>
+              <strong class="prop-val">{{ selectedHistoricalVersion.uploadedBy }}</strong>
+            </div>
+            <div class="prop-row">
+              <span class="prop-lbl">Revision Timestamp:</span>
+              <span class="prop-val">{{ selectedHistoricalVersion.date }} at {{ selectedHistoricalVersion.time }}</span>
+            </div>
+            <div class="prop-row">
+              <span class="prop-lbl">Status at Capture:</span>
+              <span class="prop-val">{{ selectedHistoricalVersion.status }}</span>
+            </div>
+            <div class="prop-row">
+              <span class="prop-lbl">Change Summary:</span>
+              <span class="prop-val">{{ selectedHistoricalVersion.changeSummary }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dialog-actions">
+          <button type="button" class="btn-close-dialog" (click)="isHistoricalReadOnlyModalOpen = false">Close Viewer</button>
         </div>
       </div>
     </div>
   }
 
+  <!-- TOAST NOTIFICATION -->
   @if (toastMessage) {
-    <div class="toast-popup"><span>{{ toastMessage }}</span></div>
+    <div class="enterprise-toast-popup">
+      <span>{{ toastMessage }}</span>
+    </div>
   }
 </div>
