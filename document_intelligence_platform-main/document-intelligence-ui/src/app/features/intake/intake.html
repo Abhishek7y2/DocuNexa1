@@ -44,139 +44,75 @@
     <app-error-state [variant]="errorVariant()" (retry)="retryLoad()"></app-error-state>
   } @else {
 
-  <!-- TOP KPI STAT CARDS ROW (WITH RICH WAVE SPARKLINES) -->
+  <!-- TOP KPI STAT CARDS ROW (SMALL & COMPACT LIKE REVIEW TABS WITH TOP ACCENT BORDER) -->
   <section class="stats-grid">
     <!-- 1. Daily Intake Volume -->
     <div class="stat-card theme-purple">
-      <div class="card-content-area">
-        <div class="card-header-row">
-          <div class="icon-bubble purple">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-          </div>
-          <span class="card-title">Daily Intake Volume</span>
-        </div>
-        <div class="card-metric-row">
-          <span class="metric-val">142 Docs</span>
-        </div>
-        <div class="card-trend-row">
-          <span class="trend-badge positive">↑ 14% vs yesterday</span>
-        </div>
-      </div>
-      <div class="sparkline-bottom-container">
-        <svg viewBox="0 0 200 44" preserveAspectRatio="none" class="sparkline-vector">
-          <defs>
-            <linearGradient id="purpleGradIntake" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.30"/>
-              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M0,34 C35,36 50,14 85,22 C120,30 150,12 200,24 L200,44 L0,44 Z" fill="url(#purpleGradIntake)"/>
-          <path d="M0,34 C35,36 50,14 85,22 C120,30 150,12 200,24" fill="none" stroke="#8b5cf6" stroke-width="2.2" stroke-linecap="round"/>
+      <div class="stat-icon purple">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
         </svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Daily Intake Volume</span>
+        <div class="stat-val-row">
+          <strong class="stat-value">142 Docs</strong>
+          <span class="trend-tag positive">↑ 14%</span>
+        </div>
       </div>
     </div>
 
     <!-- 2. SHA-256 Validated -->
     <div class="stat-card theme-green">
-      <div class="card-content-area">
-        <div class="card-header-row">
-          <div class="icon-bubble green">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              <polyline points="9 12 11 14 15 10"></polyline>
-            </svg>
-          </div>
-          <span class="card-title">SHA-256 Validated</span>
-        </div>
-        <div class="card-metric-row">
-          <span class="metric-val">100% Verified</span>
-        </div>
-        <div class="card-trend-row">
-          <span class="trend-badge positive">Checksum Tamper-Proof</span>
-        </div>
-      </div>
-      <div class="sparkline-bottom-container">
-        <svg viewBox="0 0 200 44" preserveAspectRatio="none" class="sparkline-vector">
-          <defs>
-            <linearGradient id="greenGradIntake" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#10b981" stop-opacity="0.30"/>
-              <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M0,36 C40,36 70,16 110,26 C150,36 175,10 200,18 L200,44 L0,44 Z" fill="url(#greenGradIntake)"/>
-          <path d="M0,36 C40,36 70,16 110,26 C150,36 175,10 200,18" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round"/>
+      <div class="stat-icon green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <polyline points="9 12 11 14 15 10"></polyline>
         </svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">SHA-256 Validated</span>
+        <div class="stat-val-row">
+          <strong class="stat-value">100%</strong>
+          <span class="trend-tag verified">Tamper-Proof</span>
+        </div>
       </div>
     </div>
 
     <!-- 3. Malware Quarantined -->
     <div class="stat-card theme-orange">
-      <div class="card-content-area">
-        <div class="card-header-row">
-          <div class="icon-bubble orange">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-              <line x1="12" y1="9" x2="12" y2="13"></line>
-              <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
-          </div>
-          <span class="card-title">Malware Quarantined</span>
-        </div>
-        <div class="card-metric-row">
-          <span class="metric-val">{{ quarantinedItems.length }} Files</span>
-        </div>
-        <div class="card-trend-row">
-          <span class="trend-badge positive">Zero Security Breaches</span>
-        </div>
-      </div>
-      <div class="sparkline-bottom-container">
-        <svg viewBox="0 0 200 44" preserveAspectRatio="none" class="sparkline-vector">
-          <defs>
-            <linearGradient id="orangeGradIntake" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#f97316" stop-opacity="0.30"/>
-              <stop offset="100%" stop-color="#f97316" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M0,38 C30,38 60,18 100,28 C140,38 170,12 200,20 L200,44 L0,44 Z" fill="url(#orangeGradIntake)"/>
-          <path d="M0,38 C30,38 60,18 100,28 C140,38 170,12 200,20" fill="none" stroke="#f97316" stroke-width="2.2" stroke-linecap="round"/>
+      <div class="stat-icon orange">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
         </svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Malware Quarantined</span>
+        <div class="stat-val-row">
+          <strong class="stat-value">{{ quarantinedItems.length }} Files</strong>
+          <span class="trend-tag safe">0 Breaches</span>
+        </div>
       </div>
     </div>
 
     <!-- 4. Processing Speed -->
     <div class="stat-card theme-blue">
-      <div class="card-content-area">
-        <div class="card-header-row">
-          <div class="icon-bubble blue">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-          </div>
-          <span class="card-title">Processing Speed</span>
-        </div>
-        <div class="card-metric-row">
-          <span class="metric-val">1.4 s/page</span>
-        </div>
-        <div class="card-trend-row">
-          <span class="trend-badge positive">↑ 0.2s SLA speed</span>
-        </div>
-      </div>
-      <div class="sparkline-bottom-container">
-        <svg viewBox="0 0 200 44" preserveAspectRatio="none" class="sparkline-vector">
-          <defs>
-            <linearGradient id="blueGradIntake" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.30"/>
-              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M0,32 C45,34 70,14 110,22 C150,30 180,10 200,16 L200,44 L0,44 Z" fill="url(#blueGradIntake)"/>
-          <path d="M0,32 C45,34 70,14 110,22 C150,30 180,10 200,16" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round"/>
+      <div class="stat-icon blue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Processing Speed</span>
+        <div class="stat-val-row">
+          <strong class="stat-value">1.4 s/page</strong>
+          <span class="trend-tag positive">↑ 0.2s SLA</span>
+        </div>
       </div>
     </div>
   </section>
