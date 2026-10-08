@@ -168,6 +168,14 @@
       Integrations
     </button>
 
+    <button
+      type="button"
+      [class.active]="activeTab === 'delivery'"
+      (click)="setTab('delivery')"
+    >
+      Notification Delivery
+    </button>
+
   </nav>
 
   <!-- OVERVIEW -->
@@ -1194,5 +1202,331 @@
 
     </section>
   }
+
+  <!-- NOTIFICATION DELIVERY TAB (BRD FR-020 & Section 15) -->
+  @if (activeTab === 'delivery') {
+    <section class="admin-section">
+
+      <!-- SECTION HEADER -->
+      <div class="section-heading section-heading-row">
+        <div>
+          <span class="eyebrow">OPERATIONS & AUDIT</span>
+          <h2>Notification & Webhook Delivery</h2>
+          <p>
+            Monitor outbound notifications, recipient delivery statuses, retry logs, and webhook subscriptions.
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="sendTestWebhook()"
+          >
+            ⚡ Send Test Webhook Payload
+          </button>
+        </div>
+      </div>
+
+      @if (testWebhookToast) {
+        <div style="background: #e0f2fe; border: 1px solid #7dd3fc; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; color: #0369a1; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 500;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span>🚀</span>
+            <span>{{ testWebhookToast }}</span>
+          </div>
+          <button type="button" (click)="testWebhookToast = null" style="background: none; border: none; cursor: pointer; color: #0369a1; font-weight: 700;">✕</button>
+        </div>
+      }
+
+      <!-- SYSTEM NOTIFICATION DELIVERIES PANEL -->
+      <div class="panel" style="margin-bottom: 32px;">
+        <div class="panel-header" style="padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0;">System Notifications</h3>
+            <p style="font-size: 13px; color: #64748b; margin: 2px 0 0 0;">Recipient delivery states across Email, In-App, and SMS channels.</p>
+          </div>
+
+          <!-- FILTERS & CHIPS -->
+          <div class="toolbar" style="margin: 0; padding: 0; background: transparent; border: none;">
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">State:</span>
+              <button
+                type="button"
+                class="chip"
+                [class.active]="deliveryFilterState === 'All'"
+                (click)="deliveryFilterState = 'All'"
+              >
+                All
+              </button>
+              <button
+                type="button"
+                class="chip"
+                [class.active]="deliveryFilterState === 'Queued'"
+                (click)="deliveryFilterState = 'Queued'"
+              >
+                Queued
+              </button>
+              <button
+                type="button"
+                class="chip"
+                [class.active]="deliveryFilterState === 'Sent'"
+                (click)="deliveryFilterState = 'Sent'"
+              >
+                Sent
+              </button>
+              <button
+                type="button"
+                class="chip"
+                [class.active]="deliveryFilterState === 'Failed'"
+                (click)="deliveryFilterState = 'Failed'"
+              >
+                Failed
+              </button>
+              <button
+                type="button"
+                class="chip"
+                [class.active]="deliveryFilterState === 'Retrying'"
+                (click)="deliveryFilterState = 'Retrying'"
+              >
+                Retrying
+              </button>
+            </div>
+
+            <select [(ngModel)]="deliveryDateRange" style="margin-left: 12px; font-size: 12px; padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff;">
+              <option>Today</option>
+              <option>Last 7 Days</option>
+              <option>Last 30 Days</option>
+              <option>All Time</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          @if (filteredNotificationLogs.length === 0) {
+            <app-empty-state
+              icon="🔔"
+              title="No notification logs found"
+              message="No delivery logs match the selected state filter."
+            ></app-empty-state>
+          } @else {
+            <table>
+              <thead>
+                <tr>
+                  <th>Recipient</th>
+                  <th>Template & Version</th>
+                  <th>Channel</th>
+                  <th>Delivery State</th>
+                  <th>Attempts</th>
+                  <th>Last Error</th>
+                  <th>Timestamp</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (log of filteredNotificationLogs; track log.id) {
+                  <tr>
+                    <td>
+                      <div style="font-weight: 600; color: #0f172a; font-size: 13px;">{{ log.recipient }}</div>
+                      <div style="font-size: 11px; color: #94a3b8; font-family: monospace;">{{ log.id }}</div>
+                    </td>
+                    <td>
+                      <div style="font-weight: 500; font-family: monospace; font-size: 12px; color: #334155;">{{ log.templateName }}</div>
+                      <span style="display: inline-block; background: #f1f5f9; color: #475569; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">{{ log.templateVersion }}</span>
+                    </td>
+                    <td>
+                      <span style="font-weight: 500; font-size: 12px; color: #475569;">{{ log.channel }}</span>
+                    </td>
+                    <td>
+                      <span
+                        class="status-badge"
+                        [class.connected]="log.state === 'Sent'"
+                        [class.warning]="log.state === 'Retrying' || log.state === 'Queued'"
+                        [style.background-color]="log.state === 'Failed' ? '#fef2f2' : null"
+                        [style.color]="log.state === 'Failed' ? '#dc2626' : null"
+                        [style.border-color]="log.state === 'Failed' ? '#fca5a5' : null"
+                      >
+                        {{ log.state }}
+                      </span>
+                    </td>
+                    <td>
+                      <span style="font-weight: 600; font-size: 12px; color: #334155;">{{ log.attempts }}</span>
+                    </td>
+                    <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      <span [style.color]="log.state === 'Failed' ? '#dc2626' : '#64748b'" style="font-size: 12px; font-family: monospace;">
+                        {{ log.lastError }}
+                      </span>
+                    </td>
+                    <td>
+                      <span style="font-size: 12px; color: #64748b;">{{ log.timestamp }}</span>
+                    </td>
+                    <td style="text-align: right;">
+                      <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                        <button
+                          type="button"
+                          class="text-button"
+                          style="font-size: 12px;"
+                          (click)="openAttemptHistory(log)"
+                        >
+                          📜 History
+                        </button>
+
+                        @if (log.state === 'Failed' || log.state === 'Retrying') {
+                          <button
+                            type="button"
+                            class="secondary-button"
+                            style="padding: 4px 10px; font-size: 11px; height: auto;"
+                            (click)="retryNotificationDelivery(log)"
+                          >
+                            🔄 Retry
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      </div>
+
+      <!-- WEBHOOK DELIVERIES PANEL -->
+      <div class="panel">
+        <div class="panel-header" style="padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0;">Webhook Deliveries</h3>
+            <p style="font-size: 13px; color: #64748b; margin: 2px 0 0 0;">Outbound HTTP event notifications, signature validation, and idempotency status.</p>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>Endpoint URL</th>
+                <th>HTTP Status</th>
+                <th>Signature Status</th>
+                <th>Attempts</th>
+                <th>Idempotency Key</th>
+                <th>Final Failure Reason</th>
+                <th>Timestamp</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (wh of webhookLogs; track wh.id) {
+                <tr>
+                  <td>
+                    <div style="font-weight: 700; color: #4f46e5; font-family: monospace; font-size: 12px;">{{ wh.event }}</div>
+                    <div style="font-size: 10px; color: #94a3b8; font-family: monospace;">{{ wh.id }}</div>
+                  </td>
+                  <td style="max-width: 220px; word-break: break-all;">
+                    <span style="font-size: 11px; font-family: monospace; color: #334155;">{{ wh.endpointUrl }}</span>
+                  </td>
+                  <td>
+                    <span
+                      class="status-badge"
+                      [class.connected]="wh.httpStatus.includes('200')"
+                      [style.background-color]="!wh.httpStatus.includes('200') ? '#fef2f2' : null"
+                      [style.color]="!wh.httpStatus.includes('200') ? '#dc2626' : null"
+                      [style.border-color]="!wh.httpStatus.includes('200') ? '#fca5a5' : null"
+                    >
+                      {{ wh.httpStatus }}
+                    </span>
+                  </td>
+                  <td>
+                    <span style="font-size: 11px; font-weight: 600; color: #16a34a; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 4px;">
+                      ✓ {{ wh.signatureStatus }}
+                    </span>
+                  </td>
+                  <td>
+                    <span style="font-weight: 600; font-size: 12px; color: #334155;">{{ wh.attempts }}</span>
+                  </td>
+                  <td>
+                    <span style="font-size: 11px; font-family: monospace; color: #64748b;">{{ wh.idempotencyKey }}</span>
+                  </td>
+                  <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <span [style.color]="wh.finalFailure !== '—' ? '#dc2626' : '#64748b'" style="font-size: 12px;">
+                      {{ wh.finalFailure }}
+                    </span>
+                  </td>
+                  <td>
+                    <span style="font-size: 12px; color: #64748b;">{{ wh.timestamp }}</span>
+                  </td>
+                  <td style="text-align: right;">
+                    <button
+                      type="button"
+                      class="secondary-button"
+                      style="padding: 4px 10px; font-size: 11px; height: auto;"
+                      (click)="resendWebhook(wh)"
+                    >
+                      🔁 Resend
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+  }
+  }
+
+  <!-- ATTEMPT HISTORY MODAL DRAWER -->
+  @if (showAttemptHistoryModal && selectedDeliveryLog) {
+    <div style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 1000; display: flex; justify-content: flex-end;">
+      <div style="width: 100%; max-width: 520px; background: #ffffff; height: 100%; display: flex; flex-direction: column; box-shadow: -10px 0 25px rgba(0,0,0,0.15); animation: slideIn 0.25s ease-out;">
+        
+        <!-- DRAWER HEADER -->
+        <div style="padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.05em;">DELIVERY HISTORY</div>
+            <h3 style="margin: 4px 0 0 0; font-size: 18px; font-weight: 700; color: #0f172a;">Attempt History — {{ selectedDeliveryLog.id }}</h3>
+          </div>
+          <button type="button" (click)="closeAttemptHistory()" style="background: transparent; border: none; font-size: 20px; color: #64748b; cursor: pointer; padding: 4px;">✕</button>
+        </div>
+
+        <!-- DRAWER BODY -->
+        <div style="padding: 24px; flex: 1; overflow-y: auto;">
+          <div style="background: #f1f5f9; padding: 14px; border-radius: 8px; margin-bottom: 24px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px;">
+              <div><strong style="color: #64748b;">Recipient:</strong> <span style="color: #0f172a; font-weight: 600;">{{ selectedDeliveryLog.recipient }}</span></div>
+              <div><strong style="color: #64748b;">Channel:</strong> <span style="color: #0f172a; font-weight: 600;">{{ selectedDeliveryLog.channel }}</span></div>
+              <div><strong style="color: #64748b;">Template:</strong> <span style="color: #0f172a; font-family: monospace;">{{ selectedDeliveryLog.templateName }} ({{ selectedDeliveryLog.templateVersion }})</span></div>
+              <div><strong style="color: #64748b;">Current State:</strong> <span style="font-weight: 700;" [style.color]="selectedDeliveryLog.state === 'Sent' ? '#16a34a' : '#dc2626'">{{ selectedDeliveryLog.state }}</span></div>
+            </div>
+          </div>
+
+          <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 16px;">Delivery Attempt Timeline ({{ selectedDeliveryLog.attemptHistory.length }} attempts)</h4>
+
+          <div style="position: relative; padding-left: 20px; border-left: 2px solid #e2e8f0; display: flex; flex-direction: column; gap: 20px;">
+            @for (attempt of selectedDeliveryLog.attemptHistory; track attempt.attemptNumber) {
+              <div style="position: relative;">
+                <div style="position: absolute; left: -27px; top: 0; width: 12px; height: 12px; border-radius: 50%;" [style.background]="attempt.status === 'Success' ? '#16a34a' : '#dc2626'" style="border: 2px solid #fff;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <strong style="font-size: 13px; color: #0f172a;">Attempt #{{ attempt.attemptNumber }} — {{ attempt.channel }}</strong>
+                  <span style="font-size: 11px; color: #94a3b8;">{{ attempt.timestamp }}</span>
+                </div>
+                <div style="font-size: 12px; font-weight: 600; margin-bottom: 4px;" [style.color]="attempt.status === 'Success' ? '#16a34a' : '#dc2626'">
+                  {{ attempt.status === 'Success' ? '✓' : '✗' }} Status: {{ attempt.responseStatus }}
+                </div>
+                <div style="font-size: 12px; font-family: monospace; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 10px; border-radius: 6px; color: #334155;">
+                  {{ attempt.responseMessage }}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- DRAWER FOOTER -->
+        <div style="padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: flex-end;">
+          <button type="button" class="secondary-button" (click)="closeAttemptHistory()">Close</button>
+        </div>
+
+      </div>
+    </div>
   }
 </div>

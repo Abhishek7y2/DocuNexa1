@@ -1253,3 +1253,35 @@ table {
     grid-template-columns: 1fr;
   }
 }
+
+.chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #f1f5f9;
+    color: #334155;
+  }
+
+  &.active {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: #ffffff;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

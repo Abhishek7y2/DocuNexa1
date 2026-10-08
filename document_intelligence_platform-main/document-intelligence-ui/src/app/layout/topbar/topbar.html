@@ -44,10 +44,13 @@
     <button
       type="button"
       class="topbar-icon-button notification-button"
-      aria-label="Notifications"
+      [attr.aria-label]="'Notifications, ' + notificationService.unreadCount() + ' unread'"
+      (click)="toggleNotifications()"
     >
-      <span class="notification-icon">♢</span>
-      <span class="notification-dot"></span>
+      <span class="notification-icon">🔔</span>
+      @if (notificationService.unreadCount() > 0) {
+        <span class="notification-dot-badge">{{ notificationService.unreadCount() }}</span>
+      }
     </button>
 
 

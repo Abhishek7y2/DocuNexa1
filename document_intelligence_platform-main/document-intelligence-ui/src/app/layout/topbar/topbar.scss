@@ -202,6 +202,24 @@
   background: var(--brand);
 }
 
+.notification-dot-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 1.5px solid #ffffff;
+}
+
 
 /* =========================
    DIVIDER

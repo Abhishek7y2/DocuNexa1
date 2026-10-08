@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { LoadingState } from '../../shared/ui/loading-state/loading-state';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
+import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { ADMIN_SERVICE_TOKEN, MockAdminService } from '../../core/services/api-services';
 
 type AdminTab =
@@ -13,7 +14,8 @@ type AdminTab =
   | 'workflow'
   | 'retention'
   | 'security'
-  | 'integrations';
+  | 'integrations'
+  | 'delivery';
 
 interface UserItem {
   name: string;
@@ -48,10 +50,44 @@ interface IntegrationItem {
   lastSync: string;
 }
 
+export interface DeliveryAttempt {
+  attemptNumber: number;
+  timestamp: string;
+  channel: string;
+  responseStatus: string;
+  responseMessage: string;
+  status: 'Success' | 'Failure';
+}
+
+export interface NotificationDeliveryLog {
+  id: string;
+  recipient: string;
+  templateName: string;
+  templateVersion: string;
+  channel: 'Email' | 'In-App' | 'SMS';
+  state: 'Queued' | 'Sent' | 'Failed' | 'Retrying';
+  attempts: number;
+  lastError: string;
+  timestamp: string;
+  attemptHistory: DeliveryAttempt[];
+}
+
+export interface WebhookDeliveryLog {
+  id: string;
+  event: string;
+  endpointUrl: string;
+  httpStatus: string;
+  signatureStatus: string;
+  attempts: string;
+  idempotencyKey: string;
+  finalFailure: string;
+  timestamp: string;
+}
+
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoadingState, ErrorState],
+  imports: [CommonModule, FormsModule, LoadingState, ErrorState, EmptyState],
   templateUrl: './admin.html',
   styleUrl: './admin.scss',
   providers: [{ provide: ADMIN_SERVICE_TOKEN, useClass: MockAdminService }],
@@ -69,6 +105,7 @@ export class Admin implements OnInit {
   saveError = signal(false);
   hasUnsavedChanges = signal(false);
   saveSuccessToast: string | null = null;
+  testWebhookToast: string | null = null;
 
   searchUser = '';
   selectedUserRole = 'All Roles';
@@ -128,6 +165,116 @@ export class Admin implements OnInit {
     { number: 6, title: 'Approval', description: 'Route documents to authorized approvers.', enabled: true },
     { number: 7, title: 'Repository', description: 'Store approved documents and searchable metadata.', enabled: true },
   ];
+
+  // --- TAB: NOTIFICATION DELIVERY (BRD FR-020 & Section 15) ---
+  deliveryFilterState: 'All' | 'Queued' | 'Sent' | 'Failed' | 'Retrying' = 'All';
+  deliveryDateRange = 'Last 7 Days';
+
+  selectedDeliveryLog: NotificationDeliveryLog | null = null;
+  showAttemptHistoryModal = false;
+
+  notificationLogs: NotificationDeliveryLog[] = [
+    {
+      id: 'DEL-901',
+      recipient: 'reviewer@docnexa.io',
+      templateName: 'tpl_review_assignment',
+      templateVersion: 'v2.1',
+      channel: 'Email',
+      state: 'Failed',
+      attempts: 3,
+      lastError: '550 5.1.1 SMTP relay timeout: MX host unreachable',
+      timestamp: '06 Oct 2026 · 11:32 AM',
+      attemptHistory: [
+        { attemptNumber: 1, timestamp: '06 Oct 2026 · 11:28 AM', channel: 'SMTP Email', responseStatus: '504 Gateway Timeout', responseMessage: 'Connection timed out after 3000ms', status: 'Failure' },
+        { attemptNumber: 2, timestamp: '06 Oct 2026 · 11:30 AM', channel: 'SMTP Email', responseStatus: '550 5.1.1', responseMessage: 'MX host unreachable', status: 'Failure' },
+        { attemptNumber: 3, timestamp: '06 Oct 2026 · 11:32 AM', channel: 'SMTP Email', responseStatus: '550 5.1.1', responseMessage: 'MX host unreachable', status: 'Failure' },
+      ],
+    },
+    {
+      id: 'DEL-902',
+      recipient: 'approver@docnexa.io',
+      templateName: 'tpl_approval_requested',
+      templateVersion: 'v1.4',
+      channel: 'Email',
+      state: 'Sent',
+      attempts: 1,
+      lastError: '—',
+      timestamp: '06 Oct 2026 · 11:15 AM',
+      attemptHistory: [
+        { attemptNumber: 1, timestamp: '06 Oct 2026 · 11:15 AM', channel: 'SMTP Email', responseStatus: '250 2.0.0 OK', responseMessage: 'Queued for delivery msg-id 98412', status: 'Success' },
+      ],
+    },
+    {
+      id: 'DEL-903',
+      recipient: 'admin@docnexa.io',
+      templateName: 'tpl_sla_breach_warning',
+      templateVersion: 'v3.0',
+      channel: 'In-App',
+      state: 'Sent',
+      attempts: 1,
+      lastError: '—',
+      timestamp: '06 Oct 2026 · 10:45 AM',
+      attemptHistory: [
+        { attemptNumber: 1, timestamp: '06 Oct 2026 · 10:45 AM', channel: 'WebSocket In-App', responseStatus: '200 OK', responseMessage: 'Delivered to active socket ID wss-084', status: 'Success' },
+      ],
+    },
+    {
+      id: 'DEL-904',
+      recipient: 'contributor@docnexa.io',
+      templateName: 'tpl_changes_requested',
+      templateVersion: 'v1.2',
+      channel: 'Email',
+      state: 'Retrying',
+      attempts: 2,
+      lastError: '421 4.7.0 Temporary rate limit exceeded',
+      timestamp: '06 Oct 2026 · 09:50 AM',
+      attemptHistory: [
+        { attemptNumber: 1, timestamp: '06 Oct 2026 · 09:45 AM', channel: 'SMTP Email', responseStatus: '421 4.7.0', responseMessage: 'Rate limit exceeded', status: 'Failure' },
+        { attemptNumber: 2, timestamp: '06 Oct 2026 · 09:50 AM', channel: 'SMTP Email', responseStatus: '421 4.7.0', responseMessage: 'Rate limit exceeded', status: 'Failure' },
+      ],
+    },
+  ];
+
+  webhookLogs: WebhookDeliveryLog[] = [
+    {
+      id: 'WH-801',
+      event: 'document.approved',
+      endpointUrl: 'https://api.acme.com/webhooks/docnexa-ingest',
+      httpStatus: '500 Internal Error',
+      signatureStatus: 'HMAC SHA256 Valid',
+      attempts: '3 / 5',
+      idempotencyKey: 'ik_98412_01',
+      finalFailure: 'Remote server returned HTTP 500: Database lock timeout',
+      timestamp: '06 Oct 2026 · 11:40 AM',
+    },
+    {
+      id: 'WH-802',
+      event: 'intake.completed',
+      endpointUrl: 'https://erp.acme.com/api/v1/document-listener',
+      httpStatus: '200 OK',
+      signatureStatus: 'HMAC SHA256 Valid',
+      attempts: '1 / 5',
+      idempotencyKey: 'ik_98412_02',
+      finalFailure: '—',
+      timestamp: '06 Oct 2026 · 10:12 AM',
+    },
+    {
+      id: 'WH-803',
+      event: 'sla.breached',
+      endpointUrl: 'https://compliance.acme.com/hooks/sla',
+      httpStatus: '200 OK',
+      signatureStatus: 'HMAC SHA256 Valid',
+      attempts: '1 / 5',
+      idempotencyKey: 'ik_98412_03',
+      finalFailure: '—',
+      timestamp: '06 Oct 2026 · 08:30 AM',
+    },
+  ];
+
+  get filteredNotificationLogs(): NotificationDeliveryLog[] {
+    if (this.deliveryFilterState === 'All') return this.notificationLogs;
+    return this.notificationLogs.filter((log) => log.state === this.deliveryFilterState);
+  }
 
   @HostListener('window:beforeunload', ['$event'])
   unloadNotification($event: BeforeUnloadEvent): void {
@@ -245,5 +392,49 @@ export class Admin implements OnInit {
     this.searchUser = '';
     this.selectedUserRole = 'All Roles';
     this.selectedUserStatus = 'All Status';
+  }
+
+  // --- NOTIFICATION DELIVERY ACTIONS ---
+  openAttemptHistory(log: NotificationDeliveryLog): void {
+    this.selectedDeliveryLog = log;
+    this.showAttemptHistoryModal = true;
+  }
+
+  closeAttemptHistory(): void {
+    this.showAttemptHistoryModal = false;
+    this.selectedDeliveryLog = null;
+  }
+
+  retryNotificationDelivery(log: NotificationDeliveryLog): void {
+    log.state = 'Retrying';
+    log.attempts++;
+    log.attemptHistory.push({
+      attemptNumber: log.attempts,
+      timestamp: 'Just now',
+      channel: log.channel,
+      responseStatus: '250 2.0.0 OK',
+      responseMessage: 'Manual retry succeeded via SMTP relay',
+      status: 'Success',
+    });
+    setTimeout(() => {
+      log.state = 'Sent';
+      log.lastError = '—';
+    }, 1200);
+  }
+
+  resendWebhook(webhook: WebhookDeliveryLog): void {
+    webhook.httpStatus = '200 OK (Resent)';
+    webhook.finalFailure = '—';
+    this.testWebhookToast = `Resent webhook payload [${webhook.event}] to ${webhook.endpointUrl}`;
+    setTimeout(() => {
+      this.testWebhookToast = null;
+    }, 3500);
+  }
+
+  sendTestWebhook(): void {
+    this.testWebhookToast = 'Test Webhook Payload sent successfully! Signature HMAC SHA256 verified (HTTP 200 OK).';
+    setTimeout(() => {
+      this.testWebhookToast = null;
+    }, 3500);
   }
 }
