@@ -110,7 +110,7 @@
 
   <!-- Task List -->
   @if (isLoading()) {
-    <app-loading-state message="Loading assigned workflow tasks..."></app-loading-state>
+    <app-loading-state layout="table" message="Loading assigned workflow tasks..."></app-loading-state>
   } @else if (hasError()) {
     <app-error-state
       title="Unable to load tasks"
@@ -259,28 +259,13 @@
 
     } @else {
 
-      <div class="empty-state">
-
-        <div class="empty-icon">
-          ✓
-        </div>
-
-        <h3>No tasks found</h3>
-
-        <p>
-          There are no tasks matching your current
-          filters.
-        </p>
-
-        <button
-          type="button"
-          class="clear-button"
-          (click)="clearFilters()"
-        >
-          Clear Filters
-        </button>
-
-      </div>
+      <app-empty-state
+        variant="tasks"
+        title="No tasks assigned"
+        message="You have no open tasks requiring action at this time."
+        actionLabel="Clear Filters"
+        (action)="clearFilters()"
+      ></app-empty-state>
 
     }
 

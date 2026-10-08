@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 
 import { LoadingState } from '../../shared/ui/loading-state/loading-state';
-import { ErrorState } from '../../shared/ui/error-state/error-state';
+import { ErrorState, ErrorVariant } from '../../shared/ui/error-state/error-state';
 import { COMPARE_SERVICE_TOKEN, MockCompareService } from '../../core/services/api-services';
 
 export interface ClauseDiff {
@@ -41,6 +41,7 @@ export class CompareStudio implements OnInit {
   activeFilter: 'all' | 'changed' | 'financial' | 'compliance' = 'changed';
   isLoading = signal(true);
   hasError = signal(false);
+  errorVariant = signal<ErrorVariant>('default');
   toastMessage: string | null = null;
 
   clauses: ClauseDiff[] = [];
@@ -60,6 +61,17 @@ export class CompareStudio implements OnInit {
     this.isLoading.set(true);
     this.hasError.set(false);
 
+    const stateParam = this.route.snapshot.queryParamMap.get('state');
+
+    if (this.documentId === 'alignment' || stateParam === 'alignment') {
+      setTimeout(() => {
+        this.errorVariant.set('alignment-failed');
+        this.hasError.set(true);
+        this.isLoading.set(false);
+      }, 300);
+      return;
+    }
+
     this.compareService.compareDocuments(this.documentId, 'v2').subscribe({
       next: (diffs) => {
         this.clauses = diffs.map((d, index) => ({
@@ -78,6 +90,7 @@ export class CompareStudio implements OnInit {
         this.isLoading.set(false);
       },
       error: () => {
+        this.errorVariant.set('default');
         this.hasError.set(true);
         this.isLoading.set(false);
       },

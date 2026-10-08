@@ -47,7 +47,7 @@
 
   <!-- LOADING / ERROR STATES -->
   @if (isLoading()) {
-    <app-loading-state message="Fetching live dashboard metrics and pipeline funnel stats..."></app-loading-state>
+    <app-loading-state layout="dashboard" message="Fetching live dashboard metrics and pipeline funnel stats..."></app-loading-state>
   } @else if (hasError()) {
     <app-error-state
       title="Unable to load dashboard stats"

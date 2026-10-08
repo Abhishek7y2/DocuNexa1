@@ -1,15 +1,15 @@
-<div class="empty-state">
+<div class="empty-state" [ngClass]="'variant-' + variant">
   <div class="empty-icon">
-    <span>□</span>
+    <span>{{ resolvedIcon }}</span>
   </div>
 
   <div class="empty-content">
-    <h3>{{ title }}</h3>
-    <p>{{ message }}</p>
+    <h3>{{ resolvedTitle }}</h3>
+    <p>{{ resolvedMessage }}</p>
   </div>
 
   @if (actionLabel) {
-    <button type="button" class="empty-action">
+    <button type="button" class="empty-action" (click)="onAction()">
       {{ actionLabel }}
     </button>
   }

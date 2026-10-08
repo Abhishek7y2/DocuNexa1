@@ -1,6 +1,9 @@
 <div class="workbench-page">
-
-  <!-- TOP WORKBENCH HEADER & CONTROLS -->
+  @if (isLoading()) {
+    <app-loading-state layout="split-pane" message="Rendering interactive OCR canvas and bounding boxes..."></app-loading-state>
+  } @else if (hasError()) {
+    <app-error-state [variant]="errorVariant()" (retry)="retryLoad()"></app-error-state>
+  } @else {
   <header class="workbench-header">
     <div class="header-left">
       <a routerLink="/review" class="btn-back">
@@ -494,6 +497,7 @@
     </section>
 
   </main>
+  }
 
   <!-- TOAST NOTIFICATION -->
   @if (toastMessage) {

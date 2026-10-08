@@ -1,4 +1,19 @@
 <div class="app-shell">
+  @if (isOffline()) {
+    <div class="offline-banner" role="alert">
+      <div class="banner-content">
+        <span class="banner-icon">⚡</span>
+        <div>
+          <strong>Working Offline</strong>
+          <span>You are currently disconnected from the network. API operations may fail until connectivity is restored.</span>
+        </div>
+      </div>
+      <button type="button" class="banner-retry-button" (click)="checkConnectivity()">
+        Re-check Connection
+      </button>
+    </div>
+  }
+
   <app-sidebar></app-sidebar>
 
   <div class="main-area">

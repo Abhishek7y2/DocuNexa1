@@ -1,7 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { LoadingState } from '../../shared/ui/loading-state/loading-state';
+import { ErrorState } from '../../shared/ui/error-state/error-state';
 import { ADMIN_SERVICE_TOKEN, MockAdminService } from '../../core/services/api-services';
 
 type AdminTab =
@@ -49,7 +51,7 @@ interface IntegrationItem {
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoadingState, ErrorState],
   templateUrl: './admin.html',
   styleUrl: './admin.scss',
   providers: [{ provide: ADMIN_SERVICE_TOKEN, useClass: MockAdminService }],
@@ -64,6 +66,9 @@ export class Admin implements OnInit {
 
   isLoading = signal(true);
   hasError = signal(false);
+  saveError = signal(false);
+  hasUnsavedChanges = signal(false);
+  saveSuccessToast: string | null = null;
 
   searchUser = '';
   selectedUserRole = 'All Roles';
@@ -124,6 +129,13 @@ export class Admin implements OnInit {
     { number: 7, title: 'Repository', description: 'Store approved documents and searchable metadata.', enabled: true },
   ];
 
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedChanges()) {
+      $event.returnValue = 'You have unsaved administration setting changes.';
+    }
+  }
+
   ngOnInit(): void {
     this.loadAdminSettings();
   }
@@ -149,7 +161,15 @@ export class Admin implements OnInit {
     this.loadAdminSettings();
   }
 
+  markChanged(): void {
+    this.hasUnsavedChanges.set(true);
+  }
+
   setTab(tab: AdminTab): void {
+    if (this.hasUnsavedChanges()) {
+      const confirmSwitch = confirm('You have unsaved changes. Are you sure you want to switch tabs?');
+      if (!confirmSwitch) return;
+    }
     this.activeTab = tab;
   }
 
@@ -184,8 +204,19 @@ export class Admin implements OnInit {
   }
 
   saveSettings(): void {
-    this.adminService.updateSettings({ sessionTimeoutMinutes: 15 }).subscribe(() => {
-      alert('Administration settings saved successfully.');
+    this.saveError.set(false);
+
+    this.adminService.updateSettings({ sessionTimeoutMinutes: 15 }).subscribe({
+      next: () => {
+        this.hasUnsavedChanges.set(false);
+        this.saveSuccessToast = 'Administration settings saved successfully.';
+        setTimeout(() => {
+          this.saveSuccessToast = null;
+        }, 3000);
+      },
+      error: () => {
+        this.saveError.set(true);
+      },
     });
   }
 
@@ -207,6 +238,7 @@ export class Admin implements OnInit {
 
   toggleDocumentType(documentType: DocumentTypeItem): void {
     documentType.enabled = !documentType.enabled;
+    this.markChanged();
   }
 
   clearUserFilters(): void {

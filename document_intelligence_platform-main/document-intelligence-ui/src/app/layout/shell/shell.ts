@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 
 import { Sidebar } from '../sidebar/sidebar';
@@ -11,6 +12,7 @@ import { IdleTimerService } from '../../core/services/idle-timer.service';
   selector: 'app-shell',
   standalone: true,
   imports: [
+    CommonModule,
     RouterOutlet,
     Sidebar,
     Topbar,
@@ -21,13 +23,40 @@ import { IdleTimerService } from '../../core/services/idle-timer.service';
   styleUrl: './shell.scss',
 })
 export class Shell implements OnInit, OnDestroy {
-  private idleTimerService = inject(IdleTimerService);
+  private readonly idleTimerService = inject(IdleTimerService);
+  private readonly platformId = inject(PLATFORM_ID);
+
+  readonly isOffline = signal(false);
+
+  private onlineListener?: () => void;
+  private offlineListener?: () => void;
 
   ngOnInit(): void {
     this.idleTimerService.init(15);
+
+    if (isPlatformBrowser(this.platformId)) {
+      this.isOffline.set(!navigator.onLine);
+
+      this.onlineListener = () => this.isOffline.set(false);
+      this.offlineListener = () => this.isOffline.set(true);
+
+      window.addEventListener('online', this.onlineListener);
+      window.addEventListener('offline', this.offlineListener);
+    }
   }
 
   ngOnDestroy(): void {
     this.idleTimerService.destroy();
+
+    if (isPlatformBrowser(this.platformId)) {
+      if (this.onlineListener) window.removeEventListener('online', this.onlineListener);
+      if (this.offlineListener) window.removeEventListener('offline', this.offlineListener);
+    }
+  }
+
+  checkConnectivity(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.isOffline.set(!navigator.onLine);
+    }
   }
 }

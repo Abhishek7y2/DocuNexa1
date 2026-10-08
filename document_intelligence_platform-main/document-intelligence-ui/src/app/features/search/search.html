@@ -220,7 +220,7 @@
 
     <main class="results-panel">
       @if (isLoading()) {
-        <app-loading-state message="Searching documents using hybrid RAG index..."></app-loading-state>
+        <app-loading-state layout="cards" message="Searching documents using hybrid RAG index..."></app-loading-state>
       } @else if (hasError()) {
         <app-error-state
           title="Search execution failed"
@@ -421,29 +421,13 @@
 
       } @else {
 
-        <div class="empty-state">
-
-          <div class="empty-icon">
-            ⌕
-          </div>
-
-          <h3>
-            No documents found
-          </h3>
-
-          <p>
-            We couldn't find documents matching
-            your search and filters.
-          </p>
-
-          <button
-            type="button"
-            (click)="clearSearch()"
-          >
-            Clear Search
-          </button>
-
-        </div>
+        <app-empty-state
+          variant="search"
+          title="No search results found"
+          message="No documents match your search query or selected filters."
+          actionLabel="Clear Search & Filters"
+          (action)="clearSearch()"
+        ></app-empty-state>
 
       }
       }

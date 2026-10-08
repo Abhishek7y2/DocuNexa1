@@ -173,7 +173,7 @@
 
   <!-- QUEUE TABLE CARD -->
   @if (isLoading()) {
-    <app-loading-state message="Loading verification review queue..."></app-loading-state>
+    <app-loading-state layout="table" message="Loading verification review queue..."></app-loading-state>
   } @else if (hasError()) {
     <app-error-state
       title="Unable to load review queue"
@@ -315,16 +315,13 @@
       </table>
 
       @if (filteredDocuments.length === 0) {
-        <div class="empty-state-card">
-          <div class="empty-icon-wrap">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          </div>
-          <h3>No documents match your filter criteria</h3>
-          <p>Try adjusting your search terms, document status, or priority filters.</p>
-          <button type="button" class="btn-clear-all" (click)="clearFilters()">
-            Clear All Filters
-          </button>
-        </div>
+        <app-empty-state
+          variant="queue"
+          title="No documents awaiting review"
+          message="All document validation tasks are up to date! Try adjusting your search or filters."
+          actionLabel="Clear All Filters"
+          (action)="clearFilters()"
+        ></app-empty-state>
       }
     </div>
   </section>

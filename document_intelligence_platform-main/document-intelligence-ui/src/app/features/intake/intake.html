@@ -24,7 +24,13 @@
     </div>
   </div>
 
-  <!-- TOP KPI STAT CARDS ROW (IndiHire Style) -->
+  <!-- LOADING / ERROR STATES -->
+  @if (isLoading()) {
+    <app-loading-state layout="detail" message="Initializing intake pipeline and batch queue status..."></app-loading-state>
+  } @else if (hasError()) {
+    <app-error-state [variant]="errorVariant()" (retry)="retryLoad()"></app-error-state>
+  } @else {
+    <!-- TOP KPI STAT CARDS ROW (IndiHire Style) -->
   <section class="stats-grid">
     <!-- Card 1: Purple Theme (Daily Intake Volume) -->
     <div class="stat-card theme-purple">
@@ -398,4 +404,5 @@
       }
     </div>
   </div>
+  }
 </div>

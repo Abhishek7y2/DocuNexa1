@@ -191,7 +191,7 @@
 
   <!-- LOADING / ERROR / EMPTY STATES -->
   @if (isLoading()) {
-    <app-loading-state message="Loading document repository assets..."></app-loading-state>
+    <app-loading-state layout="cards" message="Loading document repository assets..."></app-loading-state>
   } @else if (hasError()) {
     <app-error-state
       title="Unable to load documents"
@@ -200,9 +200,10 @@
     ></app-error-state>
   } @else if (filteredDocuments.length === 0) {
     <app-empty-state
+      variant="documents"
       title="No documents found"
       message="No documents match your selected search terms and filters."
-      actionText="Clear All Filters"
+      actionLabel="Clear All Filters"
       (action)="clearFilters()"
     ></app-empty-state>
   } @else {

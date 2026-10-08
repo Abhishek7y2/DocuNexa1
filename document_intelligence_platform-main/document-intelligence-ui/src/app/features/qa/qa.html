@@ -38,7 +38,8 @@
   @if (isLoadingDocuments) {
 
     <app-loading-state
-      message="Loading document context..."
+      layout="split-pane"
+      message="Loading document context and QA vector index..."
     />
 
   } @else if (hasDocumentError) {

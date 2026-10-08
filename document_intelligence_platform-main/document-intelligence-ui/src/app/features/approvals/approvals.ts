@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { LoadingState } from '../../shared/ui/loading-state/loading-state';
+import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
 import { APPROVAL_SERVICE_TOKEN, MockApprovalService } from '../../core/services/api-services';
 
@@ -23,7 +24,7 @@ export interface ApprovalDocument {
 @Component({
   selector: 'app-approvals',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LoadingState, ErrorState],
+  imports: [CommonModule, FormsModule, RouterLink, LoadingState, EmptyState, ErrorState],
   templateUrl: './approvals.html',
   styleUrl: './approvals.scss',
   providers: [{ provide: APPROVAL_SERVICE_TOKEN, useClass: MockApprovalService }],

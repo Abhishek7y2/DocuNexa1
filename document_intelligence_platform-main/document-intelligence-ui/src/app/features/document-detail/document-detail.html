@@ -1,6 +1,9 @@
 <div class="document-detail-page">
-
-  <!-- HEADER -->
+  @if (isLoading()) {
+    <app-loading-state layout="detail" message="Loading document details and OCR layout spans..."></app-loading-state>
+  } @else if (hasError()) {
+    <app-error-state [variant]="errorVariant()" (retry)="retryLoad()"></app-error-state>
+  } @else {
 
   <div class="detail-header">
 
@@ -1081,5 +1084,5 @@
     </div>
 
   }
-
+  }
 </div>

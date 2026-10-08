@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { LoadingState } from '../../shared/ui/loading-state/loading-state';
+import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
 import { REVIEW_SERVICE_TOKEN, MockReviewService, IReviewTask } from '../../core/services/api-services';
 
@@ -22,7 +23,7 @@ export interface ReviewDocument {
 @Component({
   selector: 'app-review',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LoadingState, ErrorState],
+  imports: [CommonModule, FormsModule, RouterLink, LoadingState, EmptyState, ErrorState],
   templateUrl: './review.html',
   styleUrl: './review.scss',
   providers: [{ provide: REVIEW_SERVICE_TOKEN, useClass: MockReviewService }],

@@ -1,7 +1,58 @@
 .app-shell {
   min-height: 100vh;
   display: flex;
-  background: #f6f8fb;
+  flex-direction: column;
+  background: #f8fafc;
+  position: relative;
+}
+
+.offline-banner {
+  background: #b91c1c;
+  color: #ffffff;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 1000;
+  font-size: 13px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .banner-icon {
+      font-size: 18px;
+    }
+
+    strong {
+      margin-right: 6px;
+      font-weight: 700;
+    }
+
+    span {
+      opacity: 0.95;
+    }
+  }
+
+  .banner-retry-button {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
 }
 
 .main-area {

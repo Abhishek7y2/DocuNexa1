@@ -209,7 +209,7 @@
 
   <!-- APPROVAL QUEUE -->
   @if (isLoading()) {
-    <app-loading-state message="Loading workflow approvals queue..."></app-loading-state>
+    <app-loading-state layout="cards" message="Loading workflow approvals queue..."></app-loading-state>
   } @else if (hasError()) {
     <app-error-state
       title="Unable to load approval queue"
@@ -452,30 +452,13 @@
 
 
       @if (filteredDocuments.length === 0) {
-
-        <div class="empty-state">
-
-          <div class="empty-icon">
-            ✓
-          </div>
-
-          <h3>
-            No approval requests found
-          </h3>
-
-          <p>
-            Try changing your filters or search term.
-          </p>
-
-          <button
-            type="button"
-            (click)="clearFilters()"
-          >
-            Clear Filters
-          </button>
-
-        </div>
-
+        <app-empty-state
+          variant="queue"
+          title="Approval queue is empty"
+          message="Great job! All pending approval requests have been processed."
+          actionLabel="Clear Filters"
+          (action)="clearFilters()"
+        ></app-empty-state>
       }
 
     </div>

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { LoadingState } from '../../shared/ui/loading-state/loading-state';
+import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
 import { SEARCH_SERVICE_TOKEN, MockSearchService } from '../../core/services/api-services';
 
@@ -25,7 +26,7 @@ export interface SearchDocument {
 @Component({
   selector: 'app-search',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LoadingState, ErrorState],
+  imports: [CommonModule, FormsModule, RouterLink, LoadingState, EmptyState, ErrorState],
   templateUrl: './search.html',
   styleUrl: './search.scss',
   providers: [{ provide: SEARCH_SERVICE_TOKEN, useClass: MockSearchService }],

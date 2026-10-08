@@ -1,6 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+
+import { LoadingState } from '../../shared/ui/loading-state/loading-state';
+import { ErrorState, ErrorVariant } from '../../shared/ui/error-state/error-state';
+import { DOCUMENT_SERVICE_TOKEN, MockDocumentService } from '../../core/services/api-services';
 
 export interface RecentUpload {
   id: string;
@@ -24,11 +29,19 @@ export interface DocumentTypeOption {
 @Component({
   selector: 'app-intake',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LoadingState, ErrorState],
   templateUrl: './intake.html',
   styleUrl: './intake.scss',
+  providers: [{ provide: DOCUMENT_SERVICE_TOKEN, useClass: MockDocumentService }],
 })
-export class Intake {
+export class Intake implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly documentService = inject(DOCUMENT_SERVICE_TOKEN);
+
+  isLoading = signal(true);
+  hasError = signal(false);
+  errorVariant = signal<ErrorVariant>('default');
+
   selectedType = 'Supplier Contract';
   referenceNumber = '';
   description = '';
@@ -136,6 +149,40 @@ export class Intake {
       detectedAt: '35 min ago',
     },
   ];
+
+  ngOnInit(): void {
+    this.loadIntakeData();
+  }
+
+  loadIntakeData(): void {
+    this.isLoading.set(true);
+    this.hasError.set(false);
+
+    const errorParam = this.route.snapshot.queryParamMap.get('error');
+    if (errorParam === 'quota') {
+      setTimeout(() => {
+        this.errorVariant.set('quota-exceeded');
+        this.hasError.set(true);
+        this.isLoading.set(false);
+      }, 300);
+      return;
+    }
+
+    this.documentService.getDocuments().subscribe({
+      next: () => {
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.errorVariant.set('default');
+        this.hasError.set(true);
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  retryLoad(): void {
+    this.loadIntakeData();
+  }
 
   retryQuarantine(item: any): void {
     item.status = 'Reprocessing';
