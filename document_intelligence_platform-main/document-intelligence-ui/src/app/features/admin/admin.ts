@@ -135,6 +135,22 @@ export class Admin implements OnInit {
     sessionTimeoutEnabled: true,
   };
 
+  emailIntakeConfig = {
+    mailboxAddress: 'invoices-ingest@docnexa.io',
+    allowedSenders: 'acme.com, vendors.global.org, partner-network.com',
+    defaultDocumentType: 'Purchase Invoice',
+    sandboxMode: true,
+    autoExtractAttachments: true,
+  };
+
+  saveEmailIntakeConfig(): void {
+    this.saveSuccessToast = 'Email Intake integration configuration updated successfully.';
+    setTimeout(() => {
+      this.saveSuccessToast = null;
+    }, 3000);
+  }
+
+
   workflowSettings = {
     autoClassification: true,
     autoExtraction: true,

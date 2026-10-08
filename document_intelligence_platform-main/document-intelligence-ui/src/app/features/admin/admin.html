@@ -1202,8 +1202,88 @@
 
       </div>
 
+      <!-- EMAIL INTAKE CONFIGURATION PANEL (BRD FR-005) -->
+      <div class="panel" style="margin-top: 32px;">
+        <div class="panel-header" style="padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0;">✉️ Email Intake Configuration (BRD FR-005)</h3>
+            <p style="font-size: 13px; color: #64748b; margin: 2px 0 0 0;">Ingest document attachments directly via dedicated mailbox and automated OCR validation.</p>
+          </div>
+          <button
+            type="button"
+            class="primary-button"
+            style="min-height: 36px; padding: 0 14px; font-size: 12px;"
+            (click)="saveEmailIntakeConfig()"
+          >
+            Save Email Intake Settings
+          </button>
+        </div>
+
+        <div style="padding: 20px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 6px;">Ingestion Mailbox Address</label>
+            <input
+              type="email"
+              [(ngModel)]="emailIntakeConfig.mailboxAddress"
+              style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; font-family: monospace;"
+            />
+            <small style="display: block; font-size: 11px; color: #64748b; margin-top: 4px;">Inbound emails sent to this address will automatically parse PDF/DOCX attachments.</small>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 6px;">Default Document Category</label>
+            <select
+              [(ngModel)]="emailIntakeConfig.defaultDocumentType"
+              style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; background: #fff;"
+            >
+              <option>Purchase Invoice</option>
+              <option>Supplier Contract</option>
+              <option>Internal Policy</option>
+              <option>Compliance Report</option>
+            </select>
+            <small style="display: block; font-size: 11px; color: #64748b; margin-top: 4px;">Fallback category applied when automated classifier confidence is &lt; 70%.</small>
+          </div>
+
+          <div style="grid-column: span 2;">
+            <label style="display: block; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 6px;">Allowed Sender Domains (Comma Separated)</label>
+            <input
+              type="text"
+              [(ngModel)]="emailIntakeConfig.allowedSenders"
+              style="width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;"
+            />
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <input
+              type="checkbox"
+              id="sandboxToggle"
+              [(ngModel)]="emailIntakeConfig.sandboxMode"
+              style="width: 16px; height: 16px; cursor: pointer;"
+            />
+            <label for="sandboxToggle" style="font-size: 13px; font-weight: 600; color: #0f172a; cursor: pointer;">
+              Enable Ingestion Sandbox Mode
+              <span style="display: block; font-size: 11px; font-weight: 400; color: #64748b;">Quarantine all email attachments for manual review before repository indexing.</span>
+            </label>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <input
+              type="checkbox"
+              id="extractAttachments"
+              [(ngModel)]="emailIntakeConfig.autoExtractAttachments"
+              style="width: 16px; height: 16px; cursor: pointer;"
+            />
+            <label for="extractAttachments" style="font-size: 13px; font-weight: 600; color: #0f172a; cursor: pointer;">
+              Auto-Extract Compressed ZIP Archives
+              <span style="display: block; font-size: 11px; font-weight: 400; color: #64748b;">Automatically unpack multi-document ZIP email attachments.</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
     </section>
   }
+
 
   <!-- NOTIFICATION DELIVERY TAB (BRD FR-020 & Section 15) -->
   @if (activeTab === 'delivery' && canAccessDeliveryTab) {

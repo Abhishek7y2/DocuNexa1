@@ -1,10 +1,12 @@
 <div class="intake-page">
+
   <!-- CONTROL HEADER BAR -->
   <div class="intake-header">
     <div class="header-left">
-      <h1 class="header-title">Document Intake & Upload Pipeline</h1>
+      <span class="eyebrow">DOCUMENT INGESTION ENGINE</span>
+      <h1 class="header-title">Intake & Multi-Channel Batch Pipeline</h1>
       <p class="header-subtitle">
-        Ingest, classify, scan, and process batch documents into the intelligent processing engine.
+        Ingest, classify, hash, scan, and process batch documents into the intelligent processing engine.
       </p>
     </div>
 
@@ -14,12 +16,12 @@
         <strong class="val">142 Docs</strong>
       </div>
       <div class="stat-pill">
-        <span class="lbl">OCR Workers</span>
-        <strong class="val green">8 Active</strong>
+        <span class="lbl">Active Queue</span>
+        <strong class="val blue">{{ batchQueue.length }} Docs</strong>
       </div>
       <div class="stat-pill">
-        <span class="lbl">Avg Confidence</span>
-        <strong class="val purple">98.4%</strong>
+        <span class="lbl">Concurrency</span>
+        <strong class="val green">{{ activeUploadsCount }} / 3 Active</strong>
       </div>
     </div>
   </div>
@@ -30,9 +32,9 @@
   } @else if (hasError()) {
     <app-error-state [variant]="errorVariant()" (retry)="retryLoad()"></app-error-state>
   } @else {
-    <!-- TOP KPI STAT CARDS ROW (IndiHire Style) -->
+
+  <!-- TOP KPI STAT CARDS ROW -->
   <section class="stats-grid">
-    <!-- Card 1: Purple Theme (Daily Intake Volume) -->
     <div class="stat-card theme-purple">
       <div class="card-header-row">
         <div class="card-icon-badge">📤</div>
@@ -44,365 +46,582 @@
       <div class="card-trend-row">
         <span class="trend-badge positive">↑ 14% vs yesterday</span>
       </div>
-      <div class="sparkline-container">
-        <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
-          <defs>
-            <linearGradient id="intake-grad-purple" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.35"/>
-              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M 0,38 Q 30,10 60,32 T 120,25 T 180,12 L 200,28 L 200,50 L 0,50 Z" fill="url(#intake-grad-purple)"/>
-          <path d="M 0,38 Q 30,10 60,32 T 120,25 T 180,12 L 200,28" fill="none" stroke="#8b5cf6" stroke-width="2.5"/>
-          <circle cx="0" cy="38" r="3" fill="#8b5cf6"/><circle cx="30" cy="20" r="3" fill="#8b5cf6"/><circle cx="60" cy="32" r="3" fill="#8b5cf6"/><circle cx="90" cy="18" r="3" fill="#8b5cf6"/><circle cx="120" cy="25" r="3" fill="#8b5cf6"/><circle cx="150" cy="15" r="3" fill="#8b5cf6"/><circle cx="180" cy="12" r="3" fill="#8b5cf6"/><circle cx="200" cy="28" r="3" fill="#8b5cf6"/>
-        </svg>
-      </div>
     </div>
 
-    <!-- Card 2: Green Theme (OCR Auto-Processing) -->
     <div class="stat-card theme-green">
       <div class="card-header-row">
         <div class="card-icon-badge">⚡</div>
-        <span class="card-title">OCR Auto-Processing</span>
+        <span class="card-title">SHA-256 Validated</span>
       </div>
       <div class="card-metric-row">
-        <span class="metric-val">128 Docs</span>
+        <span class="metric-val">100% Verified</span>
       </div>
       <div class="card-trend-row">
-        <span class="trend-badge positive">↑ 92% Auto-Extracted</span>
-      </div>
-      <div class="sparkline-container">
-        <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
-          <defs>
-            <linearGradient id="intake-grad-green" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"/>
-              <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M 0,36 Q 30,28 60,18 T 120,30 T 180,10 L 200,20 L 200,50 L 0,50 Z" fill="url(#intake-grad-green)"/>
-          <path d="M 0,36 Q 30,28 60,18 T 120,30 T 180,10 L 200,20" fill="none" stroke="#10b981" stroke-width="2.5"/>
-          <circle cx="0" cy="36" r="3" fill="#10b981"/><circle cx="30" cy="28" r="3" fill="#10b981"/><circle cx="60" cy="18" r="3" fill="#10b981"/><circle cx="90" cy="22" r="3" fill="#10b981"/><circle cx="120" cy="30" r="3" fill="#10b981"/><circle cx="150" cy="16" r="3" fill="#10b981"/><circle cx="180" cy="10" r="3" fill="#10b981"/><circle cx="200" cy="20" r="3" fill="#10b981"/>
-        </svg>
+        <span class="trend-badge positive">Checksum Tamper-Proof</span>
       </div>
     </div>
 
-    <!-- Card 3: Orange Theme (HITL Escalation Rate) -->
     <div class="stat-card theme-orange">
       <div class="card-header-row">
         <div class="card-icon-badge">🛡️</div>
-        <span class="card-title">HITL Review Escalation</span>
+        <span class="card-title">Malware Quarantined</span>
       </div>
       <div class="card-metric-row">
-        <span class="metric-val">14 Docs</span>
+        <span class="metric-val">{{ quarantinedItems.length }} Files</span>
       </div>
       <div class="card-trend-row">
-        <span class="trend-badge positive">↓ 4% Low Escalation</span>
-      </div>
-      <div class="sparkline-container">
-        <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
-          <defs>
-            <linearGradient id="intake-grad-orange" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#f97316" stop-opacity="0.35"/>
-              <stop offset="100%" stop-color="#f97316" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M 0,42 Q 30,24 60,32 T 120,28 T 180,12 L 200,22 L 200,50 L 0,50 Z" fill="url(#intake-grad-orange)"/>
-          <path d="M 0,42 Q 30,24 60,32 T 120,28 T 180,12 L 200,22" fill="none" stroke="#f97316" stroke-width="2.5"/>
-          <circle cx="0" cy="42" r="3" fill="#f97316"/><circle cx="30" cy="24" r="3" fill="#f97316"/><circle cx="60" cy="32" r="3" fill="#f97316"/><circle cx="90" cy="20" r="3" fill="#f97316"/><circle cx="120" cy="28" r="3" fill="#f97316"/><circle cx="150" cy="18" r="3" fill="#f97316"/><circle cx="180" cy="12" r="3" fill="#f97316"/><circle cx="200" cy="22" r="3" fill="#f97316"/>
-        </svg>
+        <span class="trend-badge positive">Zero Security Breaches</span>
       </div>
     </div>
 
-    <!-- Card 4: Blue Theme (Avg Processing Speed) -->
     <div class="stat-card theme-blue">
       <div class="card-header-row">
         <div class="card-icon-badge">⏱️</div>
-        <span class="card-title">Processing SLA Speed</span>
+        <span class="card-title">Processing Speed</span>
       </div>
       <div class="card-metric-row">
         <span class="metric-val">1.4 s/page</span>
       </div>
       <div class="card-trend-row">
-        <span class="trend-badge positive">↑ 0.2s Faster speed</span>
-      </div>
-      <div class="sparkline-container">
-        <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
-          <defs>
-            <linearGradient id="intake-grad-blue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.35"/>
-              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M 0,40 Q 30,22 60,35 T 120,20 T 180,14 L 200,24 L 200,50 L 0,50 Z" fill="url(#intake-grad-blue)"/>
-          <path d="M 0,40 Q 30,22 60,35 T 120,20 T 180,14 L 200,24" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
-          <circle cx="0" cy="40" r="3" fill="#3b82f6"/><circle cx="30" cy="22" r="3" fill="#3b82f6"/><circle cx="60" cy="35" r="3" fill="#3b82f6"/><circle cx="90" cy="26" r="3" fill="#3b82f6"/><circle cx="120" cy="20" r="3" fill="#3b82f6"/><circle cx="150" cy="17" r="3" fill="#3b82f6"/><circle cx="180" cy="14" r="3" fill="#3b82f6"/><circle cx="200" cy="24" r="3" fill="#3b82f6"/>
-        </svg>
+        <span class="trend-badge positive">↑ 0.2s SLA speed</span>
       </div>
     </div>
   </section>
 
+  @if (hashCopyToast) {
+    <div class="toast-banner">
+      <span>✓</span> {{ hashCopyToast }}
+    </div>
+  }
+
   <!-- MAIN DUAL WORKING PANEL (60/40 Split) -->
   <div class="intake-main-grid">
-    <!-- LEFT PANEL: Intake Wizard -->
+    
+    <!-- LEFT PANEL: Intake Wizard & Batch Queue -->
     <div class="panel-card wizard-panel">
-      <div class="panel-header">
-        <div>
-          <h3>Document Upload & Processing Wizard</h3>
-          <span class="panel-sub">Select category and upload files to trigger real-time OCR extraction</span>
-        </div>
+      
+      <!-- MODE SWITCHER TABS -->
+      <div class="mode-tabs">
+        <button
+          type="button"
+          class="mode-btn"
+          [class.active]="activeTab === 'batch'"
+          (click)="activeTab = 'batch'"
+        >
+          📦 Multi-File Batch Queue ({{ batchQueue.length }})
+        </button>
+        <button
+          type="button"
+          class="mode-btn"
+          [class.active]="activeTab === 'single'"
+          (click)="activeTab = 'single'"
+        >
+          📄 Single Document Upload
+        </button>
       </div>
 
       <!-- STEP 1: Select Category Grid -->
-      <div class="wizard-section">
-        <label class="section-label">1. Select Document Category</label>
+      <div class="wizard-section" style="padding-top: 16px;">
+        <label class="section-label">1. Target Document Category</label>
         <div class="category-grid">
-          <div
-            *ngFor="let item of documentTypes"
-            class="cat-card"
-            [class.selected]="selectedType === item.value"
-            (click)="selectType(item.value)"
-          >
-            <span class="cat-icon">{{ item.icon }}</span>
-            <div class="cat-info">
-              <strong>{{ item.title }}</strong>
-              <span>{{ item.description }}</span>
+          @for (item of documentTypes; track item.value) {
+            <div
+              class="cat-card"
+              [class.selected]="selectedType === item.value"
+              (click)="selectType(item.value)"
+            >
+              <span class="cat-icon">{{ item.icon }}</span>
+              <div class="cat-info">
+                <strong>{{ item.title }}</strong>
+                <span>{{ item.description }}</span>
+              </div>
+              <span class="radio-dot" [class.active]="selectedType === item.value"></span>
             </div>
-            <span class="radio-dot" [class.active]="selectedType === item.value"></span>
-          </div>
+          }
         </div>
       </div>
 
-      <!-- STEP 2: Drag & Drop Zone -->
+      <!-- STEP 2: Drag & Drop Dropzone (Supports PDF, DOCX, PNG, JPG, JPEG, TIFF up to 50MB) -->
       <div class="wizard-section">
-        <label class="section-label">2. Upload Document File</label>
+        <label class="section-label">2. Drag & Drop or Select Files (Max 50 MB per file)</label>
         
         <div
           class="dropzone-box"
           [class.dragging]="isDragging"
-          [class.has-file]="!!selectedFile"
           (dragover)="onDragOver($event)"
           (dragleave)="onDragLeave($event)"
           (drop)="onDrop($event)"
         >
-          @if (!selectedFile) {
-            <div class="drop-content">
-              <div class="cloud-icon">
-                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
-                  <path d="M12 12v9"/>
-                  <path d="m16 16-4-4-4 4"/>
-                </svg>
-              </div>
-              <p class="drop-title">
-                Drag and drop your document file here, or <label for="fileInput" class="browse-link">Browse files</label>
-              </p>
-              <span class="drop-specs">Supported formats: PDF, PNG, JPG, TIFF (Max 50 MB)</span>
-              <input
-                id="fileInput"
-                type="file"
-                class="hidden-file-input"
-                (change)="onFileSelected($event)"
-                accept=".pdf,.png,.jpg,.jpeg,.tiff"
-              />
+          <div class="drop-content">
+            <div class="cloud-icon">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+                <path d="M12 12v9"/>
+                <path d="m16 16-4-4-4 4"/>
+              </svg>
             </div>
-          } @else {
-            <div class="selected-file-card">
-              <div class="file-icon">PDF</div>
-              <div class="file-details">
-                <strong>{{ selectedFile.name }}</strong>
-                <span>{{ formatFileSize(selectedFile.size) }} · Ready for ingestion</span>
-              </div>
-              <button type="button" class="remove-btn" (click)="removeFile()" title="Remove File">×</button>
+            <p class="drop-title">
+              Drag and drop files here, or <label for="batchFileInput" class="browse-link">Browse files</label>
+            </p>
+            <span class="drop-specs">Supported formats: .pdf, .docx, .png, .jpg, .jpeg, .tiff (Up to 50 MB each)</span>
+            <input
+              id="batchFileInput"
+              type="file"
+              multiple
+              class="hidden-file-input"
+              (change)="onFilesSelected($event)"
+              accept=".pdf,.docx,.png,.jpg,.jpeg,.tiff"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- BATCH QUEUE SECTION (BRD FR-003 & UAT-02) -->
+      @if (activeTab === 'batch') {
+        <div class="batch-queue-section">
+          
+          <div class="queue-header-row">
+            <div>
+              <h3>Batch Upload Queue (Max Concurrency: 3 Active)</h3>
+              <span class="queue-sub">
+                Overall Queue Progress: {{ overallQueueProgress }}% · {{ validatedQueueCount }} validated · {{ failedQueueCount }} failed
+              </span>
+            </div>
+
+            <div class="queue-actions">
+              @if (failedQueueCount > 0) {
+                <button type="button" class="secondary-button" (click)="retryAllFailed()">
+                  🔄 Retry Failed ({{ failedQueueCount }})
+                </button>
+              }
+              <button type="button" class="text-button" (click)="clearCompletedQueue()">
+                Clear Validated
+              </button>
+            </div>
+          </div>
+
+          <!-- OVERALL PROGRESS BAR -->
+          @if (batchQueue.length > 0) {
+            <div class="overall-progress-bar">
+              <div class="progress-fill" [style.width.%]="overallQueueProgress"></div>
             </div>
           }
-        </div>
 
-        @if (errorMessage) {
-          <div class="alert-error">
-            <span>⚠️</span>
-            <span>{{ errorMessage }}</span>
-          </div>
-        }
-      </div>
+          @if (batchQueue.length === 0) {
+            <app-empty-state
+              title="Batch queue is empty"
+              message="Drop up to 10 files above to trigger automated hashing, malware scanning, and OCR ingestion."
+            ></app-empty-state>
+          } @else {
+            <div class="queue-table-wrapper">
+              <table class="queue-table">
+                <thead>
+                  <tr>
+                    <th>File & Category</th>
+                    <th>Source</th>
+                    <th>SHA-256 Checksum</th>
+                    <th>Status & Scan</th>
+                    <th>Progress</th>
+                    <th style="text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of batchQueue; track item.id) {
+                    <tr [class.row-failed]="item.status === 'Failed' || item.status === 'Quarantined'" [class.row-duplicate]="item.status === 'Duplicate'">
+                      <td>
+                        <div class="file-name-cell">
+                          <span class="ext-badge">{{ item.extension.replace('.', '').toUpperCase() || 'FILE' }}</span>
+                          <div>
+                            <strong class="fname">{{ item.name }}</strong>
+                            <span class="fsize">{{ item.formattedSize }} · {{ item.category }}</span>
+                          </div>
+                        </div>
+                        @if (item.rejectionReason || item.errorReason) {
+                          <div class="rejection-reason-text">
+                            ⚠️ {{ item.rejectionReason || item.errorReason }}
+                          </div>
+                        }
+                      </td>
 
-      <!-- STEP 3: Metadata Inputs -->
-      <div class="wizard-section">
-        <label class="section-label">3. Ingestion Metadata (Optional)</label>
-        <div class="inputs-row">
-          <div class="input-group">
-            <label for="refNum">Reference Number / PO Number</label>
-            <input
-              id="refNum"
-              type="text"
-              [(ngModel)]="referenceNumber"
-              placeholder="e.g. PO-2026-9842"
-            />
-          </div>
-          <div class="input-group">
-            <label for="desc">Ingestion Notes / Description</label>
-            <input
-              id="desc"
-              type="text"
-              [(ngModel)]="description"
-              placeholder="e.g. Q3 Vendor Renewal Contract"
-            />
-          </div>
-        </div>
-      </div>
+                      <td>
+                        <span class="source-badge" [class.web]="item.source === 'Web'" [class.api]="item.source === 'API'" [class.email]="item.source === 'Email'">
+                          @if (item.source === 'Web') { 🌐 Web }
+                          @else if (item.source === 'API') { ⚡ API }
+                          @else { ✉️ Email }
+                        </span>
+                      </td>
 
-      <!-- Upload Progress Indicator -->
-      @if (isUploading || uploadComplete) {
-        <div class="progress-box">
-          <div class="progress-label-row">
-            <span>{{ uploadComplete ? 'Ingestion Complete!' : 'Processing OCR Extraction...' }}</span>
-            <strong>{{ uploadProgress }}%</strong>
-          </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" [style.width.%]="uploadProgress"></div>
-          </div>
-          <div class="pipeline-stepper-mini">
-            <span class="mini-step done">✓ File Uploaded</span>
-            <span class="mini-step" [class.done]="uploadProgress >= 40">✓ OCR Scan</span>
-            <span class="mini-step" [class.done]="uploadProgress >= 70">✓ AI Classify</span>
-            <span class="mini-step" [class.done]="uploadProgress >= 100">✓ Ingested</span>
-          </div>
+                      <td>
+                        <div class="checksum-cell">
+                          @if (item.status === 'Hashing') {
+                            <span class="hashing-text">Hashing... {{ item.checksumProgress }}%</span>
+                          } @else if (item.checksum && item.checksum !== 'Calculating...') {
+                            <code class="hash-code" title="{{ item.checksum }}">{{ item.checksum.substring(0, 10) }}...{{ item.checksum.substring(item.checksum.length - 6) }}</code>
+                            <button type="button" class="btn-copy-hash" (click)="copyHash(item.checksum, item.id)" title="Copy full SHA-256 checksum">
+                              {{ copiedHashId === item.id ? '✓ Copied' : '📋 Copy' }}
+                            </button>
+                          } @else {
+                            <span class="hash-placeholder">—</span>
+                          }
+                        </div>
+                      </td>
+
+                      <td>
+                        <div class="status-cell-group">
+                          <span
+                            class="status-chip"
+                            [class.queued]="item.status === 'Queued'"
+                            [class.uploading]="item.status === 'Uploading' || item.status === 'Hashing'"
+                            [class.scanning]="item.status === 'Scanning'"
+                            [class.validated]="item.status === 'Validated'"
+                            [class.quarantined]="item.status === 'Quarantined'"
+                            [class.duplicate]="item.status === 'Duplicate'"
+                            [class.failed]="item.status === 'Failed'"
+                          >
+                            {{ item.status }}
+                          </span>
+
+                          <span class="scan-pill" [class.clean]="item.scanStatus === 'Clean'" [class.infected]="item.scanStatus === 'Infected'">
+                            @if (item.scanStatus === 'Clean') { ✓ Clean }
+                            @else if (item.scanStatus === 'Infected') { ☣️ Infected }
+                            @else { ⏳ Scan Pending }
+                          </span>
+                        </div>
+                      </td>
+
+                      <td>
+                        <div class="progress-cell">
+                          <div class="mini-bar-bg">
+                            <div class="mini-bar-fill" [style.width.%]="item.uploadProgress"></div>
+                          </div>
+                          <span class="pct-text">{{ item.uploadProgress }}%</span>
+                        </div>
+                      </td>
+
+                      <td style="text-align: right;">
+                        <div class="action-cell-btns">
+                          <button type="button" class="text-button" (click)="openTimelineModal(item)" title="View lifecycle timeline">
+                            📜 Timeline
+                          </button>
+
+                          @if (item.status === 'Failed' || item.status === 'Duplicate') {
+                            <button type="button" class="secondary-button" style="padding: 3px 8px; font-size: 11px;" (click)="retryQueueItem(item)">
+                              🔄 Retry
+                            </button>
+                          }
+
+                          <button type="button" class="btn-remove-row" (click)="removeQueueItem(item)" title="Remove item">✕</button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
         </div>
       }
 
-      <!-- Form Action Buttons -->
-      <div class="wizard-actions">
-        <button type="button" class="btn-ghost" (click)="resetForm()">Reset Form</button>
-        <button
-          type="button"
-          class="btn-primary-lg"
-          [disabled]="isUploading"
-          (click)="uploadDocument()"
-        >
-          @if (isUploading) {
-            <span class="spinner"></span>
-            <span>Processing Pipeline...</span>
-          } @else {
-            <span>Start Intelligent Intake Pipeline</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M5 12h14"/>
-              <path d="m12 5 7 7-7 7"/>
-            </svg>
-          }
-        </button>
-      </div>
     </div>
 
-    <!-- RIGHT PANEL: Live Ingestion Stream & Recent Batch Uploads -->
+    <!-- RIGHT PANEL: Live Ingestion Stream & Quarantined Exceptions -->
     <div class="panel-card stream-panel">
-      <!-- PANEL TABS HEADER -->
-      <div class="panel-header flex-header" style="border-bottom: none; padding-bottom: 0;">
+      
+      <!-- PANEL TABS & SUBMISSIONS FILTER -->
+      <div class="panel-header flex-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
         <div style="display: flex; gap: 8px;">
           <button
             type="button"
             class="tab-btn"
-            [style.background]="activeRightTab === 'stream' ? '#1e293b' : '#f1f5f9'"
-            [style.color]="activeRightTab === 'stream' ? '#ffffff' : '#475569'"
-            style="border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;"
+            [class.active]="activeRightTab === 'stream'"
             (click)="activeRightTab = 'stream'"
           >
-            ● Live Stream ({{ recentUploads.length }})
+            ● Ingestion Stream ({{ filteredRecentUploads.length }})
           </button>
           <button
             type="button"
-            class="tab-btn"
-            [style.background]="activeRightTab === 'quarantine' ? '#dc2626' : '#fee2e2'"
-            [style.color]="activeRightTab === 'quarantine' ? '#ffffff' : '#b91c1c'"
-            style="border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;"
+            class="tab-btn quarantine-tab-btn"
+            [class.active]="activeRightTab === 'quarantine'"
             (click)="activeRightTab = 'quarantine'"
           >
-            ⚠️ Quarantined Exceptions ({{ quarantinedItems.length }})
+            ⚠️ Quarantined ({{ quarantinedItems.length }})
           </button>
         </div>
+
+        @if (activeRightTab === 'stream') {
+          <div class="filter-toggle-group">
+            <button
+              type="button"
+              class="filter-chip-sm"
+              [class.active]="submissionFilter === 'all'"
+              (click)="submissionFilter = 'all'"
+            >
+              All Submissions
+            </button>
+            <button
+              type="button"
+              class="filter-chip-sm"
+              [class.active]="submissionFilter === 'mine'"
+              (click)="submissionFilter = 'mine'"
+            >
+              My Submissions
+            </button>
+          </div>
+        }
       </div>
 
-      <!-- STREAM VIEW -->
+      <!-- LIVE STREAM VIEW -->
       @if (activeRightTab === 'stream') {
-        <div class="recent-uploads-list">
-          <div *ngFor="let item of recentUploads" class="upload-item-card">
-            <div class="item-top">
-              <div class="item-file-icon">PDF</div>
-              <div class="item-meta">
-                <span class="item-id">{{ item.id }}</span>
-                <strong class="item-name">{{ item.name }}</strong>
-              </div>
-              <span
-                class="status-pill"
-                [class.completed]="item.status === 'Completed' || item.status === 'Approved'"
-                [class.processing]="item.status === 'Processing'"
-                [class.review]="item.status === 'In Review'"
-              >
-                {{ item.status }}
-              </span>
-            </div>
+        @if (filteredRecentUploads.length === 0) {
+          <app-empty-state
+            title="No submissions found"
+            message="No ingested documents match the selected submission filter."
+          ></app-empty-state>
+        } @else {
+          <div class="recent-uploads-list">
+            @for (item of filteredRecentUploads; track item.id) {
+              <div class="upload-item-card">
+                <div class="item-top">
+                  <div class="item-file-icon">{{ item.extension.replace('.', '').toUpperCase() }}</div>
+                  <div class="item-meta">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <span class="item-id">{{ item.id }}</span>
+                      <span class="source-badge-sm">{{ item.source }}</span>
+                    </div>
+                    <strong class="item-name">{{ item.name }}</strong>
+                  </div>
+                  <span class="status-pill completed">
+                    {{ item.status }}
+                  </span>
+                </div>
 
-            <div class="item-details-row">
-              <span>Type: <strong>{{ item.type }}</strong></span>
-              <span>Size: <strong>{{ item.size }}</strong></span>
-              <span>Confidence: <strong class="text-green">{{ item.confidence }}%</strong></span>
-            </div>
+                <div class="item-details-row">
+                  <span>Type: <strong>{{ item.category }}</strong></span>
+                  <span>Size: <strong>{{ item.formattedSize }}</strong></span>
+                  <span>Confidence: <strong class="text-green">{{ item.confidence }}%</strong></span>
+                </div>
 
-            <div class="item-footer">
-              <div class="submitter-info">
-                <span class="avatar-dot">{{ item.submitterInitials }}</span>
-                <span>Uploaded by {{ item.submitter }}</span>
+                <div class="item-footer">
+                  <div class="submitter-info">
+                    <span class="avatar-dot">{{ item.submitterInitials }}</span>
+                    <span>Uploaded by {{ item.submitter }}</span>
+                  </div>
+                  <span class="time-ago">{{ item.uploadedAt }}</span>
+                </div>
               </div>
-              <span class="time-ago">{{ item.uploadedAt }}</span>
-            </div>
+            }
           </div>
-        </div>
+        }
       }
 
       <!-- QUARANTINED EXCEPTIONS VIEW (BRD FR-006 & UAT-09) -->
       @if (activeRightTab === 'quarantine') {
         <div class="recent-uploads-list">
-          <div class="quarantine-alert-note" style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; font-size: 11.5px; color: #92400e; margin-bottom: 12px;">
-            <strong>Quarantine Policy (BRD FR-006):</strong> Pages with scan resolution < 150 DPI or corrupted text are isolated for human operator review without blocking downstream batches.
+          <div class="quarantine-alert-note">
+            <strong>Quarantine Policy (BRD FR-006):</strong> Infected files or documents failing security validation are isolated for human operator analysis without blocking batch ingestion.
           </div>
 
-          <div *ngFor="let item of quarantinedItems" class="upload-item-card" style="border-left: 4px solid #ef4444;">
-            <div class="item-top">
-              <div class="item-file-icon" style="background: #fee2e2; color: #b91c1c;">ERR</div>
-              <div class="item-meta">
-                <span class="item-id" style="color: #ef4444;">{{ item.id }}</span>
-                <strong class="item-name">{{ item.name }}</strong>
+          @for (item of quarantinedItems; track item.id) {
+            <div class="upload-item-card quarantine-card">
+              <div class="item-top">
+                <div class="item-file-icon quarantine-icon">ERR</div>
+                <div class="item-meta">
+                  <span class="item-id text-red">{{ item.id }}</span>
+                  <strong class="item-name">{{ item.name }}</strong>
+                </div>
+                <span class="status-pill quarantine-pill">
+                  Quarantined
+                </span>
               </div>
-              <span class="status-pill" style="background: #fee2e2; color: #b91c1c;">
-                {{ item.status }}
-              </span>
-            </div>
 
-            <div style="margin: 8px 0; font-size: 11.5px; color: #b91c1c; background: #fef2f2; padding: 8px; border-radius: 6px; line-height: 1.4;">
-              <strong>Failure Cause:</strong> {{ item.errorReason }}
-            </div>
+              <div class="quarantine-cause-box">
+                <strong>Failure Cause:</strong> {{ item.errorReason }}
+              </div>
 
-            <div class="item-footer" style="padding-top: 8px; border-top: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-              <span class="time-ago">{{ item.detectedAt }}</span>
-              <div style="display: flex; gap: 6px;">
-                <button
-                  type="button"
-                  (click)="manualOverride(item)"
-                  style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #1e293b; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;"
-                >
-                  HITL Override
-                </button>
-                <button
-                  type="button"
-                  (click)="retryQuarantine(item)"
-                  style="background: #4f46e5; border: none; color: #ffffff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;"
-                >
-                  Retry OCR
-                </button>
+              <div class="item-footer">
+                <span class="time-ago">{{ item.uploadedAt }}</span>
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" class="secondary-button" style="padding: 3px 8px; font-size: 11px;" (click)="manualOverride(item)">
+                    HITL Override
+                  </button>
+                  <button type="button" class="primary-button" style="padding: 3px 8px; font-size: 11px; min-height: auto;" (click)="retryQuarantine(item)">
+                    Retry OCR
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          }
         </div>
       }
+
     </div>
+
   </div>
   }
+
+  <!-- DUPLICATE WARNING MODAL DIALOG (BRD FR-004 & UAT-03) -->
+  @if (showDuplicateModal && duplicateQueueItem && existingDuplicateDoc) {
+    <div class="modal-backdrop" (click)="closeDuplicateModal()">
+      <div
+        class="modal-dialog duplicate-modal"
+        (click)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dup-modal-title"
+      >
+        <!-- MODAL HEADER -->
+        <div class="modal-header warning-header">
+          <div>
+            <div class="eyebrow-red">DUPLICATE DETECTED (BRD FR-004)</div>
+            <h3 id="dup-modal-title">Checksum Collision Warning</h3>
+          </div>
+          <button type="button" class="btn-close" (click)="closeDuplicateModal()" aria-label="Close modal">✕</button>
+        </div>
+
+        <!-- MODAL BODY -->
+        <div class="modal-body">
+          <p class="dup-intro-text">
+            An identical file hash or invoice number collision was detected in the organization repository. Review the side-by-side comparison below to decide how to process this document. <strong>Never silently overwrite!</strong>
+          </p>
+
+          <!-- SIDE-BY-SIDE COMPARISON GRID -->
+          <div class="comparison-grid">
+            
+            <!-- NEW UPLOAD CARD -->
+            <div class="comp-card new-card">
+              <div class="comp-card-header">
+                <span class="badge-new">NEW UPLOAD</span>
+                <h4>{{ duplicateQueueItem.name }}</h4>
+              </div>
+              <div class="comp-details">
+                <div><span class="lbl">SHA-256 Hash:</span> <code class="hash-sm">{{ duplicateQueueItem.checksum }}</code></div>
+                <div><span class="lbl">File Size:</span> <strong>{{ duplicateQueueItem.formattedSize }}</strong></div>
+                <div><span class="lbl">Category:</span> <strong>{{ duplicateQueueItem.category }}</strong></div>
+                <div><span class="lbl">Submitter:</span> <strong>{{ duplicateQueueItem.submitter }}</strong></div>
+                <div><span class="lbl">Source:</span> <strong>{{ duplicateQueueItem.source }} Portal</strong></div>
+              </div>
+            </div>
+
+            <!-- EXISTING RECORD CARD -->
+            <div class="comp-card existing-card">
+              <div class="comp-card-header">
+                <span class="badge-existing">EXISTING RECORD</span>
+                <h4>{{ existingDuplicateDoc.name }}</h4>
+              </div>
+              <div class="comp-details">
+                <div><span class="lbl">SHA-256 Hash:</span> <code class="hash-sm">{{ existingDuplicateDoc.checksum }}</code></div>
+                <div><span class="lbl">Document ID:</span> <strong>{{ existingDuplicateDoc.id }} ({{ existingDuplicateDoc.version }})</strong></div>
+                <div><span class="lbl">Owner:</span> <strong>{{ existingDuplicateDoc.owner }}</strong></div>
+                <div><span class="lbl">Uploaded:</span> <strong>{{ existingDuplicateDoc.uploadedAt }}</strong></div>
+                <div><span class="lbl">Extracted Meta:</span> <span class="meta-tag">{{ existingDuplicateDoc.metadata[0] }}</span></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- THREE EXPLICIT USER CHOICES -->
+          <div class="choices-section">
+            <h4>Select Resolution Strategy:</h4>
+            
+            <button type="button" class="choice-option-btn" (click)="resolveDuplicateChoice('keep_both')">
+              <div class="choice-icon">📁</div>
+              <div>
+                <strong>Keep both as separate documents</strong>
+                <span>Creates a new document record with an automatic suffix (e.g. filename_copy.pdf).</span>
+              </div>
+            </button>
+
+            <button type="button" class="choice-option-btn" (click)="resolveDuplicateChoice('new_version')">
+              <div class="choice-icon">🔄</div>
+              <div>
+                <strong>Add as a new version of the existing document</strong>
+                <span>Appends this file as version v2.0 under existing document ID {{ existingDuplicateDoc.id }}.</span>
+              </div>
+            </button>
+
+            <button type="button" class="choice-option-btn cancel-btn" (click)="resolveDuplicateChoice('cancel')">
+              <div class="choice-icon">🚫</div>
+              <div>
+                <strong>Cancel upload</strong>
+                <span>Aborts upload process and discards the new file.</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- MODAL FOOTER -->
+        <div class="modal-footer">
+          <button type="button" class="secondary-button" (click)="closeDuplicateModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TIMELINE MODAL DRAWER -->
+  @if (showTimelineModal && selectedTimelineItem) {
+    <div class="modal-backdrop" (click)="closeTimelineModal()">
+      <div
+        class="modal-dialog timeline-modal"
+        (click)="$event.stopPropagation()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="timeline-modal-title"
+      >
+        <div class="modal-header">
+          <div>
+            <div class="eyebrow">INTAKE LIFECYCLE TIMELINE</div>
+            <h3 id="timeline-modal-title">{{ selectedTimelineItem.name }} ({{ selectedTimelineItem.id }})</h3>
+          </div>
+          <button type="button" class="btn-close" (click)="closeTimelineModal()" aria-label="Close modal">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="timeline-summary-bar">
+            <div><span class="lbl">Category:</span> <strong>{{ selectedTimelineItem.category }}</strong></div>
+            <div><span class="lbl">Source:</span> <strong>{{ selectedTimelineItem.source }}</strong></div>
+            <div><span class="lbl">Status:</span> <span class="status-chip validated">{{ selectedTimelineItem.status }}</span></div>
+          </div>
+
+          <h4 style="margin: 16px 0 12px; font-size: 14px;">BRD Intake Lifecycle Stages</h4>
+          <div class="lifecycle-stepper">
+            <div class="step-box done">
+              <strong class="stitle">1. Received</strong>
+              <span class="sdesc">File ingested & specs validated</span>
+            </div>
+            <div class="step-box" [class.done]="selectedTimelineItem.status === 'Validated' || selectedTimelineItem.status === 'Quarantined'">
+              <strong class="stitle">2. Validated / Quarantined</strong>
+              <span class="sdesc">SHA-256 computed & malware scanned</span>
+            </div>
+            <div class="step-box" [class.done]="selectedTimelineItem.status === 'Validated'">
+              <strong class="stitle">3. Processing</strong>
+              <span class="sdesc">OCR LayoutLMv3 text extraction</span>
+            </div>
+            <div class="step-box" [class.done]="selectedTimelineItem.status === 'Validated'">
+              <strong class="stitle">4. Review</strong>
+              <span class="sdesc">Routed to HITL Workbench</span>
+            </div>
+          </div>
+
+          <h4 style="margin: 20px 0 12px; font-size: 14px;">Attempt Log & Event History</h4>
+          <div class="attempt-history-list">
+            @for (attempt of selectedTimelineItem.attemptHistory; track attempt.attemptNumber) {
+              <div class="attempt-log-row">
+                <span class="att-num">#{{ attempt.attemptNumber }}</span>
+                <div class="att-info">
+                  <strong>{{ attempt.stage }} — {{ attempt.status }}</strong>
+                  <p>{{ attempt.note }}</p>
+                </div>
+                <span class="att-time">{{ attempt.timestamp }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="secondary-button" (click)="closeTimelineModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+
 </div>
