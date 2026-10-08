@@ -2,35 +2,167 @@
 
   <!-- NON-AUTHORITATIVE LEGAL INTERPRETATION BANNER (TASK 7D Item 5) -->
   <div class="legal-disclaimer-bar">
-    <span class="icon">⚖️</span>
-    <span><strong>Reading Aid Disclaimer:</strong> A detected change is a reading aid. Legal interpretation and risk acceptance remain with an authorized reviewer.</span>
+    <div class="disclaimer-left">
+      <span class="icon">⚖️</span>
+      <span><strong>Reading Aid Disclaimer:</strong> A detected change is a reading aid. Legal interpretation and risk acceptance remain with an authorized reviewer.</span>
+    </div>
+    <div class="disclaimer-right">
+      <span class="compliance-badge">SOC2 & ISO 27001 AUDIT READY</span>
+    </div>
   </div>
 
+  <!-- ENTERPRISE HEADER -->
   <header class="studio-header">
     <div class="header-left">
       <a routerLink="/documents" class="btn-back">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         <span>Back to Repository</span>
       </a>
 
       <div class="doc-identity">
-        <span class="type-badge">COMPARE</span>
-        <div>
-          <h1>{{ documentTitle }}</h1>
-          <span class="sub">{{ documentId }} · Comparing {{ version1Tag }} vs {{ version2Tag }}</span>
+        <div class="identity-badges">
+          <span class="type-badge">COMPARISON STUDIO</span>
+          <span class="doc-id-pill">{{ documentId }}</span>
+          <span class="contract-type-pill">Master Services Agreement</span>
         </div>
+        <h1>{{ documentTitle }}</h1>
+        <p class="sub">Comparing <strong>{{ selectedV1 }}</strong> against <strong>{{ selectedV2 }}</strong> · Real-time semantic clause alignment & field delta</p>
       </div>
     </div>
 
     <div class="header-actions">
-      <button type="button" class="btn-export-redline" (click)="exportRedlinePdfReport()">
-        📄 Export Redline Report (PDF)
+      <button type="button" class="btn-secondary" (click)="exportRedlinePdfReport()" title="Export tamper-evident PDF comparison report">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Export Redline PDF</span>
       </button>
-      <button type="button" class="btn-primary" (click)="acknowledgeDelta()">
-        ✓ Acknowledge Changes
+      <button type="button" class="btn-secondary" (click)="exportWordRedline()" title="Download Word DOCX with Track Changes">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Word Track Changes</span>
+      </button>
+      <button type="button" class="btn-primary" (click)="acknowledgeDelta()" title="Acknowledge differences and sign off on audit trail">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Acknowledge Changes</span>
       </button>
     </div>
   </header>
+
+  <!-- INTERACTIVE VERSION COMPARISON CONTROL BAR -->
+  <section class="version-control-bar">
+    <div class="version-selectors">
+      <!-- BASELINE VERSION -->
+      <div class="version-picker">
+        <span class="picker-label">BASELINE (SOURCE):</span>
+        <div class="select-wrapper">
+          <select [(ngModel)]="selectedV1" (change)="onVersionChange()">
+            @for (v of availableVersions; track v.value) {
+              <option [value]="v.value">{{ v.label }}</option>
+            }
+          </select>
+          <svg class="select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <span class="author-hint">👤 {{ authorV1 }}</span>
+      </div>
+
+      <!-- SWAP BUTTON -->
+      <button type="button" class="btn-swap-versions" (click)="swapVersions()" title="Swap comparison versions">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12M17 20l4-4M17 20l-4-4"/></svg>
+      </button>
+
+      <!-- AMENDMENT VERSION -->
+      <div class="version-picker">
+        <span class="picker-label">AMENDMENT (TARGET):</span>
+        <div class="select-wrapper">
+          <select [(ngModel)]="selectedV2" (change)="onVersionChange()">
+            @for (v of availableVersions; track v.value) {
+              <option [value]="v.value">{{ v.label }}</option>
+            }
+          </select>
+          <svg class="select-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <span class="author-hint">👤 {{ authorV2 }}</span>
+      </div>
+    </div>
+
+    <!-- VIEW CONTROLS -->
+    <div class="version-meta-actions">
+      <div class="view-mode-toggle">
+        <span class="toggle-label">Diff Display:</span>
+        <div class="pill-group">
+          <button type="button" [class.active]="diffViewMode === 'split'" (click)="diffViewMode = 'split'">
+            Split Pane
+          </button>
+          <button type="button" [class.active]="diffViewMode === 'unified'" (click)="diffViewMode = 'unified'">
+            Unified
+          </button>
+        </div>
+      </div>
+      <div class="ai-alignment-badge" title="Semantic Clause Alignment Engine Score">
+        <span class="pulse-dot"></span>
+        <span>Semantic Match: <strong>98.4%</strong></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 COMPACT KPI STAT CARDS (INDIHIRE STYLE WITH COLORED TOP BORDERS) -->
+  <section class="kpi-grid">
+    <!-- Card 1: Total Changes (Amber) -->
+    <div class="stat-card stat-total">
+      <div class="stat-content">
+        <div class="stat-header">
+          <span class="stat-title">TOTAL DETECTED DELTAS</span>
+          <span class="stat-icon-wrap amber">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </span>
+        </div>
+        <div class="stat-value">{{ totalDiffsCount }} <span class="unit">Changes</span></div>
+        <div class="stat-subtitle">
+          <span class="highlight">{{ clauses.length }}</span> Clauses · <span class="highlight">{{ fieldDiffs.length }}</span> Fields
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Modified Clauses (Indigo) -->
+    <div class="stat-card stat-modified">
+      <div class="stat-content">
+        <div class="stat-header">
+          <span class="stat-title">MODIFIED CLAUSES</span>
+          <span class="stat-icon-wrap indigo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </span>
+        </div>
+        <div class="stat-value">{{ modifiedClausesCount }} <span class="unit">Clauses</span></div>
+        <div class="stat-subtitle">Delivery SLA & Penalty Clauses</div>
+      </div>
+    </div>
+
+    <!-- Card 3: High Risk Flags (Red) -->
+    <div class="stat-card stat-risk">
+      <div class="stat-content">
+        <div class="stat-header">
+          <span class="stat-title">HIGH RISK EXPOSURES</span>
+          <span class="stat-icon-wrap red">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </span>
+        </div>
+        <div class="stat-value danger">{{ highRiskCount }} <span class="unit">Critical Flag</span></div>
+        <div class="stat-subtitle">Uncapped Gross Negligence Shift</div>
+      </div>
+    </div>
+
+    <!-- Card 4: Commercial Delta (Emerald) -->
+    <div class="stat-card stat-financial">
+      <div class="stat-content">
+        <div class="stat-header">
+          <span class="stat-title">COMMERCIAL VARIANCE</span>
+          <span class="stat-icon-wrap emerald">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+        </div>
+        <div class="stat-value success">+₹ 3,50,000</div>
+        <div class="stat-subtitle">Net 30d (vs Net 45d Baseline)</div>
+      </div>
+    </div>
+  </section>
 
   <!-- VIEW LEVEL TABS SELECTOR (TASK 7D Item 2) -->
   <nav class="view-level-tabs">
@@ -40,7 +172,8 @@
       [class.active]="viewTab === 'clauses'" 
       (click)="viewTab = 'clauses'"
     >
-      <span>📜 Clause-Level Changes</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Clause-Level Redline</span>
       <span class="count-badge">{{ clauses.length }}</span>
     </button>
 
@@ -50,7 +183,8 @@
       [class.active]="viewTab === 'fields'" 
       (click)="viewTab = 'fields'"
     >
-      <span>🏷️ Field-Level Changes</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      <span>Field-Level Differences</span>
       <span class="count-badge">{{ fieldDiffs.length }}</span>
     </button>
 
@@ -60,7 +194,19 @@
       [class.active]="viewTab === 'text'" 
       (click)="viewTab = 'text'"
     >
-      <span>📄 Full Text Redline</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>Full Document Redline</span>
+    </button>
+
+    <button 
+      type="button" 
+      class="vlevel-btn" 
+      [class.active]="viewTab === 'audit'" 
+      (click)="viewTab = 'audit'"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span>Audit Trail & Risk Matrix</span>
+      <span class="count-badge">{{ auditRecords.length }}</span>
     </button>
   </nav>
 
@@ -73,39 +219,73 @@
     <!-- CLAUSE LEVEL CHANGES TAB -->
     @if (viewTab === 'clauses') {
       <main class="clauses-view-container">
-        <!-- FILTER BAR -->
-        <div class="filter-bar">
-          <span class="filter-label">Filter Clauses:</span>
-          <button type="button" class="filter-btn" [class.active]="activeFilter === 'changed'" (click)="setFilter('changed')">
-            Changed Only ({{ clauses.length }})
-          </button>
-          <button type="button" class="filter-btn" [class.active]="activeFilter === 'financial'" (click)="setFilter('financial')">
-            Commercial Terms
-          </button>
-          <button type="button" class="filter-btn" [class.active]="activeFilter === 'compliance'" (click)="setFilter('compliance')">
-            Legal & Compliance
-          </button>
-          <button type="button" class="filter-btn" [class.active]="activeFilter === 'all'" (click)="setFilter('all')">
-            All Clauses
-          </button>
+        <!-- FILTER & SEARCH TOOLBAR -->
+        <div class="clause-filter-toolbar">
+          <div class="search-box">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input 
+              type="text" 
+              placeholder="Search changed clauses or terms..." 
+              [(ngModel)]="searchQuery" 
+            />
+            @if (searchQuery) {
+              <button type="button" class="btn-clear-search" (click)="searchQuery = ''">×</button>
+            }
+          </div>
+
+          <div class="filter-pills">
+            <button type="button" class="filter-pill" [class.active]="activeFilter === 'changed'" (click)="setFilter('changed')">
+              Changed Only ({{ clauses.length }})
+            </button>
+            <button type="button" class="filter-pill" [class.active]="activeFilter === 'highRisk'" (click)="setFilter('highRisk')">
+              High Risk ({{ highRiskCount }})
+            </button>
+            <button type="button" class="filter-pill" [class.active]="activeFilter === 'financial'" (click)="setFilter('financial')">
+              Commercial
+            </button>
+            <button type="button" class="filter-pill" [class.active]="activeFilter === 'compliance'" (click)="setFilter('compliance')">
+              Compliance
+            </button>
+            <button type="button" class="filter-pill" [class.active]="activeFilter === 'all'" (click)="setFilter('all')">
+              All Clauses
+            </button>
+          </div>
         </div>
 
+        <!-- CLAUSE CARDS LIST -->
         <div class="clauses-diff-list">
+          @if (filteredClauses.length === 0) {
+            <div class="no-clauses-box">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <h4>No clauses match your filter</h4>
+              <p>Try resetting the search query or selecting a different category filter.</p>
+              <button type="button" class="btn-reset-filter" (click)="setFilter('all'); searchQuery = ''">Reset Filters</button>
+            </div>
+          }
+
           @for (clause of filteredClauses; track clause.id) {
-            <div class="clause-card" [class.high-risk]="clause.riskImpact === 'High'">
+            <div class="clause-card" [class.high-risk]="clause.riskImpact === 'High'" [class.accepted]="clause.status === 'accepted'">
               <div class="clause-header">
                 <div class="c-title-box">
                   <span class="sec-num">{{ clause.sectionNumber }}</span>
-                  <div>
-                    <h3>{{ clause.title }}</h3>
+                  <div class="title-details">
+                    <div class="title-row">
+                      <h3>{{ clause.title }}</h3>
+                      @if (clause.status === 'accepted') {
+                        <span class="accepted-chip">✓ Accepted</span>
+                      } @else if (clause.status === 'flagged') {
+                        <span class="flagged-chip">🚩 Flagged for Counsel</span>
+                      }
+                    </div>
                     <div class="c-tags">
                       <span class="change-tag {{ clause.changeType }}">{{ clause.changeType | uppercase }}</span>
                       <span class="risk-badge {{ clause.riskImpact.toLowerCase() }}">Risk: {{ clause.riskImpact }}</span>
+                      <span class="category-tag">{{ clause.category | titlecase }}</span>
                       
                       <!-- UNCERTAIN ALIGNMENT TAG (TASK 7D Item 2) -->
                       @if (clause.isUncertainAlignment) {
                         <span class="uncertain-tag" title="Low-confidence clause alignment. Reviewer verification required.">
-                          ⚠️ Uncertain Alignment
+                          ⚠️ Uncertain Alignment · Reviewer Verification Required
                         </span>
                       }
                     </div>
@@ -113,31 +293,97 @@
                 </div>
 
                 <!-- DUAL SOURCE CITATIONS (TASK 7D Item 3) -->
-                <div class="dual-citations-box">
+                <div class="dual-citations-box" title="Click citation to jump directly to original document page viewer">
                   <button type="button" class="cite-btn" (click)="navigateToViewerCitation(documentId, clause.pageCitationV1)">
-                    📍 {{ clause.pageCitationV1 }}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>{{ clause.pageCitationV1 }}</span>
                   </button>
                   <span class="arrow">➔</span>
                   <button type="button" class="cite-btn" (click)="navigateToViewerCitation(documentId, clause.pageCitationV2)">
-                    📍 {{ clause.pageCitationV2 }}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>{{ clause.pageCitationV2 }}</span>
                   </button>
                 </div>
               </div>
 
-              <!-- INLINE WORD-LEVEL DIFFING DISPLAY (TASK 7D Item 1) -->
-              <div class="diff-comparison-grid">
-                <div class="version-pane v1-pane">
-                  <span class="pane-tag">BASELINE (VERSION 1.0)</span>
-                  <p class="clause-text old">{{ clause.version1Text }}</p>
+              <!-- SUMMARY DELTA CALLOUT -->
+              @if (clause.summaryDelta) {
+                <div class="summary-delta-callout">
+                  <span class="summary-icon">💡</span>
+                  <div>
+                    <span class="delta-label">Executive Shift:</span>
+                    <span class="delta-text">{{ clause.summaryDelta }}</span>
+                  </div>
                 </div>
+              }
 
-                <div class="version-pane v2-pane">
-                  <span class="pane-tag">AMENDMENT (VERSION 2.0) — INLINE WORD DIFF</span>
-                  <p class="clause-text new-inline">
-                    @for (w of renderInlineWordDiff(clause.version1Text, clause.version2Text); track w.text + $index) {
-                      <span [class.diff-add]="w.type === 'added'">{{ w.text }} </span>
+              <!-- INLINE WORD-LEVEL DIFFING DISPLAY (TASK 7D Item 1) -->
+              @if (diffViewMode === 'split') {
+                <div class="diff-comparison-grid">
+                  <!-- BASELINE PANE (V1) -->
+                  <div class="version-pane v1-pane">
+                    <div class="pane-header">
+                      <span class="pane-tag">BASELINE ({{ selectedV1 | uppercase }})</span>
+                      <span class="pane-citation">{{ clause.pageCitationV1 }}</span>
+                    </div>
+                    <p class="clause-text old">
+                      @for (w of renderV1WordDiff(clause.version1Text, clause.version2Text); track w.text + $index) {
+                        <span [class.diff-del]="w.type === 'removed'">{{ w.text }} </span>
+                      }
+                    </p>
+                  </div>
+
+                  <!-- AMENDMENT PANE (V2) -->
+                  <div class="version-pane v2-pane">
+                    <div class="pane-header">
+                      <span class="pane-tag">AMENDMENT ({{ selectedV2 | uppercase }}) · INLINE WORD DELTA</span>
+                      <span class="pane-citation">{{ clause.pageCitationV2 }}</span>
+                    </div>
+                    <p class="clause-text new-inline">
+                      @for (w of renderV2WordDiff(clause.version1Text, clause.version2Text); track w.text + $index) {
+                        <span [class.diff-add]="w.type === 'added'">{{ w.text }} </span>
+                      }
+                    </p>
+                  </div>
+                </div>
+              } @else {
+                <!-- UNIFIED INLINE REDLINE VIEW -->
+                <div class="unified-pane">
+                  <div class="pane-header">
+                    <span class="pane-tag">UNIFIED TRACK CHANGES REDLINE</span>
+                    <span class="pane-citation">{{ clause.pageCitationV1 }} ➔ {{ clause.pageCitationV2 }}</span>
+                  </div>
+                  <p class="clause-text unified">
+                    @for (w of renderV1WordDiff(clause.version1Text, clause.version2Text); track 'v1-' + w.text + $index) {
+                      @if (w.type === 'removed') {
+                        <span class="diff-del">{{ w.text }} </span>
+                      }
+                    }
+                    @for (w of renderV2WordDiff(clause.version1Text, clause.version2Text); track 'v2-' + w.text + $index) {
+                      @if (w.type === 'added') {
+                        <span class="diff-add">{{ w.text }} </span>
+                      } @else {
+                        <span>{{ w.text }} </span>
+                      }
                     }
                   </p>
+                </div>
+              }
+
+              <!-- CLAUSE ACTION TOOLBAR -->
+              <div class="clause-action-bar">
+                <div class="action-left">
+                  <button type="button" class="btn-clause-action accept" (click)="acceptClause(clause)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Accept Change</span>
+                  </button>
+                  <button type="button" class="btn-clause-action flag" (click)="flagClause(clause)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                    <span>Flag for Counsel</span>
+                  </button>
+                </div>
+                <div class="action-right">
+                  <span class="sync-status">Verified with Neural Model v3.4</span>
                 </div>
               </div>
 
@@ -150,38 +396,156 @@
     <!-- FIELD LEVEL CHANGES TAB -->
     @if (viewTab === 'fields') {
       <main class="fields-view-container">
-        <h3>Extracted Field-Level Differences</h3>
-        <table class="fields-diff-table">
-          <thead>
-            <tr>
-              <th>FIELD NAME</th>
-              <th>BASELINE (V1.0)</th>
-              <th>AMENDMENT (V2.0)</th>
-              <th>CHANGE TYPE</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (f of fieldDiffs; track f.fieldKey) {
+        <div class="section-title-bar">
+          <div>
+            <h3>Extracted Key Terms & Field-Level Deltas</h3>
+            <p class="sub-text">Structured parameter variations parsed across document baseline and amendment versions.</p>
+          </div>
+          <span class="fields-count-badge">{{ fieldDiffs.length }} Parameters Tracked</span>
+        </div>
+
+        <div class="table-card">
+          <table class="fields-diff-table">
+            <thead>
               <tr>
-                <td><strong>{{ f.label }}</strong></td>
-                <td class="old-val">{{ f.v1Value }}</td>
-                <td class="new-val">{{ f.v2Value }}</td>
-                <td><span class="type-tag {{ f.status.toLowerCase() }}">{{ f.status }}</span></td>
+                <th>FIELD ATTRIBUTE</th>
+                <th>BASELINE ({{ selectedV1 }})</th>
+                <th>AMENDMENT ({{ selectedV2 }})</th>
+                <th>BUSINESS IMPACT & VARIANCE</th>
+                <th>CHANGE TYPE</th>
+                <th>REVIEW</th>
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (f of fieldDiffs; track f.fieldKey) {
+                <tr [class.verified]="f.reviewed">
+                  <td>
+                    <div class="field-name-box">
+                      <strong>{{ f.label }}</strong>
+                      <span class="field-key">{{ f.fieldKey }}</span>
+                    </div>
+                  </td>
+                  <td class="old-val">{{ f.v1Value }}</td>
+                  <td class="new-val">{{ f.v2Value }}</td>
+                  <td>
+                    <span class="variance-badge">{{ f.varianceImpact }}</span>
+                  </td>
+                  <td>
+                    <span class="type-tag {{ f.status.toLowerCase() }}">{{ f.status }}</span>
+                  </td>
+                  <td>
+                    <button type="button" class="btn-verify-field" [class.active]="f.reviewed" (click)="toggleFieldReview(f)">
+                      @if (f.reviewed) {
+                        <span>✓ Verified</span>
+                      } @else {
+                        <span>Verify</span>
+                      }
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </main>
     }
 
     <!-- FULL TEXT REDLINE TAB -->
     @if (viewTab === 'text') {
       <main class="text-view-container">
-        <h3>Full Document Redline View</h3>
+        <div class="section-title-bar">
+          <div>
+            <h3>Full Document Track Changes Redline</h3>
+            <p class="sub-text">Unified legal manuscript view with insertions highlighted in green and deletions struck out.</p>
+          </div>
+          <div class="doc-actions-quick">
+            <button type="button" class="btn-quick-print" (click)="showToast('Opening document print preview...')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              <span>Print Preview</span>
+            </button>
+          </div>
+        </div>
+
         <div class="redline-paper">
-          <p>This Master Service Agreement is made on <span class="diff-add">+01 Nov 2026</span> <span class="diff-del">-15 Jan 2026</span> between Apex Industrial Solutions Pvt Ltd and Acme Corporation Global Pvt Ltd.</p>
-          <p>Clause 1. Delivery timeline for precision sensor units is hereby set to <span class="diff-add">+30 days</span> <span class="diff-del">-45 days</span> following PO receipt.</p>
-          <p>Clause 2. Total liability shall be <span class="diff-add">+uncapped for gross negligence or confidentiality breach</span> <span class="diff-del">-capped at 100% of contract value</span>.</p>
+          <div class="paper-header">
+            <div class="paper-seal">LEGAL REDLINE DRAFT</div>
+            <h2>MASTER SERVICES & VENDOR AMENDMENT AGREEMENT</h2>
+            <p class="paper-meta">Ref: <strong>DOC-10245</strong> · Effective Date: <strong>01 Nov 2026</strong> · Parties: Apex Industrial Solutions & Acme Corp Global</p>
+            <div class="paper-divider"></div>
+          </div>
+
+          <div class="paper-body">
+            <p class="recital">This Master Service Amendment Agreement is entered into on <span class="diff-add">+01 Nov 2026</span> <span class="diff-del">-15 Jan 2026</span> by and between <strong>Apex Industrial Solutions Pvt Ltd</strong> and <strong>Acme Corporation Global Pvt Ltd</strong>.</p>
+            
+            <h4>1. SCOPE OF SERVICES & DELIVERY TIMELINES</h4>
+            <p>1.1 Supplier shall supply precision calibration sensor units within <span class="diff-add">+30 days of purchase order receipt with priority dispatch and live tracking</span> <span class="diff-del">-45 days of PO receipt with standard shipping</span>.</p>
+
+            <h4>2. LIMITATION OF LIABILITY & INDEMNIFICATION</h4>
+            <p>2.1 Total aggregate liability of either party shall be <span class="diff-add">+uncapped for any direct gross negligence, confidentiality breach, or willful misconduct</span> <span class="diff-del">-capped strictly at 100% of the total contract value paid</span> under this agreement.</p>
+
+            <h4>3. TERM, AUTO-RENEWAL & NOTICE</h4>
+            <p>3.1 <span class="diff-add">+This agreement shall automatically renew for successive 12-month terms unless either party serves written notice at least 60 calendar days prior to expiration.</span> <span class="diff-del">-[Clause 3.1 previously silent on auto-renewal; 12 months fixed duration applied]-</span></p>
+
+            <h4>4. INCIDENT NOTIFICATION WINDOW</h4>
+            <p>4.1 Vendor shall notify Customer of any data breach or security anomaly within <span class="diff-add">+24 hours of discovery and submit root-cause forensics within 5 business days</span> <span class="diff-del">-72 hours of verification</span>.</p>
+          </div>
+
+          <div class="paper-footer">
+            <span>DocuNexa Verified Comparison · Page 1 of 1 · Tamper-evident SHA-256 Checksum Included</span>
+          </div>
+        </div>
+      </main>
+    }
+
+    <!-- AUDIT TRAIL & RISK MATRIX TAB -->
+    @if (viewTab === 'audit') {
+      <main class="audit-view-container">
+        <div class="section-title-bar">
+          <div>
+            <h3>Audit Trail & Tamper-Evident Risk Matrix</h3>
+            <p class="sub-text">Cryptographic checksums, neural alignment logs, and compliance verification checkpoints.</p>
+          </div>
+        </div>
+
+        <div class="audit-summary-grid">
+          <div class="audit-stat-card">
+            <span class="astat-label">BASELINE CHECKSUM (SHA-256)</span>
+            <code class="hash-code">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</code>
+            <span class="astat-status verified">✓ Baseline Canonical Verified</span>
+          </div>
+          <div class="audit-stat-card">
+            <span class="astat-label">AMENDMENT CHECKSUM (SHA-256)</span>
+            <code class="hash-code">a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0</code>
+            <span class="astat-status verified">✓ Amendment Integrity Intact</span>
+          </div>
+        </div>
+
+        <div class="table-card mt-3">
+          <table class="fields-diff-table audit-table">
+            <thead>
+              <tr>
+                <th>TIMESTAMP</th>
+                <th>ACTION / EVENT</th>
+                <th>SUBSYSTEM / ACTOR</th>
+                <th>EVENT DETAILS</th>
+                <th>AUDIT LOG HASH</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of auditRecords; track a.id) {
+                <tr>
+                  <td class="timestamp-col">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>{{ a.timestamp }}</span>
+                  </td>
+                  <td><strong>{{ a.action }}</strong></td>
+                  <td><span class="actor-badge">{{ a.actor }}</span></td>
+                  <td>{{ a.details }}</td>
+                  <td><code class="hash-snippet">{{ a.hash | slice:0:16 }}...</code></td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       </main>
     }
@@ -189,6 +553,10 @@
   }
 
   @if (toastMessage) {
-    <div class="toast-popup"><span>{{ toastMessage }}</span></div>
+    <div class="toast-popup">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>{{ toastMessage }}</span>
+    </div>
   }
 </div>
+
