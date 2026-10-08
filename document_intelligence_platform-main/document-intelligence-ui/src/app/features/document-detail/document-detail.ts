@@ -1,13 +1,14 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { LoadingState } from '../../shared/ui/loading-state/loading-state';
 import { ErrorState, ErrorVariant } from '../../shared/ui/error-state/error-state';
+import { StatusBadge } from '../../shared/ui/status-badge/status-badge';
 import { DOCUMENT_SERVICE_TOKEN, MockDocumentService } from '../../core/services/api-services';
 
-interface DocumentDetailData {
+export interface DocumentDetailData {
   id: string;
   name: string;
   type: string;
@@ -19,26 +20,29 @@ interface DocumentDetailData {
   size: string;
   pages: number;
   fileName: string;
+  signedUrl?: string;
+  signedUrlExpiry?: string;
 }
 
-interface DocumentVersion {
+export interface DocumentVersion {
   version: string;
   date: string;
   time: string;
   uploadedBy: string;
   size: string;
   pages: number;
-  status: string;
+  status: 'Received' | 'Processing' | 'Review' | 'Approved/Published' | 'Superseded';
   changeSummary: string;
   isCurrent: boolean;
 }
 
-interface ComparisonChange {
-  section: string;
-  field: string;
-  oldValue: string;
-  newValue: string;
-  type: 'Added' | 'Removed' | 'Modified';
+export interface CommentItem {
+  id: string;
+  author: string;
+  avatar: string;
+  role: string;
+  timestamp: string;
+  text: string;
 }
 
 @Component({
@@ -47,9 +51,9 @@ interface ComparisonChange {
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
     LoadingState,
     ErrorState,
+    StatusBadge,
   ],
   templateUrl: './document-detail.html',
   styleUrl: './document-detail.scss',
@@ -57,6 +61,7 @@ interface ComparisonChange {
 })
 export class DocumentDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly documentService = inject(DOCUMENT_SERVICE_TOKEN);
 
@@ -67,19 +72,40 @@ export class DocumentDetail implements OnInit {
   hasError = signal(false);
   errorVariant = signal<ErrorVariant>('default');
 
-  showVersionHistory = false;
-  showComparison = false;
+  // Read-only historical version viewer state
+  selectedHistoricalVersion: DocumentVersion | null = null;
+  isHistoricalReadOnlyModalOpen = false;
 
-  selectedVersion = '';
-  compareFromVersion = 'v1.0';
-  compareToVersion = 'v3.0';
+  // Clarifications / Comments Drawer
+  isCommentsDrawerOpen = false;
+  commentText = '';
+  comments: CommentItem[] = [
+    {
+      id: 'COM-1',
+      author: 'Rahul Sharma',
+      avatar: 'RS',
+      role: 'Uploader',
+      timestamp: '04 Oct 2026 · 10:15 AM',
+      text: 'Original contract scan uploaded for vendor onboard approval.',
+    },
+    {
+      id: 'COM-2',
+      author: 'Abhishek Yadav',
+      avatar: 'AY',
+      role: 'Reviewer',
+      timestamp: '06 Oct 2026 · 11:45 AM',
+      text: 'Verified line item rates against PO #PO-2026-9842.',
+    },
+  ];
+
+  toastMessage: string | null = null;
 
   document: DocumentDetailData = {
     id: 'DOC-10248',
     name: 'Supplier Agreement - Acme Industries',
     type: 'Supplier Contract',
     category: 'Contract',
-    status: 'Approved',
+    status: 'Approved/Published',
     owner: 'Abhishek Yadav',
     updatedAt: '06 Oct 2026',
     uploadedAt: '04 Oct 2026',
@@ -89,14 +115,15 @@ export class DocumentDetail implements OnInit {
   };
 
   extractedFields = [
-    { label: 'Supplier Name', value: 'Acme Industries Pvt. Ltd.', confidence: '98%' },
-    { label: 'Contract Number', value: 'AGR-2026-00841', confidence: '99%' },
-    { label: 'Effective Date', value: '01 Oct 2026', confidence: '97%' },
-    { label: 'Expiry Date', value: '30 Sep 2028', confidence: '96%' },
-    { label: 'Contract Value', value: '₹48,50,000', confidence: '94%' },
-    { label: 'Payment Terms', value: 'Net 30 Days', confidence: '98%' },
+    { label: 'Supplier Name', value: 'Acme Industries Pvt. Ltd.', confidence: '98%', isRestricted: false },
+    { label: 'Contract Number', value: 'AGR-2026-00841', confidence: '99%', isRestricted: false },
+    { label: 'Effective Date', value: '01 Oct 2026', confidence: '97%', isRestricted: false },
+    { label: 'Expiry Date', value: '30 Sep 2028', confidence: '96%', isRestricted: false },
+    { label: 'Contract Value', value: '₹48,50,000', confidence: '94%', isRestricted: false },
+    { label: 'Executive Bonus Schedule', value: '[RESTRICTED FIELD - MASKED BY POLICY]', confidence: '90%', isRestricted: true },
   ];
 
+  // VERTICAL VERSION TIMELINE (BRD SECTION 10.1 - TASK 7C Item 2)
   versions: DocumentVersion[] = [
     {
       version: 'v3.0',
@@ -105,8 +132,8 @@ export class DocumentDetail implements OnInit {
       uploadedBy: 'Abhishek Yadav',
       size: '2.4 MB',
       pages: 18,
-      status: 'Current',
-      changeSummary: 'Updated payment terms and renewal clause.',
+      status: 'Approved/Published',
+      changeSummary: 'Updated payment terms and renewal penalty clause.',
       isCurrent: true,
     },
     {
@@ -116,7 +143,7 @@ export class DocumentDetail implements OnInit {
       uploadedBy: 'Rahul Sharma',
       size: '2.3 MB',
       pages: 18,
-      status: 'Approved',
+      status: 'Superseded',
       changeSummary: 'Updated supplier address and contract value.',
       isCurrent: false,
     },
@@ -127,23 +154,19 @@ export class DocumentDetail implements OnInit {
       uploadedBy: 'Abhishek Yadav',
       size: '2.1 MB',
       pages: 17,
-      status: 'Original',
+      status: 'Received',
       changeSummary: 'Initial document uploaded for processing.',
       isCurrent: false,
     },
   ];
 
-  comparisonChanges: ComparisonChange[] = [
-    { section: 'Commercial Terms', field: 'Payment Terms', oldValue: 'Net 45 Days', newValue: 'Net 30 Days', type: 'Modified' },
-    { section: 'Commercial Terms', field: 'Contract Value', oldValue: '₹45,00,000', newValue: '₹48,50,000', type: 'Modified' },
-    { section: 'Renewal', field: 'Renewal Period', oldValue: '12 months', newValue: '24 months', type: 'Modified' },
-    { section: 'Supplier Information', field: 'Registered Address', oldValue: '—', newValue: 'Plot 42, Industrial Area, New Delhi', type: 'Added' },
-    { section: 'Termination', field: 'Notice Period', oldValue: '30 days', newValue: '60 days', type: 'Modified' },
-    { section: 'Legal', field: 'Confidentiality Clause', oldValue: 'Confidential information shall be protected.', newValue: 'Confidential information shall be protected for 5 years after termination.', type: 'Modified' },
-  ];
-
   ngOnInit(): void {
-    this.documentId = this.route.snapshot.paramMap.get('id') || 'DOC-10248';
+    const paramId = this.route.snapshot.paramMap.get('id');
+    if (paramId) {
+      this.documentId = paramId;
+    } else {
+      this.documentId = 'DOC-10248';
+    }
     this.loadDocumentData();
   }
 
@@ -151,7 +174,6 @@ export class DocumentDetail implements OnInit {
     this.isLoading.set(true);
     this.hasError.set(false);
 
-    // Check specific URL query flags for testing 404 / purged states
     const statusParam = this.route.snapshot.queryParamMap.get('status');
     if (this.documentId === 'purged' || statusParam === 'purged') {
       setTimeout(() => {
@@ -182,7 +204,7 @@ export class DocumentDetail implements OnInit {
             name: doc.name,
             type: doc.type,
             category: doc.type.includes('Invoice') ? 'Invoice' : doc.type.includes('Policy') ? 'Policy' : 'Contract',
-            status: doc.status,
+            status: doc.status === 'Approved' ? 'Approved/Published' : doc.status,
             owner: doc.owner,
             updatedAt: doc.updatedAt,
             uploadedAt: '04 Oct 2026',
@@ -205,44 +227,51 @@ export class DocumentDetail implements OnInit {
     this.loadDocumentData();
   }
 
-  setActiveTab(tab: string): void {
-    this.activeTab = tab;
+  // TASK 7C Item 1: Navigate to Compare Studio (/compare)
+  navigateToCompare(): void {
+    this.router.navigate(['/compare'], { queryParams: { doc1: this.documentId, doc2: 'DOC-10246' } });
+  }
+
+  // TASK 7C Item 2: Historical Version Read-only View
+  openHistoricalVersionReadOnly(ver: DocumentVersion): void {
+    this.selectedHistoricalVersion = ver;
+    this.isHistoricalReadOnlyModalOpen = true;
+  }
+
+  // TASK 7C Item 4: Download via Signed URL & Export
+  downloadViaSignedUrl(): void {
+    const expTime = new Date(Date.now() + 15 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    this.document.signedUrl = `https://storage.docintel.internal/signed-url/${this.document.id}-v3.0.pdf?expires=${Date.now() + 900000}`;
+    this.document.signedUrlExpiry = `Expires at ${expTime} (15 mins TTL)`;
+    this.showToast(`Generated temporary signed URL! ${this.document.signedUrlExpiry}`);
+  }
+
+  exportMetadataWithMasking(): void {
+    this.showToast('Exporting document metadata (Masking rules applied for confidential fields)...');
+  }
+
+  addComment(): void {
+    if (!this.commentText.trim()) return;
+    this.comments.unshift({
+      id: `COM-${Date.now()}`,
+      author: 'Abhishek Yadav',
+      avatar: 'AY',
+      role: 'Reviewer',
+      timestamp: 'Just now',
+      text: this.commentText,
+    });
+    this.commentText = '';
+    this.showToast('Posted comment to document discussion thread');
+  }
+
+  showToast(msg: string): void {
+    this.toastMessage = msg;
+    setTimeout(() => {
+      if (this.toastMessage === msg) this.toastMessage = null;
+    }, 4000);
   }
 
   goBack(): void {
     this.location.back();
-  }
-
-  toggleVersionHistory(): void {
-    this.showVersionHistory = !this.showVersionHistory;
-  }
-
-  openComparison(): void {
-    this.showVersionHistory = false;
-    this.showComparison = true;
-  }
-
-  closeComparison(): void {
-    this.showComparison = false;
-  }
-
-  selectVersion(version: string): void {
-    this.selectedVersion = version;
-  }
-
-  restoreVersion(version: DocumentVersion): void {
-    alert(`${version.version} selected for restoration.`);
-  }
-
-  sendForReview(): void {
-    alert(`${this.document.name} has been sent for review.`);
-  }
-
-  downloadDocument(): void {
-    alert(`Downloading ${this.document.fileName}...`);
-  }
-
-  saveExtraction(): void {
-    alert('Extraction changes saved successfully.');
   }
 }

@@ -6,9 +6,13 @@ import { RouterLink } from '@angular/router';
 import { LoadingState } from '../../shared/ui/loading-state/loading-state';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
+import { StatusBadge } from '../../shared/ui/status-badge/status-badge';
 import { DOCUMENT_SERVICE_TOKEN, MockDocumentService, IDocumentItem } from '../../core/services/api-services';
 
 export type DocumentItem = IDocumentItem;
+
+export type SortField = 'name' | 'updatedAt' | 'size' | 'status';
+export type SortOrder = 'asc' | 'desc';
 
 @Component({
   selector: 'app-documents',
@@ -20,6 +24,7 @@ export type DocumentItem = IDocumentItem;
     LoadingState,
     EmptyState,
     ErrorState,
+    StatusBadge,
   ],
   templateUrl: './documents.html',
   styleUrl: './documents.scss',
@@ -34,6 +39,17 @@ export class Documents implements OnInit {
   selectedCategory = 'All Documents';
   viewMode: 'grid' | 'table' = 'grid';
 
+  // Column Sorting (TASK 7E Item 1)
+  sortField: SortField = 'updatedAt';
+  sortOrder: SortOrder = 'desc';
+
+  // Server-Style Pagination (TASK 7E Item 1)
+  currentPage = 1;
+  pageSize = 6;
+
+  // Multi-Select Checkboxes & Bulk Actions (TASK 7E Item 1)
+  selectedDocIds: string[] = [];
+
   isLoading = signal(true);
   hasError = signal(false);
 
@@ -47,35 +63,13 @@ export class Documents implements OnInit {
 
   documents: DocumentItem[] = [];
 
+  showExportModal = false;
+  exportFormat: 'CSV' | 'JSON' | 'PDF' = 'CSV';
+  maskPIIData = true;
+  exportSuccessToast: string | null = null;
+
   ngOnInit(): void {
     this.loadDocuments();
-  }
-
-  get filteredDocuments(): DocumentItem[] {
-    const search = this.searchTerm.trim().toLowerCase();
-
-    return this.documents.filter((doc) => {
-      const matchesSearch =
-        !search ||
-        doc.name.toLowerCase().includes(search) ||
-        doc.id.toLowerCase().includes(search) ||
-        doc.owner.toLowerCase().includes(search) ||
-        doc.type.toLowerCase().includes(search);
-
-      const matchesType =
-        this.selectedType === 'All Types' ||
-        doc.type === this.selectedType;
-
-      const matchesStatus =
-        this.selectedStatus === 'All Status' ||
-        doc.status === this.selectedStatus;
-
-      const matchesCategory =
-        this.selectedCategory === 'All Documents' ||
-        doc.type === this.selectedCategory;
-
-      return matchesSearch && matchesType && matchesStatus && matchesCategory;
-    });
   }
 
   loadDocuments(): void {
@@ -98,8 +92,111 @@ export class Documents implements OnInit {
     this.loadDocuments();
   }
 
+  // Column Sorting Handler
+  toggleSort(field: SortField): void {
+    if (this.sortField === field) {
+      this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field;
+      this.sortOrder = 'asc';
+    }
+  }
+
+  get filteredDocuments(): DocumentItem[] {
+    const search = this.searchTerm.trim().toLowerCase();
+
+    let result = this.documents.filter((doc) => {
+      const matchesSearch =
+        !search ||
+        doc.name.toLowerCase().includes(search) ||
+        doc.id.toLowerCase().includes(search) ||
+        doc.owner.toLowerCase().includes(search) ||
+        doc.type.toLowerCase().includes(search);
+
+      const matchesType = this.selectedType === 'All Types' || doc.type === this.selectedType;
+      const matchesStatus = this.selectedStatus === 'All Status' || doc.status === this.selectedStatus;
+      const matchesCategory = this.selectedCategory === 'All Documents' || doc.type === this.selectedCategory;
+
+      return matchesSearch && matchesType && matchesStatus && matchesCategory;
+    });
+
+    // Apply Sorting
+    result.sort((a, b) => {
+      let valA: any = a[this.sortField];
+      let valB: any = b[this.sortField];
+      if (typeof valA === 'string') valA = valA.toLowerCase();
+      if (typeof valB === 'string') valB = valB.toLowerCase();
+
+      if (valA < valB) return this.sortOrder === 'asc' ? -1 : 1;
+      if (valA > valB) return this.sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }
+
+  // Server-Style Paginated Slice
+  get paginatedDocuments(): DocumentItem[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredDocuments.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredDocuments.length / this.pageSize));
+  }
+
+  get paginatedEndCount(): number {
+    return Math.min(this.currentPage * this.pageSize, this.filteredDocuments.length);
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) this.currentPage++;
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) this.currentPage--;
+  }
+
+  // Multi-Select Checkboxes (TASK 7E Item 1)
+  toggleSelectDoc(id: string): void {
+    const idx = this.selectedDocIds.indexOf(id);
+    if (idx >= 0) {
+      this.selectedDocIds.splice(idx, 1);
+    } else {
+      this.selectedDocIds.push(id);
+    }
+  }
+
+  isDocSelected(id: string): boolean {
+    return this.selectedDocIds.includes(id);
+  }
+
+  get isAllPageSelected(): boolean {
+    return this.paginatedDocuments.length > 0 && this.paginatedDocuments.every(d => this.selectedDocIds.includes(d.id));
+  }
+
+  toggleSelectAllPage(): void {
+    if (this.isAllPageSelected) {
+      this.paginatedDocuments.forEach(d => {
+        const idx = this.selectedDocIds.indexOf(d.id);
+        if (idx >= 0) this.selectedDocIds.splice(idx, 1);
+      });
+    } else {
+      this.paginatedDocuments.forEach(d => {
+        if (!this.selectedDocIds.includes(d.id)) this.selectedDocIds.push(d.id);
+      });
+    }
+  }
+
+  bulkAction(actionName: string): void {
+    if (this.selectedDocIds.length === 0) return;
+    this.showToastNotification(`Executed ${actionName} on ${this.selectedDocIds.length} selected documents.`);
+    this.selectedDocIds = [];
+  }
+
   setCategoryTab(category: string): void {
     this.selectedCategory = category;
+    this.currentPage = 1;
   }
 
   setViewMode(mode: 'grid' | 'table'): void {
@@ -111,12 +208,9 @@ export class Documents implements OnInit {
     this.selectedType = 'All Types';
     this.selectedStatus = 'All Status';
     this.selectedCategory = 'All Documents';
+    this.currentPage = 1;
+    this.selectedDocIds = [];
   }
-
-  showExportModal = false;
-  exportFormat: 'CSV' | 'JSON' | 'PDF' = 'CSV';
-  maskPIIData = true;
-  exportSuccessToast: string | null = null;
 
   openExportModal(): void {
     this.showExportModal = true;
@@ -128,9 +222,15 @@ export class Documents implements OnInit {
 
   executeScopedExport(): void {
     this.showExportModal = false;
-    this.exportSuccessToast = `Successfully generated ${this.exportFormat} export (${this.maskPIIData ? 'PII Masked' : 'Unmasked Raw'}) for ${this.filteredDocuments.length} documents.`;
+    this.showToastNotification(`Generated ${this.exportFormat} export (${this.maskPIIData ? 'PII Masked' : 'Unmasked Raw'}) for ${this.filteredDocuments.length} documents matching active filters.`);
+  }
+
+  showToastNotification(msg: string): void {
+    this.exportSuccessToast = msg;
     setTimeout(() => {
-      this.exportSuccessToast = null;
+      if (this.exportSuccessToast === msg) {
+        this.exportSuccessToast = null;
+      }
     }, 4000);
   }
 }

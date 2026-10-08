@@ -1,581 +1,173 @@
 <div class="qa-page">
 
-  <!-- HEADER -->
-  <header class="page-header">
+  <!-- PERSISTENT AUTHORITATIVE SOURCE NOTICE BANNER (TASK 7B Item 5) -->
+  <div class="authoritative-disclaimer-bar">
+    <span class="icon">💡</span>
+    <span><strong>Authoritative Record Notice:</strong> Answers are advisory AI outputs. The original uploaded source document is the authoritative record.</span>
+  </div>
 
-    <div>
-      <div class="eyebrow">
-        INTELLIGENCE
+  <div class="qa-layout">
+
+    <!-- LEFT SIDEBAR: CHAT SESSIONS HISTORY (TASK 7B Item 2) -->
+    <aside class="sessions-sidebar">
+      <div class="sidebar-header">
+        <h3>💬 Chat Sessions</h3>
+        <button type="button" class="btn-new-chat" (click)="createNewSession()">+ New Chat</button>
       </div>
 
-      <h1>
-        AI Q&A
-      </h1>
-
-      <p>
-        Ask questions about your documents and get
-        grounded answers with source citations.
-      </p>
-    </div>
-
-    <div class="header-actions">
-
-      <button
-        type="button"
-        class="secondary-button"
-        (click)="clearConversation()"
-      >
-        <span>↻</span>
-        Clear Chat
-      </button>
-
-    </div>
-
-  </header>
-
-
-  <!-- DOCUMENT CONTEXT -->
-  @if (isLoadingDocuments) {
-
-    <app-loading-state
-      layout="split-pane"
-      message="Loading document context and QA vector index..."
-    />
-
-  } @else if (hasDocumentError) {
-
-    <app-error-state
-      title="Unable to load document context"
-      message="We could not load the available documents. Please try again."
-      (retry)="retryDocuments()"
-    />
-
-  } @else if (documents.length === 0) {
-
-    <app-empty-state
-      title="No documents available"
-      message="Upload and process a document before using AI Q&A."
-    />
-
-  } @else {
-
-    <!-- CONTEXT BAR -->
-    <section class="context-card">
-
-      <div class="context-icon">
-        AI
-      </div>
-
-      <div class="context-content">
-
-        <span class="context-label">
-          DOCUMENT CONTEXT
-        </span>
-
-        <select
-          [(ngModel)]="selectedDocumentId"
-          (change)="selectDocument()"
-          aria-label="Select document context"
-        >
-          @for (
-            document of documents;
-            track document.id
-          ) {
-
-            <option [value]="document.id">
-              {{ document.name }}
-            </option>
-
-          }
-        </select>
-
-      </div>
-
-      <div class="grounded-badge">
-
-        <span class="status-dot"></span>
-
-        Grounded in Documents
-
-      </div>
-
-    </section>
-
-
-    <div class="qa-layout">
-
-      <!-- MAIN CHAT -->
-      <section class="chat-card">
-
-        <!-- CHAT HEADER -->
-        <div class="chat-header">
-
-          <div>
-            <strong>
-              Document Assistant
-            </strong>
-
-            <span>
-              Answers are generated from indexed document content
-            </span>
-          </div>
-
-          <div class="model-badge">
-            AI
-          </div>
-
-        </div>
-
-
-        <!-- MESSAGES -->
-        <div
-          class="messages"
-          aria-live="polite"
-        >
-
-          @if (messages.length === 0 && !isLoading) {
-
-            <!-- EMPTY CHAT -->
-            <app-empty-state
-              title="Start a conversation"
-              message="Ask a question about the selected document to get a grounded AI answer."
-            />
-
-          } @else {
-
-            @for (
-              message of messages;
-              track message.id
-            ) {
-
-              <div
-                class="message-row"
-                [class.user-row]="message.role === 'user'"
-                [class.assistant-row]="message.role === 'assistant'"
-              >
-
-                <!-- ASSISTANT AVATAR -->
-                @if (message.role === 'assistant') {
-
-                  <div class="message-avatar">
-                    AI
-                  </div>
-
-                }
-
-
-                <div class="message-content">
-
-                  <!-- MESSAGE -->
-                  <div class="message-bubble">
-
-                    <p>
-                      {{ message.text }}
-                    </p>
-
-                  </div>
-
-
-                  <!-- TIME -->
-                  <span class="message-time">
-                    {{ message.timestamp }}
-                  </span>
-
-
-                  <!-- CITATIONS -->
-                  @if (
-                    message.citations &&
-                    message.citations.length > 0
-                  ) {
-
-                    <div class="citations">
-
-                      <div class="citations-header">
-
-                        <span>
-                          Sources
-                        </span>
-
-                        <small>
-                          {{ message.citations.length }}
-                          citation(s)
-                        </small>
-
-                      </div>
-
-
-                      @for (
-                        citation of message.citations;
-                        track citation.page + citation.section
-                      ) {
-
-                        <button
-                          type="button"
-                          class="citation-card"
-                          (click)="openCitation(citation)"
-                        >
-
-                          <div class="citation-icon">
-                            PDF
-                          </div>
-
-
-                          <div class="citation-info">
-
-                            <strong>
-                              {{ citation.documentName }}
-                            </strong>
-
-                            <span>
-                              Page {{ citation.page }}
-                              ·
-                              {{ citation.section }}
-                            </span>
-
-                            <small>
-                              "{{ citation.excerpt }}"
-                            </small>
-
-                          </div>
-
-
-                          <span class="citation-arrow">
-                            →
-                          </span>
-
-                        </button>
-
-                      }
-
-                    </div>
-
-                  }
-
-                </div>
-
-
-                <!-- USER AVATAR -->
-                @if (message.role === 'user') {
-
-                  <div class="user-avatar">
-                    AS
-                  </div>
-
-                }
-
-              </div>
-
-            }
-
-          }
-
-
-          <!-- AI LOADING -->
-          @if (isLoading) {
-
-            <div class="message-row assistant-row">
-
-              <div class="message-avatar">
-                AI
-              </div>
-
-              <div class="message-content">
-
-                <div class="message-bubble loading-bubble">
-
-                  <span></span>
-                  <span></span>
-                  <span></span>
-
-                </div>
-
-                <span class="message-time">
-                  AI is analyzing the document...
-                </span>
-
-              </div>
-
+      <div class="sessions-list">
+        @for (s of sessions; track s.id) {
+          <div 
+            class="session-item" 
+            [class.active]="s.id === activeSessionId"
+            (click)="switchSession(s.id)"
+          >
+            <div class="s-info">
+              <span class="s-title">{{ s.title }}</span>
+              <span class="s-time">{{ s.updatedAt }}</span>
             </div>
+            <button type="button" class="btn-del-session" (click)="deleteSession(s.id, $event)" title="Delete session">×</button>
+          </div>
+        }
+      </div>
+    </aside>
 
-          }
+    <!-- MAIN QA CHAT PANE -->
+    <main class="qa-main-pane">
 
+      <!-- CONTEXT SELECTOR HEADER -->
+      <div class="qa-header">
+        <div class="header-left">
+          <span class="eyebrow">GROUNDED RETRIEVAL Q&A</span>
+          <h2>Evidence-Backed Document Assistant</h2>
         </div>
 
+        <div class="context-selector-box">
+          <label>Target Document Context:</label>
+          <select [(ngModel)]="selectedDocumentId" class="doc-select">
+            @for (d of documents; track d.id) {
+              <option [value]="d.id">
+                {{ d.name }} ({{ d.currentVersion }}) {{ d.isRestricted ? '🔒 Restricted' : '' }}
+              </option>
+            }
+          </select>
 
-        <!-- SUGGESTIONS -->
-        @if (suggestedQuestions.length > 0) {
-
-          <div class="suggestions">
-
-            <span class="suggestion-label">
-              Suggested questions
+          @if (selectedDocument?.latestVersion && selectedDocument?.latestVersion !== selectedDocument?.currentVersion) {
+            <span class="freshness-tag" title="Newer version exists in repository">
+              ⚠️ {{ selectedDocument?.currentVersion }} (Newer {{ selectedDocument?.latestVersion }} exists)
             </span>
+          }
+        </div>
+      </div>
 
-            <div class="suggestion-list">
+      <!-- CHAT MESSAGES BODY -->
+      <div class="chat-messages-container">
+        @for (m of messages; track m.id) {
+          <div class="message-row {{ m.role }}" [class.injection]="m.isPromptInjectionAttempt" [class.retrieval-error]="m.isRetrievalError">
+            <div class="avatar">{{ m.role === 'user' ? 'AY' : 'AI' }}</div>
 
-              @for (
-                suggestion of suggestedQuestions;
-                track suggestion
-              ) {
+            <div class="message-bubble">
+              <div class="bubble-header">
+                <strong>{{ m.role === 'user' ? 'You' : 'DocIntel Assistant' }}</strong>
+                @if (m.sourceVersion) {
+                  <span class="ver-badge">Source {{ m.sourceVersion }}</span>
+                }
+                <span class="time">{{ m.timestamp }}</span>
+              </div>
 
-                <button
-                  type="button"
-                  class="suggestion-button"
-                  (click)="selectSuggestion(suggestion)"
-                  [disabled]="isLoading"
-                >
-                  {{ suggestion }}
-                </button>
+              <!-- FRESHNESS NOTICE BANNER (TASK 7B Item 3) -->
+              @if (m.newerVersionNotice) {
+                <div class="freshness-notice-banner">
+                  <span>{{ m.newerVersionNotice }}</span>
+                </div>
+              }
 
+              <!-- PROMPT INJECTION ALERT BANNER (UAT-07) -->
+              @if (m.isPromptInjectionAttempt) {
+                <div class="prompt-injection-banner">
+                  <span class="shield">🛡️</span>
+                  <span><strong>UAT-07 Prompt Injection Test:</strong> Instruction ignored. Security policy enforced.</span>
+                </div>
+              }
+
+              <p class="message-text">{{ m.text }}</p>
+
+              <!-- RETRIEVAL ERROR RETRY (TASK 7B Item 4) -->
+              @if (m.isRetrievalError) {
+                <div class="retrieval-error-card">
+                  <button type="button" class="btn-retry-retrieval" (click)="retryRetrieval()">
+                    🔄 Retry Context Retrieval
+                  </button>
+                </div>
+              }
+
+              <!-- PAGE CITATIONS WITH DEEP-LINK (TASK 7B Item 1) -->
+              @if (m.citations && m.citations.length > 0) {
+                <div class="citations-box">
+                  <span class="cite-lbl">Evidence Citations (Click to View Page & Highlight):</span>
+                  <div class="cite-chips">
+                    @for (c of m.citations; track c.spanId) {
+                      <button type="button" class="cite-btn" (click)="openCitation(c)">
+                        📍 {{ c.documentName }} (Page {{ c.page }}, {{ c.section }})
+                      </button>
+                    }
+                  </div>
+                </div>
               }
 
             </div>
-
           </div>
-
         }
 
-
-        <!-- COMPOSER -->
-        <div class="composer">
-
-          <textarea
-            [(ngModel)]="question"
-            placeholder="Ask a question about this document..."
-            rows="3"
-            [disabled]="isLoading"
-            aria-label="Ask a question about the document"
-            (keydown.enter)="!$any($event).shiftKey && $any($event).preventDefault(); !$any($event).shiftKey && askQuestion()"
-          ></textarea>
-
-
-          <div class="composer-footer">
-
-            <span class="composer-hint">
-              Press Enter to ask · Shift + Enter for new line
-            </span>
-
-
-            <button
-              type="button"
-              class="ask-button"
-              [disabled]="
-                !question.trim() ||
-                isLoading
-              "
-              (click)="askQuestion()"
-            >
-
-              @if (isLoading) {
-
-                <span class="spinner"></span>
-
-                Thinking...
-
-              } @else {
-
-                Ask AI
-
-                <span>
-                  →
-                </span>
-
-              }
-
-            </button>
-
+        @if (isLoading) {
+          <div class="message-row assistant loading">
+            <div class="avatar">AI</div>
+            <div class="message-bubble">
+              <p>Searching document vectors, evaluating access scope, and generating cited answer...</p>
+            </div>
           </div>
+        }
+      </div>
 
+      <!-- SUGGESTED QUESTIONS BAR -->
+      <div class="suggestions-bar">
+        <span class="sugg-lbl">Suggested Questions:</span>
+        @for (q of suggestedQuestions; track q) {
+          <button type="button" class="sugg-chip" (click)="selectSuggestion(q)">
+            {{ q }}
+          </button>
+        }
+      </div>
+
+      <!-- INPUT BOX -->
+      <div class="chat-input-bar">
+        <input
+          type="text"
+          [(ngModel)]="question"
+          (keyup.enter)="askQuestion()"
+          placeholder="Ask a question about the selected document..."
+          class="chat-input"
+        />
+        <button type="button" class="btn-send" (click)="askQuestion()" [disabled]="!question.trim() || isLoading">
+          Send Question
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- REVOKED ACCESS MODAL (BRD SECTION 12 CITATION ACCESS RE-CHECK) -->
+  @if (revokedAccessModalDocName) {
+    <div class="modal-backdrop" (click)="revokedAccessModalDocName = null">
+      <div class="access-modal-card" (click)="$event.stopPropagation()">
+        <h3>🚫 Permission Denied (Citation Access Control)</h3>
+        <p>Access evaluation at citation click time failed. You do not have permission to view <strong>{{ revokedAccessModalDocName }}</strong>.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn-primary" (click)="revokedAccessModalDocName = null">Close</button>
         </div>
-
-      </section>
-
-
-      <!-- RIGHT SIDEBAR -->
-      @if (showHistory) {
-
-        <aside class="qa-sidebar">
-
-          <!-- CURRENT DOCUMENT -->
-          <div class="side-card">
-
-            <div class="side-card-header">
-              <span>
-                Current Document
-              </span>
-            </div>
-
-
-            @if (selectedDocument) {
-
-              <div class="document-preview">
-
-                <div class="large-file-icon">
-                  PDF
-                </div>
-
-                <strong>
-                  {{ selectedDocument.name }}
-                </strong>
-
-                <span>
-                  {{ selectedDocument.type }}
-                </span>
-
-                <div class="document-meta">
-
-                  <span>
-                    18 pages
-                  </span>
-
-                  <span>
-                    2.4 MB
-                  </span>
-
-                </div>
-
-              </div>
-
-            } @else {
-
-              <app-empty-state
-                title="No document selected"
-                message="Select a document to view its details."
-              />
-
-            }
-
-          </div>
-
-
-          <!-- ANSWER QUALITY -->
-          <div class="side-card">
-
-            <div class="side-card-header">
-
-              <span>
-                Answer Quality
-              </span>
-
-              <span class="quality-score">
-                94%
-              </span>
-
-            </div>
-
-
-            <div class="quality-bar">
-              <div class="quality-fill"></div>
-            </div>
-
-
-            <p class="quality-text">
-              High confidence. The answer is supported
-              by indexed document content.
-            </p>
-
-
-            <div class="quality-item">
-              <span>✓</span>
-              Source grounded
-            </div>
-
-            <div class="quality-item">
-              <span>✓</span>
-              Citation available
-            </div>
-
-            <div class="quality-item">
-              <span>✓</span>
-              Document context active
-            </div>
-
-          </div>
-
-
-          <!-- RECENT QUESTIONS -->
-          <div class="side-card">
-
-            <div class="side-card-header">
-
-              <span>
-                Recent Questions
-              </span>
-
-              <button
-                type="button"
-                (click)="clearConversation()"
-              >
-                Clear
-              </button>
-
-            </div>
-
-
-            <div class="recent-question">
-
-              <span>Q</span>
-
-              <p>
-                What are the payment terms?
-              </p>
-
-            </div>
-
-
-            <div class="recent-question">
-
-              <span>Q</span>
-
-              <p>
-                What is the contract value?
-              </p>
-
-            </div>
-
-
-            <div class="recent-question">
-
-              <span>Q</span>
-
-              <p>
-                When does the contract expire?
-              </p>
-
-            </div>
-
-          </div>
-
-
-          <!-- DISCLAIMER -->
-          <div class="disclaimer">
-
-            <div class="disclaimer-icon">
-              i
-            </div>
-
-            <div>
-
-              <strong>
-                Grounded AI
-              </strong>
-
-              <p>
-                AI responses are based on indexed
-                workspace documents. Always verify
-                critical information against the source.
-              </p>
-
-            </div>
-
-          </div>
-
-        </aside>
-
-      }
-
+      </div>
     </div>
-
   }
 
 </div>

@@ -1,429 +1,252 @@
 <div class="documents-page">
-  <!-- CONTROL HEADER BAR -->
-  <div class="documents-header">
-    <div class="header-left">
-      <h1 class="header-title">Document Repository & Library</h1>
-      <p class="header-subtitle">
-        Browse, filter, search, and manage enterprise document assets and extraction metadata.
-      </p>
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">REPOSITORY & METADATA</span>
+      <h1>Document Repository</h1>
+      <p>Multi-tenant document store with versioning, pagination, column sorting, and bulk export capabilities.</p>
     </div>
 
     <div class="header-actions">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input
-          type="text"
-          [(ngModel)]="searchTerm"
-          placeholder="Search document name, ID, owner..."
-        />
-      </div>
-
-      <select [(ngModel)]="selectedType" class="select-filter">
-        <option>All Types</option>
-        <option>Supplier Contract</option>
-        <option>Purchase Invoice</option>
-        <option>Internal Policy</option>
-        <option>Compliance Report</option>
-      </select>
-
-      <select [(ngModel)]="selectedStatus" class="select-filter">
-        <option>All Status</option>
-        <option>Approved</option>
-        <option>Pending Review</option>
-        <option>Under Review</option>
-        <option>Processing</option>
-        <option>Draft</option>
-      </select>
-
-      <button class="btn-outline" (click)="clearFilters()">Clear Filters</button>
-      <button class="btn-outline" (click)="openExportModal()" title="Scoped Data Export (BRD FR-018)">
-        <span>↓</span> Export Scoped Data
+      <button type="button" class="btn-secondary" (click)="openExportModal()">
+        📤 Scoped Export
       </button>
-      <button class="btn-primary" routerLink="/intake">
-        <span>+</span> Ingest New Document
-      </button>
+      <a routerLink="/intake" class="btn-primary">
+        + Upload Document
+      </a>
     </div>
   </div>
 
-  <!-- TOP KPI STAT CARDS ROW (IndiHire Style) -->
-  <section class="stats-grid">
-    <!-- Card 1: Purple Theme (Total Documents) -->
-    <div class="stat-card theme-purple">
-      <div class="card-header-row">
-        <div class="card-icon-badge">🏠</div>
-        <span class="card-title">Total Repository Docs</span>
-      </div>
-      <div class="card-metric-row">
-        <span class="metric-val">1,248</span>
-      </div>
-      <div class="card-trend-row">
-        <span class="trend-badge positive">↑ 12.5% vs last month</span>
-      </div>
-      <div class="sparkline-container">
-        <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
-          <defs>
-            <linearGradient id="doc-grad-purple" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.35"/>
-              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M 0,38 Q 30,10 60,32 T 120,25 T 180,12 L 200,28 L 200,50 L 0,50 Z" fill="url(#doc-grad-purple)"/>
-          <path d="M 0,38 Q 30,10 60,32 T 120,25 T 180,12 L 200,28" fill="none" stroke="#8b5cf6" stroke-width="2.5"/>
-          <circle cx="0" cy="38" r="3" fill="#8b5cf6"/><circle cx="30" cy="20" r="3" fill="#8b5cf6"/><circle cx="60" cy="32" r="3" fill="#8b5cf6"/><circle cx="90" cy="18" r="3" fill="#8b5cf6"/><circle cx="120" cy="25" r="3" fill="#8b5cf6"/><circle cx="150" cy="15" r="3" fill="#8b5cf6"/><circle cx="180" cy="12" r="3" fill="#8b5cf6"/><circle cx="200" cy="28" r="3" fill="#8b5cf6"/>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Card 2: Green Theme (Approved & Archived) -->
-    <div class="stat-card theme-green">
-      <div class="card-header-row">
-        <div class="card-icon-badge">✓</div>
-        <span class="card-title">Approved & Archived</span>
-      </div>
-      <div class="card-metric-row">
-        <span class="metric-val">984</span>
-      </div>
-      <div class="card-trend-row">
-        <span class="trend-badge positive">↑ 16% approved rate</span>
-      </div>
-      <div class="sparkline-container">
-        <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
-          <defs>
-            <linearGradient id="doc-grad-green" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"/>
-              <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M 0,36 Q 30,28 60,18 T 120,30 T 180,10 L 200,20 L 200,50 L 0,50 Z" fill="url(#doc-grad-green)"/>
-          <path d="M 0,36 Q 30,28 60,18 T 120,30 T 180,10 L 200,20" fill="none" stroke="#10b981" stroke-width="2.5"/>
-          <circle cx="0" cy="36" r="3" fill="#10b981"/><circle cx="30" cy="28" r="3" fill="#10b981"/><circle cx="60" cy="18" r="3" fill="#10b981"/><circle cx="90" cy="22" r="3" fill="#10b981"/><circle cx="120" cy="30" r="3" fill="#10b981"/><circle cx="150" cy="16" r="3" fill="#10b981"/><circle cx="180" cy="10" r="3" fill="#10b981"/><circle cx="200" cy="20" r="3" fill="#10b981"/>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Card 3: Orange Theme (Pending Review HITL) -->
-    <div class="stat-card theme-orange">
-      <div class="card-header-row">
-        <div class="card-icon-badge">⏳</div>
-        <span class="card-title">Pending Review & HITL</span>
-      </div>
-      <div class="card-metric-row">
-        <span class="metric-val">186</span>
-      </div>
-      <div class="card-trend-row">
-        <span class="trend-badge positive">↑ 8% in queue</span>
-      </div>
-      <div class="sparkline-container">
-        <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
-          <defs>
-            <linearGradient id="doc-grad-orange" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#f97316" stop-opacity="0.35"/>
-              <stop offset="100%" stop-color="#f97316" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M 0,42 Q 30,24 60,32 T 120,28 T 180,12 L 200,22 L 200,50 L 0,50 Z" fill="url(#doc-grad-orange)"/>
-          <path d="M 0,42 Q 30,24 60,32 T 120,28 T 180,12 L 200,22" fill="none" stroke="#f97316" stroke-width="2.5"/>
-          <circle cx="0" cy="42" r="3" fill="#f97316"/><circle cx="30" cy="24" r="3" fill="#f97316"/><circle cx="60" cy="32" r="3" fill="#f97316"/><circle cx="90" cy="20" r="3" fill="#f97316"/><circle cx="120" cy="28" r="3" fill="#f97316"/><circle cx="150" cy="18" r="3" fill="#f97316"/><circle cx="180" cy="12" r="3" fill="#f97316"/><circle cx="200" cy="22" r="3" fill="#f97316"/>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Card 4: Blue Theme (Storage Utilization) -->
-    <div class="stat-card theme-blue">
-      <div class="card-header-row">
-        <div class="card-icon-badge">💾</div>
-        <span class="card-title">Storage Utilization</span>
-      </div>
-      <div class="card-metric-row">
-        <span class="metric-val">48.2 GB</span>
-      </div>
-      <div class="card-trend-row">
-        <span class="trend-badge positive">↑ 4.2 GB this month</span>
-      </div>
-      <div class="sparkline-container">
-        <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
-          <defs>
-            <linearGradient id="doc-grad-blue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.35"/>
-              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <path d="M 0,40 Q 30,22 60,35 T 120,20 T 180,14 L 200,24 L 200,50 L 0,50 Z" fill="url(#doc-grad-blue)"/>
-          <path d="M 0,40 Q 30,22 60,35 T 120,20 T 180,14 L 200,24" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
-          <circle cx="0" cy="40" r="3" fill="#3b82f6"/><circle cx="30" cy="22" r="3" fill="#3b82f6"/><circle cx="60" cy="35" r="3" fill="#3b82f6"/><circle cx="90" cy="26" r="3" fill="#3b82f6"/><circle cx="120" cy="20" r="3" fill="#3b82f6"/><circle cx="150" cy="17" r="3" fill="#3b82f6"/><circle cx="180" cy="14" r="3" fill="#3b82f6"/><circle cx="200" cy="24" r="3" fill="#3b82f6"/>
-        </svg>
-      </div>
-    </div>
-  </section>
-
-  <!-- CATEGORY TABS & VIEW MODE SWITCHER BAR -->
-  <div class="bar-controls">
-    <div class="category-pills">
+  <!-- CATEGORY TABS -->
+  <nav class="category-tabs">
+    @for (tab of categoryTabs; track tab) {
       <button
-        *ngFor="let tab of categoryTabs"
-        class="cat-pill"
+        type="button"
+        class="cat-tab-btn"
         [class.active]="selectedCategory === tab"
         (click)="setCategoryTab(tab)"
       >
         {{ tab }}
       </button>
+    }
+  </nav>
+
+  <!-- FILTERS & VIEW MODE BAR -->
+  <section class="filter-card">
+    <div class="search-box">
+      <span>⌕</span>
+      <input
+        type="text"
+        placeholder="Search documents by title, ID, type or owner..."
+        [(ngModel)]="searchTerm"
+      />
     </div>
 
-    <div class="view-mode-toggle">
+    <select [(ngModel)]="selectedType">
+      <option>All Types</option>
+      <option>Supplier Contract</option>
+      <option>Purchase Invoice</option>
+      <option>Internal Policy</option>
+    </select>
+
+    <select [(ngModel)]="selectedStatus">
+      <option>All Status</option>
+      <option>Approved/Published</option>
+      <option>Review</option>
+      <option>Pending approval</option>
+      <option>Quarantined</option>
+    </select>
+
+    <div class="view-toggle-buttons">
       <button
-        class="mode-btn"
+        type="button"
+        class="toggle-btn"
         [class.active]="viewMode === 'grid'"
         (click)="setViewMode('grid')"
-        title="Grid Card View"
+        title="Grid View"
       >
-        <span>▞</span> Grid
+        ❖ Grid
       </button>
       <button
-        class="mode-btn"
+        type="button"
+        class="toggle-btn"
         [class.active]="viewMode === 'table'"
         (click)="setViewMode('table')"
         title="Table View"
       >
-        <span>☰</span> Table
+        ☰ Table
       </button>
     </div>
-  </div>
 
-  <!-- LOADING / ERROR / EMPTY STATES -->
+    <button type="button" class="clear-button" (click)="clearFilters()">Clear</button>
+  </section>
+
+  <!-- BULK ACTIONS BAR (TASK 7E Item 1) -->
+  @if (selectedDocIds.length > 0) {
+    <div class="bulk-actions-bar">
+      <span><strong>{{ selectedDocIds.length }}</strong> document(s) selected:</span>
+      <div class="bulk-btns">
+        <button type="button" class="btn-bulk" (click)="bulkAction('Bulk Export')">📤 Bulk Export</button>
+        <button type="button" class="btn-bulk" (click)="bulkAction('Bulk Re-scan')">🔄 Bulk Re-scan</button>
+        <button type="button" class="btn-bulk danger" (click)="bulkAction('Bulk Archive')">🗑️ Bulk Archive</button>
+      </div>
+    </div>
+  }
+
+  <!-- CONTENT VIEW -->
   @if (isLoading()) {
-    <app-loading-state layout="cards" message="Loading document repository assets..."></app-loading-state>
+    <app-loading-state layout="cards" message="Loading versioned document repository..."></app-loading-state>
   } @else if (hasError()) {
-    <app-error-state
-      title="Unable to load documents"
-      message="We encountered an issue connecting to the document repository."
-      (retry)="retryLoad()"
-    ></app-error-state>
-  } @else if (filteredDocuments.length === 0) {
-    <app-empty-state
-      variant="documents"
-      title="No documents found"
-      message="No documents match your selected search terms and filters."
-      actionLabel="Clear All Filters"
-      (action)="clearFilters()"
-    ></app-empty-state>
+    <app-error-state (retry)="retryLoad()"></app-error-state>
   } @else {
-    <!-- GRID CARDS VIEW (IndiHire Style Cards) -->
+    <!-- GRID VIEW WITH WRAPPING FIX (TASK 7E Item 1) -->
     @if (viewMode === 'grid') {
-      <div class="documents-grid">
-        <div *ngFor="let doc of filteredDocuments" class="doc-card">
-          <!-- Card Top Bar -->
-          <div class="card-top">
-            <span class="type-tag">{{ doc.type }}</span>
-            <span
-              class="status-pill"
-              [class.approved]="doc.status === 'Approved'"
-              [class.pending]="doc.status === 'Pending Review'"
-              [class.review]="doc.status === 'Under Review'"
-              [class.processing]="doc.status === 'Processing'"
-              [class.draft]="doc.status === 'Draft'"
-            >
-              {{ doc.status }}
-            </span>
-          </div>
-
-          <!-- Document Main Info -->
-          <div class="doc-body">
-            <div class="doc-file-icon">PDF</div>
-            <div class="doc-title-box">
-              <span class="doc-id">{{ doc.id }}</span>
-              <h3 class="doc-name">{{ doc.name }}</h3>
-              <span class="doc-specs">{{ doc.pages }} Pages · {{ doc.size }}</span>
-            </div>
-          </div>
-
-          <!-- OCR Confidence Bar -->
-          <div class="confidence-box">
-            <div class="conf-label-row">
-              <span>OCR Confidence</span>
-              <strong>{{ doc.confidence }}%</strong>
-            </div>
-            <div class="conf-bar-bg">
-              <div
-                class="conf-bar-fill"
-                [style.width.%]="doc.confidence"
-                [class.high]="doc.confidence >= 90"
-                [class.med]="doc.confidence < 90 && doc.confidence >= 80"
-                [class.low]="doc.confidence < 80"
-              ></div>
-            </div>
-          </div>
-
-          <!-- Extracted Metadata Tags -->
-          <div class="meta-tags-row">
-            <span *ngFor="let tag of doc.extractedMetadata" class="meta-tag">{{ tag }}</span>
-          </div>
-
-          <!-- Card Footer -->
-          <div class="card-footer">
-            <div class="owner-info">
-              <div class="owner-avatar">{{ doc.ownerInitials }}</div>
-              <div class="owner-details">
-                <strong>{{ doc.owner }}</strong>
-                <span>{{ doc.updatedAt }}</span>
-              </div>
+      <div class="documents-grid-view">
+        @for (doc of paginatedDocuments; track doc.id) {
+          <div class="grid-doc-card" [class.selected]="isDocSelected(doc.id)">
+            <div class="card-header-bar">
+              <input type="checkbox" [checked]="isDocSelected(doc.id)" (change)="toggleSelectDoc(doc.id)" class="doc-chk" />
+              <span class="file-icon">PDF</span>
+              <app-status-badge [status]="doc.status"></app-status-badge>
             </div>
 
-            <a [routerLink]="['/documents', doc.id]" class="btn-card-action">
-              View Details ›
-            </a>
+            <div class="card-body">
+              <a [routerLink]="['/documents', doc.id]" class="grid-title-link" title="{{ doc.name }}">{{ doc.name }}</a>
+              <span class="doc-sub">{{ doc.id }} · {{ doc.type }}</span>
+            </div>
+
+            <!-- GRID TAG WRAPPING FIX (TASK 7E Item 1) -->
+            <div class="grid-tags-wrapper">
+              <span class="grid-tag">{{ doc.size }}</span>
+              <span class="grid-tag">{{ doc.pages }} pgs</span>
+              <span class="grid-tag">{{ doc.owner }}</span>
+            </div>
+
+            <div class="card-footer-bar">
+              <span class="updated-time">{{ doc.updatedAt }}</span>
+              <a [routerLink]="['/documents', doc.id]" class="btn-view-detail">View Detail →</a>
+            </div>
           </div>
-        </div>
+        }
       </div>
     }
 
-    <!-- TABLE VIEW -->
+    <!-- TABLE VIEW WITH COLUMN SORTING (TASK 7E Item 1) -->
     @if (viewMode === 'table') {
-      <div class="table-card-panel">
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Doc ID</th>
-                <th>Document Name</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Confidence</th>
-                <th>Owner</th>
-                <th>Updated</th>
-                <th>Size</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let doc of filteredDocuments">
-                <td><span class="font-bold text-mono">{{ doc.id }}</span></td>
+      <div class="table-wrapper">
+        <table class="repo-table">
+          <thead>
+            <tr>
+              <th class="chk-col"><input type="checkbox" [checked]="isAllPageSelected" (change)="toggleSelectAllPage()" /></th>
+              <th class="sortable" (click)="toggleSort('name')">
+                DOCUMENT TITLE {{ sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕' }}
+              </th>
+              <th>TYPE</th>
+              <th class="sortable" (click)="toggleSort('size')">
+                SIZE {{ sortField === 'size' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕' }}
+              </th>
+              <th class="sortable" (click)="toggleSort('updatedAt')">
+                UPDATED {{ sortField === 'updatedAt' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕' }}
+              </th>
+              <th class="sortable" (click)="toggleSort('status')">
+                STATUS {{ sortField === 'status' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕' }}
+              </th>
+              <th class="text-right">ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (doc of paginatedDocuments; track doc.id) {
+              <tr [class.selected-row]="isDocSelected(doc.id)">
+                <td class="chk-col"><input type="checkbox" [checked]="isDocSelected(doc.id)" (change)="toggleSelectDoc(doc.id)" /></td>
                 <td>
-                  <div class="table-name-cell">
-                    <span class="mini-pdf-icon">PDF</span>
-                    <strong>{{ doc.name }}</strong>
-                  </div>
+                  <a [routerLink]="['/documents', doc.id]" class="tbl-doc-title">{{ doc.name }}</a>
+                  <span class="tbl-doc-id">{{ doc.id }} · By {{ doc.owner }}</span>
                 </td>
-                <td>{{ doc.type }}</td>
-                <td>
-                  <span
-                    class="status-pill"
-                    [class.approved]="doc.status === 'Approved'"
-                    [class.pending]="doc.status === 'Pending Review'"
-                    [class.review]="doc.status === 'Under Review'"
-                    [class.processing]="doc.status === 'Processing'"
-                    [class.draft]="doc.status === 'Draft'"
-                  >
-                    {{ doc.status }}
-                  </span>
-                </td>
-                <td>
-                  <span class="pct-badge" [class.high]="doc.confidence >= 90" [class.med]="doc.confidence < 90 && doc.confidence >= 80" [class.low]="doc.confidence < 80">
-                    {{ doc.confidence }}%
-                  </span>
-                </td>
-                <td>
-                  <div class="table-user-cell">
-                    <span class="mini-avatar">{{ doc.ownerInitials }}</span>
-                    <span>{{ doc.owner }}</span>
-                  </div>
-                </td>
-                <td>{{ doc.updatedAt }}</td>
+                <td><span class="type-tag">{{ doc.type }}</span></td>
                 <td>{{ doc.size }}</td>
-                <td>
-                  <a [routerLink]="['/documents', doc.id]" class="btn-table-action">
-                    Open ›
-                  </a>
+                <td>{{ doc.updatedAt }}</td>
+                <td><app-status-badge [status]="doc.status"></app-status-badge></td>
+                <td class="text-right">
+                  <a [routerLink]="['/documents', doc.id]" class="tbl-action-btn">View Detail</a>
                 </td>
               </tr>
-            </tbody>
-          </table>
-        </div>
+            }
+          </tbody>
+        </table>
       </div>
+    }
+
+    <!-- SERVER-STYLE PAGINATION COMPONENT (TASK 7E Item 1) -->
+    <div class="pagination-footer">
+      <span class="page-info">
+        Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> - <strong>{{ paginatedEndCount }}</strong> of <strong>{{ filteredDocuments.length }}</strong> documents
+      </span>
+
+      <div class="pagination-controls">
+        <button type="button" class="btn-page-step" (click)="prevPage()" [disabled]="currentPage <= 1">‹ Previous</button>
+        <span class="current-page-num">Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
+        <button type="button" class="btn-page-step" (click)="nextPage()" [disabled]="currentPage >= totalPages">Next ›</button>
+      </div>
+    </div>
+
+    @if (filteredDocuments.length === 0) {
+      <app-empty-state
+        variant="documents"
+        title="No documents found"
+        message="No documents match your query or active filters."
+        actionLabel="Clear Filters"
+        (action)="clearFilters()"
+      ></app-empty-state>
     }
   }
 
-  <!-- SCOPED EXPORT MODAL (BRD FR-018) -->
+  <!-- EXPORT MODAL WITH FILTER MIRRORING & AUDIT NOTE (TASK 7E Item 2) -->
   @if (showExportModal) {
-    <div class="modal-backdrop" (click)="closeExportModal()" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000;">
-      <div class="export-modal" (click)="$event.stopPropagation()" style="background: #ffffff; border-radius: 12px; width: 460px; max-width: 90%; padding: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <div>
-            <span style="font-size: 10px; font-weight: 800; color: #6366f1; letter-spacing: 0.06em; display: block;">COMPLIANCE EXPORT STUDIO</span>
-            <h3 style="margin: 2px 0 0; font-size: 16px; font-weight: 700; color: #0f172a;">Export Scoped Document Data</h3>
-          </div>
-          <button type="button" (click)="closeExportModal()" style="border: none; background: #f1f5f9; width: 28px; height: 28px; border-radius: 50%; font-size: 16px; cursor: pointer;">×</button>
-        </div>
-
-        <p style="font-size: 12.5px; color: #64748b; margin: 0 0 18px;">
-          Download structured extraction datasets across {{ filteredDocuments.length }} documents subject to role-based compliance policies (FR-018).
-        </p>
-
-        <!-- FORMAT SELECTOR -->
-        <div style="margin-bottom: 16px;">
-          <label style="display: block; font-size: 11.5px; font-weight: 700; color: #1e293b; margin-bottom: 6px;">
-            Export File Format
-          </label>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-            <button
-              type="button"
-              [style.background]="exportFormat === 'CSV' ? '#1e293b' : '#f8fafc'"
-              [style.color]="exportFormat === 'CSV' ? '#ffffff' : '#334155'"
-              style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;"
-              (click)="exportFormat = 'CSV'"
-            >
-              CSV Sheet
-            </button>
-            <button
-              type="button"
-              [style.background]="exportFormat === 'JSON' ? '#1e293b' : '#f8fafc'"
-              [style.color]="exportFormat === 'JSON' ? '#ffffff' : '#334155'"
-              style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;"
-              (click)="exportFormat = 'JSON'"
-            >
-              JSON Schema
-            </button>
-            <button
-              type="button"
-              [style.background]="exportFormat === 'PDF' ? '#1e293b' : '#f8fafc'"
-              [style.color]="exportFormat === 'PDF' ? '#ffffff' : '#334155'"
-              style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;"
-              (click)="exportFormat = 'PDF'"
-            >
-              Audit PDF
-            </button>
+    <div class="modal-backdrop" (click)="closeExportModal()">
+      <div class="export-modal-card" (click)="$event.stopPropagation()">
+        <h3>📤 Scoped Export Configuration</h3>
+        
+        <!-- ACTIVE FILTER SCOPE MIRRORING -->
+        <div class="filter-mirroring-box">
+          <span class="mirror-title">Active Filter Scope Mirrored:</span>
+          <div class="mirror-chips">
+            <span class="m-chip">Category: {{ selectedCategory }}</span>
+            <span class="m-chip">Type: {{ selectedType }}</span>
+            <span class="m-chip">Status: {{ selectedStatus }}</span>
+            <span class="m-chip highlight">{{ filteredDocuments.length }} Documents Included</span>
           </div>
         </div>
 
-        <!-- PII MASKING TOGGLE -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; margin-bottom: 20px;">
-          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-            <input type="checkbox" [(ngModel)]="maskPIIData" style="margin-top: 3px; accent-color: #4f46e5; width: 16px; height: 16px;" />
-            <div>
-              <strong style="display: block; font-size: 12.5px; color: #0f172a;">Enable PII & Financial Masking (Mandatory for Auditors)</strong>
-              <span style="font-size: 11px; color: #64748b; line-height: 1.4; display: block; margin-top: 2px;">
-                Masks bank account numbers, tax identification codes, and executive mobile contacts according to Reader/Auditor privacy roles.
-              </span>
-            </div>
+        <div class="form-group">
+          <label>Export Format:</label>
+          <select [(ngModel)]="exportFormat" class="modal-select">
+            <option value="CSV">CSV Spreadsheet (Metadata & Field Values)</option>
+            <option value="JSON">JSON Schema Payload & OCR Bounding Spans</option>
+            <option value="PDF">PDF Renditions Package</option>
+          </select>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" [(ngModel)]="maskPIIData" />
+            Enforce Security PII & Sensitive Field Masking
           </label>
         </div>
 
-        <!-- MODAL ACTIONS -->
-        <div style="display: flex; justify-content: flex-end; gap: 10px;">
-          <button type="button" (click)="closeExportModal()" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;">
-            Cancel
-          </button>
-          <button type="button" (click)="executeScopedExport()" style="background: #4f46e5; color: #ffffff; border: none; padding: 8px 18px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer;">
-            Generate & Download Export
-          </button>
+        <!-- AUDIT NOTE (TASK 7E Item 2) -->
+        <div class="audit-notice-card">
+          <span class="notice-icon">⚠️</span>
+          <p><strong>Audit Log Notice:</strong> This export operation will be logged with your user identity, timestamp, filter constraints, and target format.</p>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeExportModal()">Cancel</button>
+          <button type="button" class="btn-primary" (click)="executeScopedExport()">Generate & Download Export</button>
         </div>
       </div>
     </div>
   }
 
-  <!-- EXPORT SUCCESS TOAST -->
   @if (exportSuccessToast) {
-    <div style="position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: #34d399; border-left: 4px solid #10b981; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); z-index: 1000;">
-      {{ exportSuccessToast }}
-    </div>
+    <div class="toast-popup"><span>{{ exportSuccessToast }}</span></div>
   }
 </div>
