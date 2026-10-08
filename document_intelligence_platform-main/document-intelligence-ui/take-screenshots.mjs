@@ -58,14 +58,11 @@ async function run() {
   // 3. Log in as Admin via UI
   console.log('Logging in as Admin via UI...');
   await page.goto('http://localhost:4200/login', { waitUntil: 'networkidle2' });
-  await page.waitForSelector('.pill');
-  await page.click('.pill');
-  await new Promise((r) => setTimeout(r, 400));
-  await page.click('.btn-submit');
+  await page.waitForSelector('.pill-btn');
+  await page.click('.pill-btn'); // Automatically authenticates and navigates to /dashboard
   
-  // Wait for redirect to dashboard
-  await page.waitForNavigation({ waitUntil: 'networkidle2' });
-  await new Promise((r) => setTimeout(r, 2000));
+  // Wait for SPA router transition to dashboard
+  await new Promise((r) => setTimeout(r, 2500));
 
   // 4. Capture Dashboard
   console.log('Capturing 03_dashboard...');
