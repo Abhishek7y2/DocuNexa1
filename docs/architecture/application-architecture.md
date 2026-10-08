@@ -28,7 +28,7 @@ document_intelligence_platform-main/
         │   │   ├── shared/                # Shared Components, Pipes, & UI Directives
         │   │   ├── app.component.ts       # Root Application Shell & Navigation Rail
         │   │   └── app.routes.ts          # Declarative Typed Route Configurations
-        │   └── styles.scss                # IndiHire Design System & CSS Token Library
+        │   └── styles.scss                # DocuNexa Enterprise Design System & CSS Token Library
 ```
 
 ---

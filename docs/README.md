@@ -19,7 +19,7 @@ Welcome to the central documentation index for **DocuNexa (Document Intelligence
 * [System Architecture](architecture/system-architecture.md) — High-level enterprise topologies, microservices, and ingestion queues.
 * [Application Architecture](architecture/application-architecture.md) — Monorepo design, state isolation, and component hierarchy.
 * [Backend Architecture](architecture/backend-architecture.md) — Node.js service architecture, controllers, and domain services.
-* [Frontend Architecture](architecture/frontend-architecture.md) — Angular standalone architecture, signals, and IndiHire styling design tokens.
+* [Frontend Architecture](architecture/frontend-architecture.md) — Angular standalone architecture, signals, and DocuNexa enterprise styling design tokens.
 * [Mobile Architecture](architecture/mobile-architecture.md) — Native iOS Swift architectural blueprints, Combine/MVVM patterns.
 * [Admin Architecture](architecture/admin-architecture.md) — Multi-tenant organization control, RBAC matrices, and policy management.
 * [Database Architecture](architecture/database-architecture.md) — PostgreSQL relational schema, partitioning, and audit logging.
@@ -32,7 +32,7 @@ Welcome to the central documentation index for **DocuNexa (Document Intelligence
 ### 3. Frontend Application System (`frontend/`)
 * [Web Application Specification](frontend/web-application.md) — Angular single-page web portal specifications and view models.
 * [Admin Application Specification](frontend/admin-application.md) — Governance portal, tenant management, and integration studio.
-* [UI Architecture & Design Tokens](frontend/ui-architecture.md) — IndiHire aesthetics, glassmorphism, responsive breakpoints, and SCSS tokens.
+* [UI Architecture & Design Tokens](frontend/ui-architecture.md) — DocuNexa enterprise aesthetics, responsive breakpoints, and SCSS tokens.
 * [Routing & Navigation](frontend/routing.md) — Route tables, auth guards, parameter resolvers, and SSR server routing.
 * [Component Catalog](frontend/components.md) — Deep-dive into all 14 standalone screen components.
 * [Frontend Services](frontend/services.md) — AuthService, DocumentService, UiState signals, and API gateways.

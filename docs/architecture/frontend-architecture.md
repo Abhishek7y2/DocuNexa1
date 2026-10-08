@@ -3,7 +3,7 @@
 ## Architecture Principles
 * **Standalone Architecture**: 100% modular standalone components with zero legacy `NgModule` overhead.
 * **Reactive Signal State**: Leveraging Angular `signal()`, `computed()`, and `effect()` for fine-grained reactivity, lightning-fast rendering, and predictable state transitions.
-* **IndiHire Design System**: Custom enterprise design system inspired by IndiHire aesthetics: sleek dark-mode accents, glassmorphic cards, polished gradients, and 8px grid alignment.
+* **DocuNexa Enterprise Design System**: Custom enterprise design system tailored for high-density B2B operations: high-contrast accents, elevated cards, polished typography, and 8px spatial grid alignment.
 * **Synchronized Bounding Box Canvas**: Bidirectional linking between SVG/HTML5 canvas document previews and metadata form fields.
 
 ```mermaid

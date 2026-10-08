@@ -90,9 +90,9 @@ On **07 October 2026**, the web frontend implementation for the **DocNexa / DocI
 * **Component Location:** `src/app/features/compare/`
 * **Files:** `compare-studio.ts`, `compare-studio.html`, `compare-studio.scss`
 * **Architectural & Design System Highlights:**
-  - **Light Enterprise & IndiHire Design Alignment:** Converted dark background palette to high-contrast enterprise design (`#f8fafc` canvas, `#ffffff` cards, `#e2e8f0` borders, `#4f46e5` primary indigo accents).
+  - **Light Enterprise Design System Alignment:** Converted dark background palette to high-contrast enterprise design (`#f8fafc` canvas, `#ffffff` cards, `#e2e8f0` borders, `#4f46e5` primary indigo accents).
   - **Dynamic Interactive Version Selector:** Full bidirectional comparison bar comparing Baseline (`v1.0`) against Amendment (`v2.0` or draft `v1.1`) with instant version swap (`⇄`) and author attribution chips.
-  - **4 Compact IndiHire-Style KPI Stat Cards:**
+  - **4 Compact High-Density KPI Stat Cards:**
     - 🟡 **Total Deltas (Amber Border-Top):** `7 Changes` (3 Clauses · 4 Fields)
     - 🟣 **Modified Clauses (Indigo Border-Top):** `2 Clauses` (Delivery SLA & Liability Limits)
     - 🔴 **High Risk Shifts (Red Border-Top):** `1 Critical Flag` (Uncapped Gross Negligence)
