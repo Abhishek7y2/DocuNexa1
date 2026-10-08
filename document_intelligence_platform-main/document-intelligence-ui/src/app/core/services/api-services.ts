@@ -434,11 +434,15 @@ export class MockReportService implements IReportService {
         { name: 'Purchase Invoices', activeIngestion: 86, extractedFields: 912, approvedDocs: 74, archivedCount: 620, accuracy: 82 },
         { name: 'Internal Policies', activeIngestion: 34, extractedFields: 480, approvedDocs: 30, archivedCount: 310, accuracy: 76 },
         { name: 'Compliance Reports', activeIngestion: 28, extractedFields: 390, approvedDocs: 24, archivedCount: 210, accuracy: 71 },
+        { name: 'Financial Statements', activeIngestion: 19, extractedFields: 290, approvedDocs: 16, archivedCount: 180, accuracy: 68 },
+        { name: 'HR Agreements', activeIngestion: 15, extractedFields: 210, approvedDocs: 12, archivedCount: 140, accuracy: 65 },
       ],
       reviewerRankings: [
         { rank: 1, name: 'Abhishek Yadav', initials: 'AY', assignedQueue: 48, verifiedCount: 340, accuracyRate: 98, targetAchieved: 96, avatarBg: '#4f46e5' },
         { rank: 2, name: 'Rahul Sharma', initials: 'RS', assignedQueue: 36, verifiedCount: 290, accuracyRate: 95, targetAchieved: 90, avatarBg: '#2563eb' },
         { rank: 3, name: 'Priya Mehta', initials: 'PM', assignedQueue: 28, verifiedCount: 240, accuracyRate: 92, targetAchieved: 88, avatarBg: '#7c3aed' },
+        { rank: 4, name: 'Neha Verma', initials: 'NV', assignedQueue: 22, verifiedCount: 180, accuracyRate: 88, targetAchieved: 82, avatarBg: '#0d9488' },
+        { rank: 5, name: 'Arjun Kapoor', initials: 'AK', assignedQueue: 18, verifiedCount: 140, accuracyRate: 84, targetAchieved: 78, avatarBg: '#ea580c' },
       ],
       pipelineStages: [
         { id: 1, name: 'Ingestion Intake', count: 16 },

@@ -167,7 +167,31 @@ export class Dashboard implements OnInit, OnDestroy {
     this.selectedTab = tab;
   }
 
+  currentDateStr = 'Oct 07, 2026';
+
   drillDown(targetRoute: string, queryParams: Record<string, string>): void {
     this.router.navigate([targetRoute], { queryParams });
+  }
+
+  filterByCategory(cat: string): void {
+    this.router.navigate(['/documents'], { queryParams: { category: cat } });
+  }
+
+  onSearchSubmit(): void {
+    if (this.searchQuery.trim()) {
+      this.router.navigate(['/documents'], { queryParams: { q: this.searchQuery.trim() } });
+    }
+  }
+
+  getAccuracyBarColor(acc: number): string {
+    if (acc >= 80) return '#10b981';
+    if (acc >= 70) return '#f59e0b';
+    return '#6366f1';
+  }
+
+  getTargetColorClass(target: number): string {
+    if (target >= 90) return 'target-green';
+    if (target >= 80) return 'target-amber';
+    return 'target-red';
   }
 }
