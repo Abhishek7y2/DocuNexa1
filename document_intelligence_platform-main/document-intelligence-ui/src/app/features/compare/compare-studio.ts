@@ -24,6 +24,7 @@ export interface ClauseDiff {
   afterSummary: string;
   plainEnglishImpact: string;
   legalRecommendation: string;
+  fallbackClause?: string;
   pageCitationV1: string;
   pageCitationV2: string;
   riskImpact: 'High' | 'Medium' | 'Low' | 'None';
@@ -34,6 +35,7 @@ export interface ClauseDiff {
   v2Chunks: DiffChunk[];
   unifiedChunks: DiffChunk[];
 }
+
 
 export interface FieldDiff {
   fieldKey: string;
@@ -82,12 +84,13 @@ export class CompareStudio implements OnInit {
   selectedV2 = 'v2.0';
 
   // View Level Tabs
-  viewTab: 'clauses' | 'fields' | 'text' | 'audit' = 'clauses';
+  viewTab: 'studio' | 'matrix' | 'fields' | 'text' | 'audit' = 'studio';
   diffViewMode: 'split' | 'unified' = 'split';
 
-  activeFilter: 'all' | 'changed' | 'financial' | 'compliance' | 'highRisk' = 'changed';
+  activeFilter: 'all' | 'changed' | 'financial' | 'compliance' | 'highRisk' = 'all';
   searchQuery = '';
-  selectedClauseId: string | null = null;
+  selectedClauseIndex = 0;
+  selectedClauseId: string | null = 'CL-1';
   isLoading = signal(true);
   hasError = signal(false);
   errorVariant = signal<ErrorVariant>('default');
@@ -113,7 +116,7 @@ export class CompareStudio implements OnInit {
       v2Value: '₹ 48,50,000.00', 
       status: 'Modified', 
       varianceImpact: '+₹ 3,50,000 (+7.78% Scope Addendum)',
-      plainMeaning: 'Contract commercial cap increased by ₹ 3.5 Lakhs due to 추가 sensor calibration deliverables.',
+      plainMeaning: 'Contract commercial cap increased by ₹ 3.5 Lakhs due to sensor calibration deliverables.',
       reviewed: true
     },
     { 
@@ -165,6 +168,12 @@ export class CompareStudio implements OnInit {
     },
   ];
 
+  get activeClause(): ClauseDiff | null {
+    const list = this.filteredClauses;
+    if (list.length === 0) return null;
+    return list[this.selectedClauseIndex] || list[0];
+  }
+
   get highRiskCount(): number {
     return this.clauses.filter((c) => c.riskImpact === 'High').length;
   }
@@ -188,6 +197,56 @@ export class CompareStudio implements OnInit {
   get reviewedClausesCount(): number {
     return this.clauses.filter((c) => c.status !== 'pending').length;
   }
+
+  get progressPercent(): number {
+    if (this.clauses.length === 0) return 0;
+    return Math.round((this.reviewedClausesCount / this.clauses.length) * 100);
+  }
+
+  selectClauseIndex(index: number): void {
+    if (index >= 0 && index < this.filteredClauses.length) {
+      this.selectedClauseIndex = index;
+      const clause = this.filteredClauses[index];
+      if (clause) {
+        this.selectedClauseId = clause.id;
+      }
+    }
+  }
+
+  openInStudio(index: number): void {
+    this.viewTab = 'studio';
+    this.selectClauseIndex(index);
+  }
+
+  openClauseInStudio(clauseId: string): void {
+    const idx = this.filteredClauses.findIndex((c) => c.id === clauseId);
+    if (idx !== -1) {
+      this.openInStudio(idx);
+    } else {
+      this.viewTab = 'studio';
+      this.selectedClauseId = clauseId;
+    }
+  }
+
+  nextClause(): void {
+    if (this.selectedClauseIndex < this.filteredClauses.length - 1) {
+      this.selectClauseIndex(this.selectedClauseIndex + 1);
+    }
+  }
+
+  prevClause(): void {
+    if (this.selectedClauseIndex > 0) {
+      this.selectClauseIndex(this.selectedClauseIndex - 1);
+    }
+  }
+
+  copyFallback(clause: ClauseDiff): void {
+    if (clause.fallbackClause) {
+      navigator.clipboard?.writeText(clause.fallbackClause);
+      this.showToast('Copied AI legal fallback clause to clipboard!');
+    }
+  }
+
 
   onVersionChange(): void {
     const v1 = this.availableVersions.find((v) => v.value === this.selectedV1);
@@ -257,6 +316,7 @@ export class CompareStudio implements OnInit {
             afterSummary: 'Delivery in 30 days from purchase order receipt (priority dispatch + live tracking)',
             plainEnglishImpact: 'Vendor delivery turnaround is accelerated by 15 days, with mandatory live dispatch tracking.',
             legalRecommendation: 'Commercial terms are favorable to Company. Approve without reservation.',
+            fallbackClause: 'Supplier shall use reasonable commercial efforts to expedite delivery within 30 days of purchase order confirmation; provided that delivery shall not exceed 45 days without prior written notice.',
             version1Text: 'Supplier shall supply precision calibration sensor units within 45 days of purchase order receipt with standard shipping.',
             version2Text: 'Supplier shall supply precision calibration sensor units within 30 days of purchase order receipt with priority dispatch and live tracking.',
             pageCitationV1: 'v1.0 Page 2, Para 4',
@@ -290,6 +350,7 @@ export class CompareStudio implements OnInit {
             afterSummary: 'Liability is UNCAPPED for gross negligence, confidentiality breach, or willful misconduct',
             plainEnglishImpact: 'CRITICAL SHIFT: The safety cap limiting liability to 100% of contract value has been eliminated. The company is now exposed to unlimited financial liability.',
             legalRecommendation: '🚨 HIGH RISK: Reject this clause in current form. Propose a balanced mutual liability sub-cap (e.g. 2x contract value) before signing.',
+            fallbackClause: 'Total aggregate liability of either party under this agreement, including for gross negligence or confidentiality breach, shall in no event exceed two (2) times the total contract consideration paid in the preceding twelve (12) months.',
             version1Text: 'Total aggregate liability of either party under this agreement shall be capped strictly at 100% of the total contract value paid.',
             version2Text: 'Total aggregate liability shall be uncapped for any direct gross negligence, confidentiality breach, or willful misconduct.',
             pageCitationV1: 'v1.0 Page 5, Para 2',
@@ -325,6 +386,7 @@ export class CompareStudio implements OnInit {
             afterSummary: 'Contract auto-renews for 12 months unless 60 days advance written notice is served',
             plainEnglishImpact: 'Evergreen renewal mechanism introduced. If the team forgets to send notice 60 days prior to year-end, the agreement automatically binds company for another 12 months.',
             legalRecommendation: 'Acceptable standard clause. Add an automated calendar reminder 75 days before anniversary to evaluate vendor performance.',
+            fallbackClause: 'This agreement may be renewed for successive 12-month terms solely upon mutual written agreement signed by authorized representatives at least 30 calendar days prior to term expiration.',
             version1Text: '[No clause present in baseline version. Standard expiration was governed by general contract duration of 12 months.]',
             version2Text: 'This agreement shall automatically renew for successive 12-month terms unless either party serves written notice at least 60 calendar days prior to expiration.',
             pageCitationV1: 'v1.0 Page 8, Para 1',
@@ -354,6 +416,7 @@ export class CompareStudio implements OnInit {
             afterSummary: 'Breach notification within 24 hours of suspected discovery + 5-day forensic root-cause report',
             plainEnglishImpact: 'Notification window tightened by 66% (from 72h down to 24h), and covers even suspected breaches.',
             legalRecommendation: 'Aligns with modern European GDPR standards. Ensure IT Security Operations team is prepared for 24-hour escalation.',
+            fallbackClause: 'Vendor shall notify Customer in writing within 48 hours of confirmed verification of any unauthorized data security incident and deliver root-cause analysis within 7 business days.',
             version1Text: 'Vendor shall notify Customer of any confirmed data breach incident within 72 hours of verification.',
             version2Text: 'Vendor shall notify Customer of any suspected or confirmed data breach incident within 24 hours of discovery and submit root-cause forensics within 5 business days.',
             pageCitationV1: 'v1.0 Page 11, Para 2',
