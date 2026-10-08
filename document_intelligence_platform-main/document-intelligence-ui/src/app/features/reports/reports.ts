@@ -26,7 +26,7 @@ export interface AuditMatrixRow {
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LoadingState, ErrorState, EmptyState],
+  imports: [CommonModule, FormsModule, LoadingState, ErrorState],
   template: `
     <div class="reports-page-container">
       <!-- CONTROL HEADER -->
