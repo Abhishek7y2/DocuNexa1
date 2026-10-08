@@ -32,6 +32,12 @@ export class VerifyEmail implements OnInit, OnDestroy {
   private timerInterval: any = null;
   demoOtpCode = '742918';
 
+  // Lockout & Expiry States
+  otpAttempts = 0;
+  isOtpLockedOut = false;
+  lockoutTimeLeft = 0;
+  private lockoutTimer: any = null;
+
   // MFA Authenticator Modal toggle
   showAuthenticatorModal = false;
 
@@ -66,6 +72,9 @@ export class VerifyEmail implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.clearResendTimer();
+    if (this.lockoutTimer) {
+      clearInterval(this.lockoutTimer);
+    }
   }
 
   focusFirstOtp(): void {
@@ -138,6 +147,7 @@ export class VerifyEmail implements OnInit, OnDestroy {
   }
 
   onOtpInput(event: Event, index: number): void {
+    if (this.isOtpLockedOut) return;
     const input = event.target as HTMLInputElement;
     const value = input.value;
 
@@ -167,6 +177,7 @@ export class VerifyEmail implements OnInit, OnDestroy {
   }
 
   onOtpKeyDown(event: KeyboardEvent, index: number): void {
+    if (this.isOtpLockedOut) return;
     // Handle backspace navigation
     if (event.key === 'Backspace') {
       if (!this.otpDigits[index] && index > 0) {
@@ -193,6 +204,7 @@ export class VerifyEmail implements OnInit, OnDestroy {
   }
 
   onOtpPaste(event: ClipboardEvent): void {
+    if (this.isOtpLockedOut) return;
     event.preventDefault();
     const pastedData = event.clipboardData?.getData('text') || '';
     const cleanDigits = pastedData.replace(/\D/g, '').slice(0, 6);
@@ -214,6 +226,7 @@ export class VerifyEmail implements OnInit, OnDestroy {
   }
 
   fillDemoOtp(): void {
+    if (this.isOtpLockedOut) return;
     for (let i = 0; i < 6; i++) {
       this.otpDigits[i] = this.demoOtpCode[i] || '';
     }
@@ -243,7 +256,7 @@ export class VerifyEmail implements OnInit, OnDestroy {
   }
 
   resendOtp(): void {
-    if (!this.canResend) return;
+    if (!this.canResend || this.isOtpLockedOut) return;
 
     this.otpDigits = ['', '', '', '', '', ''];
     this.otpError = null;
@@ -252,6 +265,8 @@ export class VerifyEmail implements OnInit, OnDestroy {
   }
 
   verifyOtp(): void {
+    if (this.isOtpLockedOut) return;
+
     if (this.fullOtp.length < 6) {
       this.otpError = 'Please enter the complete 6-digit verification code.';
       this.cdr.markForCheck();
@@ -261,12 +276,29 @@ export class VerifyEmail implements OnInit, OnDestroy {
     this.otpError = null;
 
     if (this.fullOtp === this.demoOtpCode || /^\d{6}$/.test(this.fullOtp)) {
-      // Authenticate session so authGuard allows access to dashboard
+      this.otpAttempts = 0;
       this.authService.loginByEmail(this.email);
-      // Direct navigation to Dashboard upon verification
       this.router.navigate(['/dashboard']);
     } else {
-      this.otpError = 'Invalid verification code. Please check and try again.';
+      this.otpAttempts++;
+      if (this.otpAttempts >= 5) {
+        this.isOtpLockedOut = true;
+        this.lockoutTimeLeft = 60;
+        this.otpError = 'Maximum OTP verification attempts exceeded (5 failed tries). Locked out for 60 seconds.';
+
+        this.lockoutTimer = setInterval(() => {
+          this.lockoutTimeLeft--;
+          if (this.lockoutTimeLeft <= 0) {
+            clearInterval(this.lockoutTimer);
+            this.isOtpLockedOut = false;
+            this.otpAttempts = 0;
+            this.otpError = null;
+          }
+          this.cdr.markForCheck();
+        }, 1000);
+      } else {
+        this.otpError = `Invalid verification code. Attempt ${this.otpAttempts} of 5.`;
+      }
       this.cdr.markForCheck();
     }
   }

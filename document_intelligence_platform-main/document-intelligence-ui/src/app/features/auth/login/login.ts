@@ -1,17 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { EmailValidator, PasswordValidator } from '../../../core/validators';
+import { DEMO_ROLES, Role } from '../../../core/models/roles';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login {
+export class Login implements OnInit, OnDestroy {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   email = '';
   password = '';
   rememberMe = false;
@@ -30,19 +36,44 @@ export class Login {
   isLoading = false;
   errorMessage = '';
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly router: Router,
-  ) {}
+  // Security & Connectivity States (BRD Section 13)
+  demoRoles = DEMO_ROLES;
+  failedAttempts = 0;
+  isLockedOut = false;
+  lockoutSecondsLeft = 0;
+  private lockoutInterval: any;
 
-  /**
-   * Realtime/Blur email validation.
-   */
+  isRateLimited = false;
+  isOffline = false;
+
+  ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.isOffline = !navigator.onLine;
+      window.addEventListener('online', this.updateOnlineStatus);
+      window.addEventListener('offline', this.updateOnlineStatus);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      window.removeEventListener('online', this.updateOnlineStatus);
+      window.removeEventListener('offline', this.updateOnlineStatus);
+    }
+    if (this.lockoutInterval) {
+      clearInterval(this.lockoutInterval);
+    }
+  }
+
+  private updateOnlineStatus = (): void => {
+    if (isPlatformBrowser(this.platformId)) {
+      this.isOffline = !navigator.onLine;
+    }
+  };
+
   validateEmail(isRealtime = false): boolean {
     if (isRealtime && !this.emailTouched && !this.isSubmitted) {
       return true;
     }
-
     const result = EmailValidator.validate(this.email);
     this.emailError = result.isValid ? null : result.error;
     this.emailValid = result.isValid;
@@ -60,14 +91,10 @@ export class Login {
     this.validateEmail(false);
   }
 
-  /**
-   * Realtime/Blur password validation.
-   */
   validatePassword(isRealtime = false): boolean {
     if (isRealtime && !this.passwordTouched && !this.isSubmitted) {
       return true;
     }
-
     const result = PasswordValidator.validateLoginPassword(this.password);
     this.passwordError = result.isValid ? null : result.error;
     this.passwordValid = result.isValid;
@@ -85,12 +112,9 @@ export class Login {
     this.validatePassword(false);
   }
 
-  /**
-   * Enterprise-grade submit validation and login handler.
-   */
   login(): void {
-    if (this.isLoading) {
-      return; // Prevent accidental double submission
+    if (this.isLoading || this.isLockedOut || this.isOffline) {
+      return;
     }
 
     this.isSubmitted = true;
@@ -106,27 +130,54 @@ export class Login {
     }
 
     this.isLoading = true;
-    const normalizedEmail = EmailValidator.normalize(this.email);
 
     setTimeout(() => {
-      const success = this.authService.login(
-        normalizedEmail,
-        this.password,
-        this.rememberMe,
-      );
-
+      const success = this.authService.login(this.email, this.password, this.rememberMe);
       this.isLoading = false;
 
       if (success) {
+        this.failedAttempts = 0;
         this.router.navigate(['/dashboard']);
       } else {
-        // Generic enterprise security message: never reveal whether email exists
-        this.errorMessage = 'Invalid email or password. Please verify your credentials and try again.';
+        this.failedAttempts++;
+
+        if (this.failedAttempts >= 5) {
+          this.triggerLockout();
+        } else {
+          this.errorMessage = `Invalid credentials. Attempt ${this.failedAttempts} of 5 before account lockout.`;
+        }
       }
     }, 600);
   }
 
+  private triggerLockout(): void {
+    this.isLockedOut = true;
+    this.lockoutSecondsLeft = 60; // 60s lockout
+    this.errorMessage = 'Account locked due to 5 consecutive failed login attempts.';
+
+    if (this.lockoutInterval) {
+      clearInterval(this.lockoutInterval);
+    }
+
+    this.lockoutInterval = setInterval(() => {
+      this.lockoutSecondsLeft--;
+      if (this.lockoutSecondsLeft <= 0) {
+        clearInterval(this.lockoutInterval);
+        this.isLockedOut = false;
+        this.failedAttempts = 0;
+        this.errorMessage = '';
+      }
+    }, 1000);
+  }
+
+  selectRoleByObject(role: Role, email: string): void {
+    if (this.isLockedOut) return;
+    this.authService.loginByRole(role);
+    this.router.navigate(['/dashboard']);
+  }
+
   selectRole(roleEmail: string): void {
+    if (this.isLockedOut) return;
     this.email = roleEmail;
     this.password = 'password123';
     this.errorMessage = '';
@@ -139,9 +190,8 @@ export class Login {
   }
 
   loginWithSso(): void {
-    this.email = 'abhishek7y2@gmail.com';
-    this.password = 'password123';
-    this.login();
+    if (this.isLockedOut) return;
+    this.selectRole('admin@docnexa.io');
   }
 
   togglePassword(): void {

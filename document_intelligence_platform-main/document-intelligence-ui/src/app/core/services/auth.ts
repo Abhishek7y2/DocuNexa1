@@ -1,14 +1,10 @@
-import { Injectable, inject } from '@angular/core';
-import { PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { Router } from '@angular/router';
+import { Role, DEMO_ROLES } from '../models/roles';
+import { AuthUser } from '../models/auth.model';
 
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  organization: string;
-}
+export type { AuthUser } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root',
@@ -16,132 +12,107 @@ export interface AuthUser {
 export class AuthService {
   private readonly storageKey = 'docintel-auth';
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly router = inject(Router);
 
-  private readonly usersList: AuthUser[] = [
-    {
-      id: 'USR-001',
-      name: 'Abhishek Yadav',
-      email: 'abhishek7y2@gmail.com',
-      role: 'Organization Admin',
-      organization: 'Acme Corporation',
-    },
-    {
-      id: 'USR-002',
-      name: 'Rahul Sharma',
-      email: 'rahul7y2@gmail.com',
-      role: 'Senior Operations Reviewer',
-      organization: 'Acme Corporation',
-    },
-    {
-      id: 'USR-003',
-      name: 'Priya Mehta',
-      email: 'priya7y2@gmail.com',
-      role: 'Financial Approver',
-      organization: 'Acme Corporation',
-    },
-    {
-      id: 'USR-004',
-      name: 'Neha Verma',
-      email: 'neha7y2@gmail.com',
-      role: 'Procurement Contributor',
-      organization: 'Acme Corporation',
-    },
-    {
-      id: 'USR-005',
-      name: 'Arjun Kapoor',
-      email: 'arjun7y2@gmail.com',
-      role: 'Compliance Reader / Auditor',
-      organization: 'Acme Corporation',
-    },
-    {
-      id: 'USR-006',
-      name: 'Karan Malhotra',
-      email: 'karan7y2@gmail.com',
-      role: 'Procurement Contributor',
-      organization: 'Acme Corporation',
-    },
-  ];
+  readonly currentUser = signal<AuthUser | null>(this.getStoredUser());
 
-  login(
-    email: string,
-    password: string,
-    _rememberMe = true,
-  ): boolean {
+  private readonly usersList: AuthUser[] = DEMO_ROLES.map((role) => ({
+    id: `USR-${role.id.toUpperCase()}`,
+    name: `${role.name} User`,
+    email: role.demoEmail,
+    role: role.id,
+    organization: role.organization,
+    avatarInitials: role.avatarInitials,
+    status: 'active',
+  }));
+
+  login(email: string, password: string, rememberMe = true): boolean {
     const matchedUser = this.usersList.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase(),
+      (u) => u.email.toLowerCase() === email.trim().toLowerCase()
     );
-    const validPassword = password === 'password123';
+
+    const validPassword = password === 'password123' || password.length >= 8;
 
     if (!matchedUser || !validPassword) {
       return false;
     }
 
-    if (!isPlatformBrowser(this.platformId)) {
-      return false;
-    }
-
-    // Keep demo login persistent until user explicitly logs out.
-    localStorage.setItem(
-      this.storageKey,
-      JSON.stringify(matchedUser),
-    );
-
+    this.setCurrentUser(matchedUser, rememberMe);
     return true;
   }
 
   loginByEmail(email: string): boolean {
     const matchedUser = this.usersList.find(
-      (u) => u.email.toLowerCase() === email.trim().toLowerCase(),
+      (u) => u.email.toLowerCase() === email.trim().toLowerCase()
     ) || {
-      id: 'USR-001',
-      name: email.split('@')[0].replace('.', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      id: 'USR-ADMIN',
+      name: email.split('@')[0],
       email: email,
-      role: 'Organization Admin',
-      organization: 'Acme Corporation',
+      role: 'org_admin' as Role,
+      organization: 'Acme Enterprise',
+      avatarInitials: 'AE',
+      status: 'active' as const,
     };
 
-    if (!isPlatformBrowser(this.platformId)) {
-      return false;
-    }
+    this.setCurrentUser(matchedUser, true);
+    return true;
+  }
 
-    localStorage.setItem(this.storageKey, JSON.stringify(matchedUser));
+  loginByRole(role: Role): boolean {
+    const matchedUser = this.usersList.find((u) => u.role === role);
+    if (!matchedUser) return false;
+
+    this.setCurrentUser(matchedUser, true);
     return true;
   }
 
   logout(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem(this.storageKey);
+      sessionStorage.removeItem(this.storageKey);
     }
-
-    localStorage.removeItem(this.storageKey);
-    sessionStorage.removeItem(this.storageKey);
+    this.currentUser.set(null);
+    this.router.navigate(['/login']);
   }
 
   isAuthenticated(): boolean {
-    if (!isPlatformBrowser(this.platformId)) {
-      return false;
-    }
+    return this.currentUser() !== null;
+  }
 
-    return Boolean(
-      localStorage.getItem(this.storageKey),
-    );
+  getUser(): AuthUser | null {
+    return this.currentUser();
   }
 
   getCurrentUser(): AuthUser | null {
+    return this.currentUser();
+  }
+
+  private setCurrentUser(user: AuthUser, rememberMe: boolean): void {
+    this.currentUser.set(user);
+    if (isPlatformBrowser(this.platformId)) {
+      const storage = rememberMe ? localStorage : sessionStorage;
+      storage.setItem(this.storageKey, JSON.stringify(user));
+    }
+  }
+
+  private getStoredUser(): AuthUser | null {
     if (!isPlatformBrowser(this.platformId)) {
       return null;
     }
 
-    const user = localStorage.getItem(this.storageKey);
+    const stored =
+      localStorage.getItem(this.storageKey) ??
+      sessionStorage.getItem(this.storageKey);
 
-    if (!user) {
+    if (!stored) {
       return null;
     }
 
     try {
-      return JSON.parse(user) as AuthUser;
+      return JSON.parse(stored) as AuthUser;
     } catch {
       localStorage.removeItem(this.storageKey);
+      sessionStorage.removeItem(this.storageKey);
       return null;
     }
   }

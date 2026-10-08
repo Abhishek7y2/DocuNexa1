@@ -45,6 +45,7 @@
       </span>
 
       <a
+        *ngIf="canAccess('/dashboard')"
         routerLink="/dashboard"
         routerLinkActive="active"
         class="nav-item"
@@ -55,6 +56,7 @@
       </a>
 
       <a
+        *ngIf="canAccess('/documents')"
         routerLink="/documents"
         routerLinkActive="active"
         class="nav-item"
@@ -65,6 +67,7 @@
       </a>
 
       <a
+        *ngIf="canAccess('/intake')"
         routerLink="/intake"
         routerLinkActive="active"
         class="nav-item"
@@ -84,6 +87,7 @@
       </span>
 
       <a
+        *ngIf="canAccess('/review')"
         routerLink="/review"
         routerLinkActive="active"
         class="nav-item"
@@ -95,6 +99,7 @@
       </a>
 
       <a
+        *ngIf="canAccess('/compare')"
         routerLink="/compare"
         routerLinkActive="active"
         class="nav-item"
@@ -106,6 +111,7 @@
       </a>
 
       <a
+        *ngIf="canAccess('/approvals')"
         routerLink="/approvals"
         routerLinkActive="active"
         class="nav-item"
@@ -117,6 +123,7 @@
       </a>
 
       <a
+        *ngIf="canAccess('/tasks')"
         routerLink="/tasks"
         routerLinkActive="active"
         class="nav-item"
@@ -136,6 +143,7 @@
       </span>
 
       <a
+        *ngIf="canAccess('/search')"
         routerLink="/search"
         routerLinkActive="active"
         class="nav-item"
@@ -146,6 +154,7 @@
       </a>
 
       <a
+        *ngIf="canAccess('/qa')"
         routerLink="/qa"
         routerLinkActive="active"
         class="nav-item"
@@ -165,6 +174,7 @@
       </span>
 
       <a
+        *ngIf="canAccess('/admin')"
         routerLink="/admin"
         routerLinkActive="active"
         class="nav-item"
@@ -186,11 +196,11 @@
     </span>
 
     <strong>
-      Acme Corporation
+      {{ authService.currentUser()?.organization || 'Acme Corporation' }}
     </strong>
 
     <span class="workspace-status">
-      ● Active
+      ● {{ authService.currentUser()?.role || 'active' }}
     </span>
 
   </div>

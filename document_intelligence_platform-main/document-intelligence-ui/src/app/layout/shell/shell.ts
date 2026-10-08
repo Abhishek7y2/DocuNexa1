@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { Sidebar } from '../sidebar/sidebar';
 import { Topbar } from '../topbar/topbar';
+import { SessionWarningModal } from '../../shared/ui/session-warning-modal/session-warning-modal';
+import { IdleTimerService } from '../../core/services/idle-timer.service';
 
 @Component({
   selector: 'app-shell',
@@ -11,13 +13,19 @@ import { Topbar } from '../topbar/topbar';
     RouterOutlet,
     Sidebar,
     Topbar,
+    SessionWarningModal,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
 })
-export class Shell {
+export class Shell implements OnInit, OnDestroy {
+  private idleTimerService = inject(IdleTimerService);
 
-  toggleSidebar(): void {
-    // Sidebar state is handled through the topbar/sidebar UI.
+  ngOnInit(): void {
+    this.idleTimerService.init(15); // Default 15 mins timeout
+  }
+
+  ngOnDestroy(): void {
+    this.idleTimerService.destroy();
   }
 }

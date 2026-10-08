@@ -1,18 +1,15 @@
-export type UserRole =
-  | 'platform-operator'
-  | 'organization-admin'
-  | 'contributor'
-  | 'reviewer'
-  | 'approver'
-  | 'reader';
+import { Role } from './roles';
+
+export type UserRole = Role | 'organization-admin' | 'platform-operator' | 'reader';
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  role: Role;
   organization: string;
   avatarInitials: string;
+  status?: 'active' | 'deactivated';
 }
 
 export interface LoginCredentials {
