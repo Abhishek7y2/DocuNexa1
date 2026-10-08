@@ -1,0 +1,23 @@
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+
+import { Sidebar } from '../sidebar/sidebar';
+import { Topbar } from '../topbar/topbar';
+
+@Component({
+  selector: 'app-shell',
+  standalone: true,
+  imports: [
+    RouterOutlet,
+    Sidebar,
+    Topbar,
+  ],
+  templateUrl: './shell.html',
+  styleUrl: './shell.scss',
+})
+export class Shell {
+
+  toggleSidebar(): void {
+    // Sidebar state is handled through the topbar/sidebar UI.
+  }
+}

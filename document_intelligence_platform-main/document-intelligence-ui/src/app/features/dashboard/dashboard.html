@@ -1,0 +1,510 @@
+<div class="indihire-dashboard">
+  <!-- CONTROL & ACTION HEADER -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <h1 class="header-title">Dashboard</h1>
+      <p class="header-subtitle">
+        {{ greetingPrefix }}, <strong>{{ userName }}</strong> 👋 — Here's what's happening across your document workspace.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <label class="team-toggle">
+        <input type="checkbox" [(ngModel)]="includeTeamDocs" />
+        <span>Include Team Documents</span>
+      </label>
+
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search user / document..." />
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn-ghost" routerLink="/documents">Contracts</button>
+        <button class="btn-ghost" routerLink="/documents">Invoices</button>
+        <button class="btn-ghost" routerLink="/search">RAG Search</button>
+        <button class="btn-outline" routerLink="/intake">Upload Batch</button>
+        <button class="btn-primary" routerLink="/intake">
+          <span>+</span> Process New Document
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLA BREACH WARNING BANNER (BRD FR-021 & UAT-08) -->
+  <div class="sla-banner" style="background: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; gap: 14px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 20px;">⏱️</span>
+      <div>
+        <strong style="display: block; font-size: 13px; color: #92400e;">SLA Warning: 3 Documents Approaching Review SLA Threshold (< 4h remaining)</strong>
+        <span style="font-size: 11.5px; color: #b45309;">DOC-10247 (INV-78421) and DOC-10245 requires reviewer sign-off within 3.5 hours to prevent SLA compliance breach (FR-021).</span>
+      </div>
+    </div>
+    <a routerLink="/review" style="text-decoration: none; background: #d97706; color: #ffffff; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; white-space: nowrap;">
+      Review Urgent Queue ›
+    </a>
+  </div>
+
+  <!-- SECTION 1: "DocuNexa's Achievements" (6 Sparkline Stat Cards) -->
+  <section class="achievements-section">
+    <div class="section-title-bar">
+      <h2>DocuNexa's Achievements</h2>
+      <span class="timestamp-label">Data as on Oct 07, 2026</span>
+    </div>
+
+    <div class="stats-grid">
+      <!-- Card 1: Purple Theme (Total Documents) -->
+      <div class="stat-card theme-purple">
+        <div class="card-header-row">
+          <div class="card-icon-badge">🏠</div>
+          <span class="card-title">Total Documents</span>
+        </div>
+        <div class="card-metric-row">
+          <span class="metric-val">1,248</span>
+        </div>
+        <div class="card-trend-row">
+          <span class="trend-badge positive">↑ 12.5%</span>
+        </div>
+        <div class="sparkline-container">
+          <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
+            <defs>
+              <linearGradient id="grad-purple" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0,38 Q 30,10 60,32 T 120,25 T 180,12 L 200,28 L 200,50 L 0,50 Z" fill="url(#grad-purple)"/>
+            <path d="M 0,38 Q 30,10 60,32 T 120,25 T 180,12 L 200,28" fill="none" stroke="#8b5cf6" stroke-width="2.5"/>
+            <circle cx="0" cy="38" r="3" fill="#8b5cf6"/><circle cx="30" cy="20" r="3" fill="#8b5cf6"/><circle cx="60" cy="32" r="3" fill="#8b5cf6"/><circle cx="90" cy="18" r="3" fill="#8b5cf6"/><circle cx="120" cy="25" r="3" fill="#8b5cf6"/><circle cx="150" cy="15" r="3" fill="#8b5cf6"/><circle cx="180" cy="12" r="3" fill="#8b5cf6"/><circle cx="200" cy="28" r="3" fill="#8b5cf6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 2: Blue Theme (Active Ingestion) -->
+      <div class="stat-card theme-blue">
+        <div class="card-header-row">
+          <div class="card-icon-badge">📄</div>
+          <span class="card-title">Active Processing</span>
+        </div>
+        <div class="card-metric-row">
+          <span class="metric-val">286</span>
+        </div>
+        <div class="card-trend-row">
+          <span class="trend-badge positive">↑ 18%</span>
+        </div>
+        <div class="sparkline-container">
+          <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
+            <defs>
+              <linearGradient id="grad-blue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0,40 Q 30,22 60,35 T 120,20 T 180,14 L 200,24 L 200,50 L 0,50 Z" fill="url(#grad-blue)"/>
+            <path d="M 0,40 Q 30,22 60,35 T 120,20 T 180,14 L 200,24" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+            <circle cx="0" cy="40" r="3" fill="#3b82f6"/><circle cx="30" cy="22" r="3" fill="#3b82f6"/><circle cx="60" cy="35" r="3" fill="#3b82f6"/><circle cx="90" cy="26" r="3" fill="#3b82f6"/><circle cx="120" cy="20" r="3" fill="#3b82f6"/><circle cx="150" cy="17" r="3" fill="#3b82f6"/><circle cx="180" cy="14" r="3" fill="#3b82f6"/><circle cx="200" cy="24" r="3" fill="#3b82f6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 3: Green Theme (Extracted Entities) -->
+      <div class="stat-card theme-green">
+        <div class="card-header-row">
+          <div class="card-icon-badge">👥</div>
+          <span class="card-title">Extracted Entities</span>
+        </div>
+        <div class="card-metric-row">
+          <span class="metric-val">6,128</span>
+        </div>
+        <div class="card-trend-row">
+          <span class="trend-badge positive">↑ 24%</span>
+        </div>
+        <div class="sparkline-container">
+          <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
+            <defs>
+              <linearGradient id="grad-green" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0,36 Q 30,28 60,18 T 120,30 T 180,10 L 200,20 L 200,50 L 0,50 Z" fill="url(#grad-green)"/>
+            <path d="M 0,36 Q 30,28 60,18 T 120,30 T 180,10 L 200,20" fill="none" stroke="#10b981" stroke-width="2.5"/>
+            <circle cx="0" cy="36" r="3" fill="#10b981"/><circle cx="30" cy="28" r="3" fill="#10b981"/><circle cx="60" cy="18" r="3" fill="#10b981"/><circle cx="90" cy="22" r="3" fill="#10b981"/><circle cx="120" cy="30" r="3" fill="#10b981"/><circle cx="150" cy="16" r="3" fill="#10b981"/><circle cx="180" cy="10" r="3" fill="#10b981"/><circle cx="200" cy="20" r="3" fill="#10b981"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 4: Orange Theme (Review Queue HITL) -->
+      <div class="stat-card theme-orange">
+        <div class="card-header-row">
+          <div class="card-icon-badge">🚀</div>
+          <span class="card-title">Review Queue</span>
+        </div>
+        <div class="card-metric-row">
+          <span class="metric-val">4,912</span>
+        </div>
+        <div class="card-trend-row">
+          <span class="trend-badge positive">↑ 22%</span>
+        </div>
+        <div class="sparkline-container">
+          <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
+            <defs>
+              <linearGradient id="grad-orange" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f97316" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#f97316" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0,42 Q 30,24 60,32 T 120,28 T 180,12 L 200,22 L 200,50 L 0,50 Z" fill="url(#grad-orange)"/>
+            <path d="M 0,42 Q 30,24 60,32 T 120,28 T 180,12 L 200,22" fill="none" stroke="#f97316" stroke-width="2.5"/>
+            <circle cx="0" cy="42" r="3" fill="#f97316"/><circle cx="30" cy="24" r="3" fill="#f97316"/><circle cx="60" cy="32" r="3" fill="#f97316"/><circle cx="90" cy="20" r="3" fill="#f97316"/><circle cx="120" cy="28" r="3" fill="#f97316"/><circle cx="150" cy="18" r="3" fill="#f97316"/><circle cx="180" cy="12" r="3" fill="#f97316"/><circle cx="200" cy="22" r="3" fill="#f97316"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 5: Amber Theme (Pending Approvals) -->
+      <div class="stat-card theme-amber">
+        <div class="card-header-row">
+          <div class="card-icon-badge">💼</div>
+          <span class="card-title">Pending Approvals</span>
+        </div>
+        <div class="card-metric-row">
+          <span class="metric-val">261</span>
+        </div>
+        <div class="card-trend-row">
+          <span class="trend-badge positive">↑ 15%</span>
+        </div>
+        <div class="sparkline-container">
+          <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
+            <defs>
+              <linearGradient id="grad-amber" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0,38 Q 30,20 60,30 T 120,24 T 180,14 L 200,26 L 200,50 L 0,50 Z" fill="url(#grad-amber)"/>
+            <path d="M 0,38 Q 30,20 60,30 T 120,24 T 180,14 L 200,26" fill="none" stroke="#f59e0b" stroke-width="2.5"/>
+            <circle cx="0" cy="38" r="3" fill="#f59e0b"/><circle cx="30" cy="20" r="3" fill="#f59e0b"/><circle cx="60" cy="30" r="3" fill="#f59e0b"/><circle cx="90" cy="22" r="3" fill="#f59e0b"/><circle cx="120" cy="24" r="3" fill="#f59e0b"/><circle cx="150" cy="18" r="3" fill="#f59e0b"/><circle cx="180" cy="14" r="3" fill="#f59e0b"/><circle cx="200" cy="26" r="3" fill="#f59e0b"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 6: Teal Theme (Archived & Indexed) -->
+      <div class="stat-card theme-teal">
+        <div class="card-header-row">
+          <div class="card-icon-badge">⭐</div>
+          <span class="card-title">Indexed Repository</span>
+        </div>
+        <div class="card-metric-row">
+          <span class="metric-val">224</span>
+        </div>
+        <div class="card-trend-row">
+          <span class="trend-badge positive">↑ 14%</span>
+        </div>
+        <div class="sparkline-container">
+          <svg viewBox="0 0 200 50" preserveAspectRatio="none" class="sparkline-svg">
+            <defs>
+              <linearGradient id="grad-teal" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#14b8a6" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#14b8a6" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0,38 Q 30,22 60,34 T 120,26 T 180,12 L 200,24 L 200,50 L 0,50 Z" fill="url(#grad-teal)"/>
+            <path d="M 0,38 Q 30,22 60,34 T 120,26 T 180,12 L 200,24" fill="none" stroke="#14b8a6" stroke-width="2.5"/>
+            <circle cx="0" cy="38" r="3" fill="#14b8a6"/><circle cx="30" cy="22" r="3" fill="#14b8a6"/><circle cx="60" cy="34" r="3" fill="#14b8a6"/><circle cx="90" cy="24" r="3" fill="#14b8a6"/><circle cx="120" cy="26" r="3" fill="#14b8a6"/><circle cx="150" cy="18" r="3" fill="#14b8a6"/><circle cx="180" cy="12" r="3" fill="#14b8a6"/><circle cx="200" cy="24" r="3" fill="#14b8a6"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: DUAL OVERVIEW TABLES (Category Overview & Top Reviewers Ranking) -->
+  <section class="dual-tables-grid">
+    <!-- LEFT TABLE: Category Ingestion Overview -->
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h3>Category Ingestion Overview</h3>
+          <span class="panel-sub">Live breakdown by document category</span>
+        </div>
+        <button class="view-all-link" routerLink="/documents">View All Categories ›</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Document Category</th>
+              <th>Active</th>
+              <th>Extracted</th>
+              <th>Approved</th>
+              <th>Archived</th>
+              <th>Accuracy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cat of categoryOverview">
+              <td class="font-medium">{{ cat.name }}</td>
+              <td><span class="pill-badge pill-blue">{{ cat.activeIngestion }}</span></td>
+              <td>{{ cat.extractedFields }}</td>
+              <td><span class="pill-badge pill-green">{{ cat.approvedDocs }}</span></td>
+              <td>{{ cat.archivedCount }}</td>
+              <td>
+                <div class="progress-cell">
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" [style.width.%]="cat.accuracy" [class.high]="cat.accuracy >= 80" [class.med]="cat.accuracy < 80 && cat.accuracy >= 70"></div>
+                  </div>
+                  <span class="pct-lbl">{{ cat.accuracy }}%</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT TABLE: Top Document Reviewers Ranking -->
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h3>Top Document Reviewers</h3>
+          <span class="panel-sub">Performance and accuracy rankings</span>
+        </div>
+        <button class="view-all-link" routerLink="/admin">Manage Team ›</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Rank & Reviewer</th>
+              <th>Assigned</th>
+              <th>Verified</th>
+              <th>Accuracy</th>
+              <th>Target %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let rev of reviewerRankings">
+              <td>
+                <div class="user-rank-cell">
+                  <span class="rank-badge" [class.top-1]="rev.rank === 1" [class.top-2]="rev.rank === 2" [class.top-3]="rev.rank === 3">#{{ rev.rank }}</span>
+                  <div class="user-avatar" [style.background]="rev.avatarBg">{{ rev.initials }}</div>
+                  <div class="user-name">
+                    <strong>{{ rev.name }}</strong>
+                  </div>
+                </div>
+              </td>
+              <td>{{ rev.assignedQueue }}</td>
+              <td><strong>{{ rev.verifiedCount }}</strong></td>
+              <td><span class="pill-badge pill-green">{{ rev.accuracyRate }}%</span></td>
+              <td>
+                <span class="pct-badge" [class.high]="rev.targetAchieved >= 90" [class.med]="rev.targetAchieved < 90 && rev.targetAchieved >= 80" [class.low]="rev.targetAchieved < 80">
+                  {{ rev.targetAchieved }}%
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: DOCUMENT PROCESSING PIPELINE FUNNEL STEPPER -->
+  <section class="pipeline-funnel-section">
+    <div class="panel-card">
+      <div class="panel-header flex-header">
+        <div>
+          <h3>Document Processing Pipeline Funnel</h3>
+          <span class="panel-sub">Real-time status breakdown through processing stages</span>
+        </div>
+
+        <!-- Period Filter Pills -->
+        <div class="filter-pills-row">
+          <button
+            *ngFor="let period of funnelPeriods"
+            class="filter-pill"
+            [class.active]="selectedFunnelPeriod === period"
+            (click)="setFunnelPeriod(period)"
+          >
+            {{ period }}
+          </button>
+        </div>
+      </div>
+
+      <div class="stepper-pipeline">
+        <div *ngFor="let stage of pipelineStages; let i = index" class="step-card">
+          <div class="step-header">
+            <span class="step-num">Step {{ stage.id }}</span>
+            <span class="step-arrow" *ngIf="i < pipelineStages.length - 1">›</span>
+          </div>
+          <div class="step-count">{{ stage.count }}</div>
+          <div class="step-name">{{ stage.name }}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: EXTRACTION CONVERSION RATIO CARDS -->
+  <section class="conversion-ratios-section">
+    <div class="ratios-grid">
+      <div *ngFor="let item of conversionRatios" class="ratio-card">
+        <div class="ratio-header">
+          <span class="ratio-title">{{ item.title }}</span>
+          <span class="ratio-pct">{{ item.percentage }}%</span>
+        </div>
+
+        <div class="ratio-bar-bg">
+          <div class="ratio-bar-fill" [style.width.%]="item.percentage"></div>
+        </div>
+
+        <div class="ratio-footer">
+          <span class="ratio-numbers">Ratio: <strong>{{ item.ratioText }}</strong></span>
+          <span class="ratio-sub">{{ item.subtitle }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: RECENT REVIEWS & AUDIT TIMELINE -->
+  <section class="dual-tables-grid">
+    <!-- LEFT: Recent Ingestion Stream -->
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h3>Recent Ingestion Stream</h3>
+          <span class="panel-sub">Active documents in workflow</span>
+        </div>
+        <div class="tab-buttons">
+          <button class="tab-btn" [class.active]="selectedTab === 'In Review'" (click)="setTab('In Review')">In Review</button>
+          <button class="tab-btn" [class.active]="selectedTab === 'Approved'" (click)="setTab('Approved')">Recently Approved</button>
+        </div>
+      </div>
+
+      <div class="stream-list">
+        <div class="stream-item">
+          <div class="stream-icon invoice">PDF</div>
+          <div class="stream-info">
+            <strong>INV-2026-1048.pdf</strong>
+            <span>Purchase Invoice · 2.4 MB · Uploaded by Abhishek</span>
+          </div>
+          <span class="pill-badge pill-blue">Processing</span>
+          <span class="time-tag">5 min ago</span>
+        </div>
+
+        <div class="stream-item">
+          <div class="stream-icon contract">PDF</div>
+          <div class="stream-info">
+            <strong>Acme Supplier Agreement.pdf</strong>
+            <span>Supplier Contract · 4.8 MB · Uploaded by Rahul</span>
+          </div>
+          <span class="pill-badge pill-warning">In Review</span>
+          <span class="time-tag">32 min ago</span>
+        </div>
+
+        <div class="stream-item">
+          <div class="stream-icon policy">PDF</div>
+          <div class="stream-info">
+            <strong>Information Security Policy.pdf</strong>
+            <span>Internal Policy · 1.7 MB · Uploaded by Priya</span>
+          </div>
+          <span class="pill-badge pill-green">Approved</span>
+          <span class="time-tag">2 hrs ago</span>
+        </div>
+
+        <div class="stream-item">
+          <div class="stream-icon invoice">PDF</div>
+          <div class="stream-info">
+            <strong>PO-45821.pdf</strong>
+            <span>Purchase Invoice · 3.1 MB · Uploaded by Neha</span>
+          </div>
+          <span class="pill-badge pill-warning">In Review</span>
+          <span class="time-tag">3 hrs ago</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Audit & Compliance Integrity Rating -->
+    <div class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h3>System Audit Integrity</h3>
+          <span class="panel-sub">OCR model confidence & compliance rating</span>
+        </div>
+        <span class="rating-badge font-bold">★ 5.0 Integrity Score</span>
+      </div>
+
+      <div class="audit-quote-card">
+        <div class="quote-header">
+          <span class="quote-avatar">AI</span>
+          <div>
+            <strong>OCR Engine v4.2</strong>
+            <span>99.8% Extraction Accuracy Certified</span>
+          </div>
+        </div>
+        <p class="quote-body">
+          "All document ingestion pipelines are executing within normal operational confidence limits. Zero security flags detected in today's batch."
+        </p>
+        <div class="quote-footer">
+          <span class="tag-success">✓ 100% Compliant</span>
+          <span class="quote-date">07 Oct 2026</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 6: DEFAULTER & REVIEWER PROCESSING MATRIX (Bottom Full-width Table) -->
+  <section class="audit-matrix-section">
+    <div class="panel-card">
+      <div class="panel-header flex-header">
+        <div>
+          <h3>Reviewer Processing Matrix & Exception Audit</h3>
+          <span class="panel-sub">Complete breakdown of reviewer throughput and field exception flags</span>
+        </div>
+
+        <div class="filter-pills-row">
+          <button
+            *ngFor="let period of auditPeriods"
+            class="filter-pill"
+            [class.active]="selectedAuditPeriod === period"
+            (click)="setAuditPeriod(period)"
+          >
+            {{ period }}
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Reviewer Name</th>
+              <th>Ingested</th>
+              <th>New OCR</th>
+              <th>Extracted</th>
+              <th>High Conf.</th>
+              <th>Low Conf.</th>
+              <th>Manual Fixes</th>
+              <th>Approved</th>
+              <th>Rejected</th>
+              <th>Escalated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of auditMatrix">
+              <td class="font-bold">{{ row.reviewer }}</td>
+              <td>{{ row.ingested }}</td>
+              <td>{{ row.newOcr }}</td>
+              <td>{{ row.dataExtracted }}</td>
+              <td><span class="pill-badge pill-green">{{ row.highConfidence }}</span></td>
+              <td><span class="pill-badge pill-warning">{{ row.lowConfidence }}</span></td>
+              <td>{{ row.manualCorrections }}</td>
+              <td><span class="pill-badge pill-green">{{ row.approved }}</span></td>
+              <td><span class="pill-badge pill-red">{{ row.rejected }}</span></td>
+              <td><span class="pill-badge pill-purple">{{ row.escalated }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>

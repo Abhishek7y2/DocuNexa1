@@ -1,0 +1,505 @@
+<div class="workbench-page">
+
+  <!-- TOP WORKBENCH HEADER & CONTROLS -->
+  <header class="workbench-header">
+    <div class="header-left">
+      <a routerLink="/review" class="btn-back">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Back to Queue</span>
+      </a>
+
+      <div class="doc-identity">
+        <div class="doc-badge">{{ documentType === 'Purchase Invoice' ? 'INV' : 'DOC' }}</div>
+        <div>
+          <div class="title-row">
+            <h1>{{ documentName }}</h1>
+            <span class="status-pill in-review">● IN VERIFICATION</span>
+          </div>
+          <span class="doc-sub">{{ documentId }} · Submitted by Rahul Sharma · 4 pages</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CANVAS TOOLS: PAGE & ZOOM -->
+    <div class="canvas-controls">
+      <div class="page-stepper">
+        <button type="button" class="btn-icon" (click)="prevPage()" [disabled]="currentPage <= 1" title="Previous Page">‹</button>
+        <span class="page-label">Page <strong>{{ currentPage }}</strong> of {{ totalPages }}</span>
+        <button type="button" class="btn-icon" (click)="nextPage()" [disabled]="currentPage >= totalPages" title="Next Page">›</button>
+      </div>
+
+      <div class="zoom-stepper">
+        <button type="button" class="btn-icon" (click)="zoomOut()" title="Zoom Out">−</button>
+        <button type="button" class="btn-text" (click)="resetZoom()" title="Reset Zoom">{{ zoomLevel }}%</button>
+        <button type="button" class="btn-icon" (click)="zoomIn()" title="Zoom In">+</button>
+        <button type="button" class="btn-icon" (click)="rotateDoc()" title="Rotate 90°">↻</button>
+      </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="acceptAllExtractions()">
+        <span>✓ Accept All</span>
+      </button>
+
+      <button type="button" class="btn-primary" (click)="completeReviewAndEscalate()">
+        <span>Complete Review</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN 50/50 SPLIT-SCREEN WORKBENCH -->
+  <main class="split-layout">
+
+    <!-- LEFT PANE: HIGH-FIDELITY DOCUMENT CANVAS WITH BOUNDING BOXES -->
+    <section class="document-pane">
+      <div class="pane-header">
+        <div class="pane-title">
+          <span class="dot-indicator"></span>
+          <span>ORIGINAL SCANNED DOCUMENT (PDF CANVAS)</span>
+        </div>
+        <span class="tip-badge">Click field on right to jump to highlight</span>
+      </div>
+
+      <div class="canvas-viewport">
+        <div 
+          class="document-sheet"
+          [style.transform]="'scale(' + (zoomLevel / 100) + ') rotate(' + rotation + 'deg)'"
+        >
+          <!-- BOUNDING BOX OVERLAYS -->
+          <div class="bounding-boxes-layer">
+            @for (box of boundingBoxes; track box.id) {
+              <div
+                class="bounding-box"
+                [class.active]="isBoxActive(box.fieldKey)"
+                [class.low-confidence]="box.confidence < 90"
+                [style.top.%]="box.top"
+                [style.left.%]="box.left"
+                [style.width.%]="box.width"
+                [style.height.%]="box.height"
+                (click)="selectField(box.fieldKey)"
+              >
+                <span class="box-tag">
+                  {{ box.label }} ({{ box.confidence }}%)
+                </span>
+              </div>
+            }
+          </div>
+
+          <!-- DOCUMENT CONTENT SIMULATION (Page 1) -->
+          <div class="sheet-content">
+            <div class="invoice-letterhead">
+              <div class="company-brand">
+                <div class="logo-box">AIS</div>
+                <div>
+                  <h2 class="company-name">Apex Industrial Solutions Pvt Ltd</h2>
+                  <p class="company-addr">Plot 42, Electronic City Phase 1, Bangalore 560100</p>
+                  <p class="company-tax">GSTIN: 27AABCA1234F1Z8 · CIN: U72200KA2015PTC081290</p>
+                </div>
+              </div>
+
+              <div class="invoice-title-block">
+                <span class="tax-inv-badge">TAX INVOICE</span>
+                <div class="inv-number-callout">
+                  <strong>Invoice #: INV-78421</strong>
+                  <span>Date: 04 Oct 2026</span>
+                  <span>PO Ref: PO-2026-9842</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sheet-divider"></div>
+
+            <div class="bill-to-grid">
+              <div class="bill-box">
+                <span class="bill-label">BILLED TO (BUYER):</span>
+                <strong>Acme Corporation Global Pvt Ltd</strong>
+                <p>Cyber City, Tower B, Level 8, DLF Phase 2, Gurugram 122002</p>
+                <p>GSTIN: 06AABCA9876M1Z2 · State: Haryana (06)</p>
+              </div>
+              <div class="bill-box">
+                <span class="bill-label">PAYMENT TERMS:</span>
+                <strong>Due Date: 03 Nov 2026 (Net 30 Days)</strong>
+                <p>Dispatched via: BlueDart Surface Express</p>
+                <p>Dispatch Note: DN-901824</p>
+              </div>
+            </div>
+
+            <!-- SIMULATED PRINTED TABLE -->
+            <table class="simulated-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Description of Goods / Services</th>
+                  <th>HSN</th>
+                  <th class="num">Qty</th>
+                  <th class="num">Rate (₹)</th>
+                  <th class="num">Amount (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>Industrial Sensor Module A-204 (Precision Calibration)</td>
+                  <td>8536</td>
+                  <td class="num">10</td>
+                  <td class="num">4,500.00</td>
+                  <td class="num">45,000.00</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>PLC Automation Interface Unit (4-Channel Analog)</td>
+                  <td>8537</td>
+                  <td class="num">4</td>
+                  <td class="num">12,000.00</td>
+                  <td class="num">48,000.00</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Heavy Duty Thermal Relay Assembly (400V 50Hz)</td>
+                  <td>8536</td>
+                  <td class="num">6</td>
+                  <td class="num">5,000.00</td>
+                  <td class="num">30,000.00</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- PRINTED TOTALS SUMMARY -->
+            <div class="simulated-totals">
+              <div class="totals-row">
+                <span>Sub Total (Before Tax):</span>
+                <strong>₹ 1,23,000.00</strong>
+              </div>
+              <div class="totals-row">
+                <span>Integrated GST (IGST 18%):</span>
+                <strong>₹ 22,140.00</strong>
+              </div>
+              <div class="totals-row grand">
+                <span>TOTAL INVOICE AMOUNT:</span>
+                <strong>₹ 1,45,140.00</strong>
+              </div>
+            </div>
+
+            <div class="sheet-stamp">
+              <div class="stamp-circle">
+                <span>APEX INDUSTRIAL</span>
+                <span>★ VERIFIED ★</span>
+                <span>ACCOUNTS DEPT</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANE: HUMAN-IN-THE-LOOP VERIFICATION & ARITHMETIC VALIDATOR -->
+    <section class="verification-pane">
+
+      <!-- TABS SELECTOR -->
+      <nav class="verification-tabs">
+        <button 
+          type="button" 
+          class="vtab-btn" 
+          [class.active]="activeTab === 'metadata'"
+          (click)="activeTab = 'metadata'"
+        >
+          <span class="icon">🏷️</span>
+          <span>Field Extraction</span>
+          <span class="count-tag">{{ fields.length }}</span>
+        </button>
+
+        @if (documentType === 'Purchase Invoice') {
+          <button 
+            type="button" 
+            class="vtab-btn" 
+            [class.active]="activeTab === 'line-items'"
+            (click)="activeTab = 'line-items'"
+          >
+            <span class="icon">🧮</span>
+            <span>Invoice Math & Line-Items</span>
+            <span class="count-tag" [class.danger]="!isArithmeticMatch">
+              {{ isArithmeticMatch ? '✓ Verified' : '! Mismatch' }}
+            </span>
+          </button>
+        }
+
+        <button 
+          type="button" 
+          class="vtab-btn" 
+          [class.active]="activeTab === 'audit'"
+          (click)="activeTab = 'audit'"
+        >
+          <span class="icon">📜</span>
+          <span>HITL Audit Trail</span>
+        </button>
+      </nav>
+
+      <!-- TAB 1: METADATA FIELD EXTRACTION VERIFICATION -->
+      @if (activeTab === 'metadata') {
+        <div class="tab-scroll-body">
+          <!-- LOW CONFIDENCE SUMMARY BANNER -->
+          <div class="confidence-summary-card">
+            <div class="metric-block">
+              <span class="lbl">Average Confidence</span>
+              <strong class="val">91.8%</strong>
+            </div>
+            <div class="metric-block">
+              <span class="lbl">Verified Fields</span>
+              <strong class="val green">6 / 9</strong>
+            </div>
+            <div class="metric-block">
+              <span class="lbl">Attention Flagged</span>
+              <strong class="val red">2 Fields (< 90%)</strong>
+            </div>
+          </div>
+
+          <div class="field-cards-list">
+            @for (field of fields; track field.key) {
+              <div 
+                class="field-card"
+                [class.active-card]="activeFieldKey === field.key"
+                [class.flagged-card]="field.status === 'flagged' || field.confidence < 90"
+                (mouseenter)="hoverField(field.key)"
+                (mouseleave)="hoverField(null)"
+                (click)="selectField(field.key)"
+              >
+                <div class="card-top">
+                  <div class="label-info">
+                    <span class="field-label">{{ field.label }}</span>
+                    @if (field.isArithmetic) {
+                      <span class="arithmetic-tag">Math Formula</span>
+                    }
+                  </div>
+
+                  <div class="confidence-badge" [class.low]="field.confidence < 90">
+                    <span class="dot"></span>
+                    <span>{{ field.confidence }}% AI Confidence</span>
+                  </div>
+                </div>
+
+                <!-- EDITABLE INPUT FIELD -->
+                <div class="input-wrapper">
+                  <input
+                    type="text"
+                    [(ngModel)]="field.value"
+                    (input)="onFieldValueChange(field)"
+                    placeholder="Enter value..."
+                    class="field-input"
+                  />
+                  @if (field.status === 'modified') {
+                    <span class="modified-badge">Edited</span>
+                  }
+                </div>
+
+                <div class="card-bottom">
+                  <div class="status-indicator">
+                    <span class="status-name" [class.verified]="field.status === 'verified'">
+                      Status: <strong>{{ field.status | uppercase }}</strong>
+                    </span>
+                    <span class="page-cite">Found on Page {{ field.page }}</span>
+                  </div>
+
+                  <div class="field-actions">
+                    <button 
+                      type="button" 
+                      class="btn-action-verify" 
+                      (click)="acceptField(field); $event.stopPropagation()"
+                      title="Verify and Accept Field"
+                    >
+                      ✓ Accept
+                    </button>
+                    <button 
+                      type="button" 
+                      class="btn-action-flag" 
+                      (click)="flagField(field); $event.stopPropagation()"
+                      title="Flag Anomaly for Senior Reviewer"
+                    >
+                      ⚠ Flag
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- TAB 2: SCR-07 PURCHASE INVOICE LINE-ITEMS & DETERMINISTIC ARITHMETIC VALIDATOR -->
+      @if (activeTab === 'line-items') {
+        <div class="tab-scroll-body line-items-view">
+
+          <!-- ARITHMETIC STATUS ALERT BANNER -->
+          @if (isArithmeticMatch) {
+            <div class="math-banner success">
+              <div class="banner-icon">✓</div>
+              <div class="banner-body">
+                <strong>Deterministic Math Fully Reconciled</strong>
+                <p>Line items sum + GST 18% matches grand invoice total of ₹{{ calculatedGrandTotal | number:'1.2-2' }}.</p>
+              </div>
+              <span class="zero-diff-badge">₹ 0.00 Discrepancy</span>
+            </div>
+          } @else {
+            <div class="math-banner warning">
+              <div class="banner-icon">⚠️</div>
+              <div class="banner-body">
+                <strong>Arithmetic Discrepancy Detected (BRD FR-009)</strong>
+                <p>Calculated total (₹{{ calculatedGrandTotal | number:'1.2-2' }}) differs from extracted invoice amount (₹{{ extractedGrandTotal | number:'1.2-2' }}).</p>
+              </div>
+              <button type="button" class="btn-reconcile" (click)="autoFixGrandTotal()">
+                Reconcile Total
+              </button>
+            </div>
+          }
+
+          <!-- LINE ITEMS TABLE -->
+          <div class="line-items-box">
+            <div class="box-header">
+              <h3>Extracted Line Items ({{ lineItems.length }})</h3>
+              <button type="button" class="btn-add-item" (click)="addLineItem()">+ Add Line Item</button>
+            </div>
+
+            <div class="table-scroll">
+              <table class="line-items-table">
+                <thead>
+                  <tr>
+                    <th>ITEM DESCRIPTION</th>
+                    <th class="num">QTY</th>
+                    <th class="num">UNIT RATE (₹)</th>
+                    <th class="num">TAX %</th>
+                    <th class="num">LINE TOTAL (₹)</th>
+                    <th class="text-right">ACT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of lineItems; track item.id; let idx = $index) {
+                    <tr>
+                      <td>
+                        <input type="text" [(ngModel)]="item.description" class="table-input desc" />
+                      </td>
+                      <td class="num">
+                        <input 
+                          type="number" 
+                          [(ngModel)]="item.quantity" 
+                          (input)="onItemChange(item)" 
+                          class="table-input qty" 
+                        />
+                      </td>
+                      <td class="num">
+                        <input 
+                          type="number" 
+                          [(ngModel)]="item.unitPrice" 
+                          (input)="onItemChange(item)" 
+                          class="table-input rate" 
+                        />
+                      </td>
+                      <td class="num">
+                        <span class="tax-pill">{{ item.taxRate }}%</span>
+                      </td>
+                      <td class="num">
+                        <strong class="line-sum">₹ {{ item.lineTotal | number:'1.2-2' }}</strong>
+                      </td>
+                      <td class="text-right">
+                        <button type="button" class="btn-del" (click)="removeLineItem(idx)" title="Remove Row">×</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- DETERMINISTIC RECALCULATION SUMMARY BOX -->
+          <div class="recalc-summary-card">
+            <h4>Live Arithmetic Reconciliation Breakdown</h4>
+
+            <div class="calc-row">
+              <span>Subtotal (Sum of Line Items):</span>
+              <strong>₹ {{ calculatedSubtotal | number:'1.2-2' }}</strong>
+            </div>
+
+            <div class="calc-row">
+              <span>IGST (Integrated GST @ 18%):</span>
+              <strong>₹ {{ calculatedTaxTotal | number:'1.2-2' }}</strong>
+            </div>
+
+            <div class="calc-divider"></div>
+
+            <div class="calc-row highlight">
+              <span>Calculated Net Amount:</span>
+              <strong class="text-green">₹ {{ calculatedGrandTotal | number:'1.2-2' }}</strong>
+            </div>
+
+            <div class="calc-row">
+              <span>Extracted Invoice Header Amount:</span>
+              <strong>₹ {{ extractedGrandTotal | number:'1.2-2' }}</strong>
+            </div>
+
+            <div class="calc-row diff" [class.has-diff]="!isArithmeticMatch">
+              <span>Arithmetic Discrepancy:</span>
+              <strong [class.red]="!isArithmeticMatch" [class.green]="isArithmeticMatch">
+                {{ isArithmeticMatch ? '✓ None (Exact Match)' : '₹ ' + (arithmeticDifference | number:'1.2-2') + ' Mismatch' }}
+              </strong>
+            </div>
+          </div>
+
+          <!-- DUPLICATE INVOICE CHECK -->
+          <div class="duplicate-check-card">
+            <span class="check-icon">🛡️</span>
+            <div>
+              <strong>Duplicate Invoice Detection (Section 6 Rule)</strong>
+              <p>System verified invoice #INV-78421 against historical repository. Zero duplicate records found in the last 18 months.</p>
+            </div>
+            <span class="pill-pass">PASS</span>
+          </div>
+
+        </div>
+      }
+
+      <!-- TAB 3: AUDIT TRAIL -->
+      @if (activeTab === 'audit') {
+        <div class="tab-scroll-body">
+          <div class="audit-timeline">
+            <div class="timeline-step">
+              <span class="step-dot"></span>
+              <div class="step-details">
+                <strong>Ingestion & OCR Extraction Completed</strong>
+                <p>Confidence score: 91.8% · Engine: LayoutLMv3 + PaddleOCR</p>
+                <span class="timestamp">06 Oct 2026 · 09:18 AM by System Ingestion Pipeline</span>
+              </div>
+            </div>
+
+            <div class="timeline-step">
+              <span class="step-dot active"></span>
+              <div class="step-details">
+                <strong>Human-in-the-Loop Verification Started</strong>
+                <p>Assigned to {{ reviewerName }} ({{ reviewerRole }})</p>
+                <span class="timestamp">07 Oct 2026 · 11:45 AM</span>
+              </div>
+            </div>
+
+            <div class="timeline-step">
+              <span class="step-dot pending"></span>
+              <div class="step-details">
+                <strong>Departmental Approval Sign-Off</strong>
+                <p>Awaiting completion of HITL verification</p>
+                <span class="timestamp">Pending Next Step</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+    </section>
+
+  </main>
+
+  <!-- TOAST NOTIFICATION -->
+  @if (toastMessage) {
+    <div class="toast-popup" [class]="toastType">
+      <span>{{ toastMessage }}</span>
+    </div>
+  }
+
+</div>

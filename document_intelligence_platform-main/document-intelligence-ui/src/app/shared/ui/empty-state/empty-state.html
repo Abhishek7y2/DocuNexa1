@@ -1,0 +1,16 @@
+<div class="empty-state">
+  <div class="empty-icon">
+    <span>□</span>
+  </div>
+
+  <div class="empty-content">
+    <h3>{{ title }}</h3>
+    <p>{{ message }}</p>
+  </div>
+
+  @if (actionLabel) {
+    <button type="button" class="empty-action">
+      {{ actionLabel }}
+    </button>
+  }
+</div>

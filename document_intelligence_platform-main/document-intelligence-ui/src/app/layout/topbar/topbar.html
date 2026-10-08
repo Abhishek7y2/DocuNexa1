@@ -1,0 +1,110 @@
+<header class="topbar">
+
+  <!-- LEFT -->
+  <div class="topbar-left">
+
+    <button
+      type="button"
+      class="menu-button"
+      (click)="toggleSidebar()"
+      aria-label="Open navigation"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <div class="breadcrumb">
+      <div class="breadcrumb-icon">D</div>
+
+      <div class="breadcrumb-text">
+        <span>Workspace</span>
+        <b>/</b>
+        <strong>Document Intelligence</strong>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- RIGHT -->
+  <div class="topbar-right">
+
+    <!-- Search -->
+    <button
+      type="button"
+      class="topbar-icon-button"
+      aria-label="Search"
+    >
+      <span class="search-icon"></span>
+    </button>
+
+
+    <!-- Notifications -->
+    <button
+      type="button"
+      class="topbar-icon-button notification-button"
+      aria-label="Notifications"
+    >
+      <span class="notification-icon">♢</span>
+      <span class="notification-dot"></span>
+    </button>
+
+
+    <!-- Divider -->
+    <div class="topbar-divider"></div>
+
+
+    <!-- Organization -->
+    <div class="organization-info">
+
+      <span class="organization-label">
+        ORGANIZATION
+      </span>
+
+      <strong>
+        {{ currentUser?.organization || 'Acme Corporation' }}
+      </strong>
+
+    </div>
+
+
+    <!-- User -->
+    <div class="user-profile">
+
+      <div class="avatar">
+        {{ currentUser?.name?.charAt(0) || 'U' }}
+      </div>
+
+      <div class="user-info">
+
+        <strong>
+          {{ currentUser?.name || 'User' }}
+        </strong>
+
+        <span>
+          {{ currentUser?.role || 'User' }}
+        </span>
+
+      </div>
+
+      <span class="profile-chevron">
+       ⌄
+      </span>
+
+    </div>
+
+
+    <!-- Logout -->
+    <button
+      type="button"
+      class="logout-button"
+      (click)="logout()"
+    >
+      <span class="logout-icon">↪</span>
+      <span>Logout</span>
+    </button>
+
+  </div>
+
+</header>

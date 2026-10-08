@@ -1,0 +1,1159 @@
+<div class="admin-page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">ADMINISTRATION</span>
+
+      <h1>Administration</h1>
+
+      <p>
+        Manage your organization, users, workflows, security and
+        platform integrations.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="saveSettings()"
+    >
+      <span>✓</span>
+      Save Changes
+    </button>
+  </div>
+
+  <!-- ORGANIZATION BAR -->
+  <section class="organization-bar">
+
+    <div class="organization-main">
+      <div class="organization-logo">
+        AC
+      </div>
+
+      <div>
+        <span class="organization-label">ORGANIZATION</span>
+
+        <div class="organization-name-row">
+          <h2>{{ organizationName }}</h2>
+
+          <span class="active-badge">
+            <span></span>
+            {{ organizationStatus }}
+          </span>
+        </div>
+
+        <p>
+          Enterprise workspace · Document Intelligence Platform
+        </p>
+      </div>
+    </div>
+
+    <div class="organization-meta">
+
+      <div>
+        <span>PLAN</span>
+        <strong>{{ organizationPlan }}</strong>
+      </div>
+
+      <div>
+        <span>WORKSPACE ID</span>
+        <strong>ORG-ACME-001</strong>
+      </div>
+
+      <div>
+        <span>CREATED</span>
+        <strong>12 Jan 2026</strong>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- TABS -->
+  <nav class="admin-tabs">
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'overview'"
+      (click)="setTab('overview')"
+    >
+      Overview
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'users'"
+      (click)="setTab('users')"
+    >
+      Users & Roles
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'documents'"
+      (click)="setTab('documents')"
+    >
+      Document Types
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'workflow'"
+      (click)="setTab('workflow')"
+    >
+      Workflow
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'retention'"
+      (click)="setTab('retention')"
+    >
+      Retention
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'security'"
+      (click)="setTab('security')"
+    >
+      Security
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab === 'integrations'"
+      (click)="setTab('integrations')"
+    >
+      Integrations
+    </button>
+
+  </nav>
+
+  <!-- OVERVIEW -->
+  @if (activeTab === 'overview') {
+
+    <section class="admin-section">
+
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">ORGANIZATION OVERVIEW</span>
+          <h2>Workspace health</h2>
+          <p>
+            A quick view of your organization configuration and usage.
+          </p>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <div class="stat-icon users-icon">U</div>
+
+          <div>
+            <span>Total Users</span>
+            <strong>{{ users.length }}</strong>
+            <small>{{ activeUsers }} active users</small>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon documents-icon">D</div>
+
+          <div>
+            <span>Document Types</span>
+            <strong>{{ documentTypes.length }}</strong>
+            <small>All enabled</small>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon integration-icon">I</div>
+
+          <div>
+            <span>Integrations</span>
+            <strong>{{ integrations.length }}</strong>
+            <small>{{ connectedIntegrations }} connected</small>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon security-icon">S</div>
+
+          <div>
+            <span>Security</span>
+            <strong>Strong</strong>
+            <small>MFA + audit logging enabled</small>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="overview-grid">
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <div>
+              <h3>Platform configuration</h3>
+              <p>Current organization settings.</p>
+            </div>
+
+            <button
+              type="button"
+              class="text-button"
+              (click)="setTab('security')"
+            >
+              Manage
+            </button>
+          </div>
+
+          <div class="configuration-list">
+
+            <div class="configuration-row">
+              <div class="config-symbol">A</div>
+
+              <div>
+                <strong>Authentication</strong>
+                <span>Username and password authentication</span>
+              </div>
+
+              <b>Configured</b>
+            </div>
+
+            <div class="configuration-row">
+              <div class="config-symbol">M</div>
+
+              <div>
+                <strong>Multi-factor authentication</strong>
+                <span>MFA is required for administrators</span>
+              </div>
+
+              <b>Enabled</b>
+            </div>
+
+            <div class="configuration-row">
+              <div class="config-symbol">L</div>
+
+              <div>
+                <strong>Audit logging</strong>
+                <span>Document and administrative events are logged</span>
+              </div>
+
+              <b>Enabled</b>
+            </div>
+
+            <div class="configuration-row">
+              <div class="config-symbol">R</div>
+
+              <div>
+                <strong>Retention policy</strong>
+                <span>Documents retained for {{ retentionPeriod }}</span>
+              </div>
+
+              <b>7 Years</b>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <div>
+              <h3>Workflow pipeline</h3>
+              <p>Configured document lifecycle.</p>
+            </div>
+
+            <button
+              type="button"
+              class="text-button"
+              (click)="setTab('workflow')"
+            >
+              Configure
+            </button>
+          </div>
+
+          <div class="mini-pipeline">
+
+            @for (step of workflowSteps; track step.number) {
+
+              <div class="mini-step">
+
+                <div class="step-number">
+                  {{ step.number }}
+                </div>
+
+                <div>
+                  <strong>{{ step.title }}</strong>
+                  <span>{{ step.description }}</span>
+                </div>
+
+                @if (step.enabled) {
+                  <span class="step-check">✓</span>
+                }
+
+              </div>
+
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+  }
+
+  <!-- USERS -->
+  @if (activeTab === 'users') {
+
+    <section class="admin-section">
+
+      <div class="section-heading section-heading-row">
+
+        <div>
+          <span class="eyebrow">ACCESS MANAGEMENT</span>
+
+          <h2>Users & Roles</h2>
+
+          <p>
+            Manage organization members and their platform permissions.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="inviteUser()"
+        >
+          + Invite User
+        </button>
+
+      </div>
+
+      <div class="users-layout">
+
+        <div class="panel users-panel">
+
+          <div class="toolbar">
+
+            <div class="search-box">
+              <span>⌕</span>
+
+              <input
+                type="text"
+                placeholder="Search users..."
+                [(ngModel)]="searchUser"
+              />
+            </div>
+
+            <select [(ngModel)]="selectedUserRole">
+              <option>All Roles</option>
+              <option>Organization Admin</option>
+              <option>Reviewer</option>
+              <option>Approver</option>
+              <option>Contributor</option>
+              <option>Reader / Auditor</option>
+            </select>
+
+            <select [(ngModel)]="selectedUserStatus">
+              <option>All Status</option>
+              <option>Active</option>
+              <option>Invited</option>
+              <option>Suspended</option>
+            </select>
+
+            <button
+              type="button"
+              class="clear-button"
+              (click)="clearUserFilters()"
+            >
+              Clear
+            </button>
+
+          </div>
+
+          <div class="table-wrapper">
+
+            <table>
+
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Department</th>
+                  <th>Status</th>
+                  <th>Last Active</th>
+                  <th></th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                @for (user of filteredUsers; track user.email) {
+
+                  <tr>
+
+                    <td>
+                      <div class="user-cell">
+
+                        <div class="user-avatar">
+                          {{ user.name.charAt(0) }}
+                        </div>
+
+                        <div>
+                          <strong>{{ user.name }}</strong>
+                          <span>{{ user.email }}</span>
+                        </div>
+
+                      </div>
+                    </td>
+
+                    <td>
+                      <span class="role-badge">
+                        {{ user.role }}
+                      </span>
+                    </td>
+
+                    <td>{{ user.department }}</td>
+
+                    <td>
+                      <span
+                        class="status-badge"
+                        [class.active-status]="user.status === 'Active'"
+                        [class.invited-status]="user.status === 'Invited'"
+                        [class.suspended-status]="user.status === 'Suspended'"
+                      >
+                        {{ user.status }}
+                      </span>
+                    </td>
+
+                    <td>{{ user.lastActive }}</td>
+
+                    <td>
+                      <button
+                        type="button"
+                        class="more-button"
+                        (click)="editUser(user)"
+                      >
+                        •••
+                      </button>
+                    </td>
+
+                  </tr>
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+          @if (filteredUsers.length === 0) {
+            <div class="empty-state">
+              <strong>No users found</strong>
+              <span>Try changing your search or filters.</span>
+            </div>
+          }
+
+        </div>
+
+      </div>
+
+      <div class="section-heading roles-heading">
+        <div>
+          <span class="eyebrow">ROLE DEFINITIONS</span>
+          <h2>Roles & Permissions</h2>
+        </div>
+      </div>
+
+      <div class="roles-grid">
+
+        @for (role of roles; track role.name) {
+
+          <div class="role-card">
+
+            <div class="role-card-header">
+
+              <div class="role-icon">
+                {{ role.name.charAt(0) }}
+              </div>
+
+              <div>
+                <h3>{{ role.name }}</h3>
+                <span>{{ role.users }} assigned users</span>
+              </div>
+
+            </div>
+
+            <p>{{ role.description }}</p>
+
+            <div class="permission-list">
+
+              @for (
+                permission of role.permissions;
+                track permission
+              ) {
+                <span>
+                  <b>✓</b>
+                  {{ permission }}
+                </span>
+              }
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+  }
+
+  <!-- DOCUMENT TYPES -->
+  @if (activeTab === 'documents') {
+
+    <section class="admin-section">
+
+      <div class="section-heading section-heading-row">
+
+        <div>
+          <span class="eyebrow">DOCUMENT CONFIGURATION</span>
+
+          <h2>Document Types</h2>
+
+          <p>
+            Configure supported document types, extraction fields and workflows.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="saveSettings()"
+        >
+          + Add Document Type
+        </button>
+
+      </div>
+
+      <div class="document-types-grid">
+
+        @for (
+          documentType of documentTypes;
+          track documentType.code
+        ) {
+
+          <div class="document-type-card">
+
+            <div class="document-type-header">
+
+              <div class="document-type-icon">
+                PDF
+              </div>
+
+              <div class="document-type-title">
+                <h3>{{ documentType.name }}</h3>
+                <span>{{ documentType.code }}</span>
+              </div>
+
+              <label class="toggle">
+
+                <input
+                  type="checkbox"
+                  [(ngModel)]="documentType.enabled"
+                />
+
+                <span class="toggle-slider"></span>
+
+              </label>
+
+            </div>
+
+            <p>
+              {{ documentType.description }}
+            </p>
+
+            <div class="document-type-meta">
+
+              <div>
+                <span>FIELDS</span>
+                <strong>{{ documentType.fields }}</strong>
+              </div>
+
+              <div>
+                <span>WORKFLOW</span>
+                <strong>{{ documentType.workflow }}</strong>
+              </div>
+
+            </div>
+
+            <div class="card-footer">
+
+              <span
+                class="enabled-label"
+                [class.disabled]="!documentType.enabled"
+              >
+                {{ documentType.enabled ? 'Enabled' : 'Disabled' }}
+              </span>
+
+              <button
+                type="button"
+                class="text-button"
+                (click)="configureDocumentType(documentType)"
+              >
+                Configure →
+              </button>
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+  }
+
+  <!-- WORKFLOW -->
+  @if (activeTab === 'workflow') {
+
+    <section class="admin-section">
+
+      <div class="section-heading">
+
+        <span class="eyebrow">WORKFLOW CONFIGURATION</span>
+
+        <h2>Document processing pipeline</h2>
+
+        <p>
+          Define how documents move from intake through review and approval.
+        </p>
+
+      </div>
+
+      <div class="workflow-layout">
+
+        <div class="panel workflow-panel">
+
+          <div class="workflow-header">
+            <div>
+              <h3>Default processing workflow</h3>
+              <p>
+                Documents follow these steps unless a document type
+                defines an override.
+              </p>
+            </div>
+
+            <span class="workflow-status">
+              Active
+            </span>
+          </div>
+
+          <div class="workflow-list">
+
+            @for (step of workflowSteps; track step.number) {
+
+              <div class="workflow-step">
+
+                <div class="workflow-line">
+
+                  <div class="workflow-number">
+                    {{ step.number }}
+                  </div>
+
+                  @if (step.number < workflowSteps.length) {
+                    <div class="connector"></div>
+                  }
+
+                </div>
+
+                <div class="workflow-content">
+
+                  <div>
+                    <h3>{{ step.title }}</h3>
+                    <p>{{ step.description }}</p>
+                  </div>
+
+                  <span class="enabled-pill">
+                    Enabled
+                  </span>
+
+                </div>
+
+              </div>
+
+            }
+
+          </div>
+
+        </div>
+
+        <div class="panel settings-panel">
+
+          <div class="panel-header">
+            <div>
+              <h3>Automation rules</h3>
+              <p>Control automatic processing behavior.</p>
+            </div>
+          </div>
+
+          <div class="setting-list">
+
+            <label class="setting-row">
+              <div>
+                <strong>Automatic classification</strong>
+                <span>Classify documents using AI.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                [(ngModel)]="workflowSettings.autoClassification"
+              />
+            </label>
+
+            <label class="setting-row">
+              <div>
+                <strong>Automatic extraction</strong>
+                <span>Extract configured fields automatically.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                [(ngModel)]="workflowSettings.autoExtraction"
+              />
+            </label>
+
+            <label class="setting-row">
+              <div>
+                <strong>Require human review</strong>
+                <span>Route extracted data to a reviewer.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                [(ngModel)]="workflowSettings.requireReview"
+              />
+            </label>
+
+            <label class="setting-row">
+              <div>
+                <strong>Require approval</strong>
+                <span>Require an authorized approver.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                [(ngModel)]="workflowSettings.requireApproval"
+              />
+            </label>
+
+            <label class="setting-row">
+              <div>
+                <strong>Low confidence review</strong>
+                <span>Flag fields below confidence threshold.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                [(ngModel)]="workflowSettings.lowConfidenceReview"
+              />
+            </label>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+  }
+
+  <!-- RETENTION -->
+  @if (activeTab === 'retention') {
+
+    <section class="admin-section">
+
+      <div class="section-heading">
+
+        <span class="eyebrow">DATA GOVERNANCE</span>
+
+        <h2>Retention & Lifecycle</h2>
+
+        <p>
+          Control document retention, archival and deletion policies.
+        </p>
+
+      </div>
+
+      <div class="retention-grid">
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <div>
+              <h3>Retention policy</h3>
+              <p>
+                Documents are retained according to your organization policy.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Default retention period</label>
+
+            <select [(ngModel)]="retentionPeriod">
+              <option>1 year</option>
+              <option>3 years</option>
+              <option>5 years</option>
+              <option>7 years</option>
+              <option>10 years</option>
+              <option>Indefinite</option>
+            </select>
+
+            <span class="field-help">
+              Applies to newly created document records unless overridden.
+            </span>
+          </div>
+
+          <div class="retention-info">
+
+            <div class="info-icon">i</div>
+
+            <div>
+              <strong>Legal hold protection</strong>
+
+              <p>
+                Documents under legal hold cannot be automatically
+                deleted until the hold is released.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel lifecycle-panel">
+
+          <div class="panel-header">
+            <div>
+              <h3>Lifecycle actions</h3>
+              <p>Configure automated document lifecycle events.</p>
+            </div>
+          </div>
+
+          <label class="setting-row">
+            <div>
+              <strong>Automatic archival</strong>
+              <span>Archive documents after the active period.</span>
+            </div>
+
+            <input type="checkbox" checked />
+          </label>
+
+          <label class="setting-row">
+            <div>
+              <strong>Deletion notifications</strong>
+              <span>Notify owners before permanent deletion.</span>
+            </div>
+
+            <input type="checkbox" checked />
+          </label>
+
+          <label class="setting-row">
+            <div>
+              <strong>Version retention</strong>
+              <span>Keep historical document versions.</span>
+            </div>
+
+            <input type="checkbox" checked />
+          </label>
+
+          <label class="setting-row">
+            <div>
+              <strong>Legal hold</strong>
+              <span>Allow authorized users to place documents on hold.</span>
+            </div>
+
+            <input type="checkbox" checked />
+          </label>
+
+        </div>
+
+      </div>
+
+    </section>
+  }
+
+  <!-- SECURITY -->
+  @if (activeTab === 'security') {
+
+    <section class="admin-section">
+
+      <div class="section-heading">
+
+        <span class="eyebrow">SECURITY & COMPLIANCE</span>
+
+        <h2>Security Controls</h2>
+
+        <p>
+          Configure authentication, session security and audit controls.
+        </p>
+
+      </div>
+
+      <div class="security-grid">
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <div>
+              <h3>Authentication & access</h3>
+              <p>Organization-wide security policies.</p>
+            </div>
+          </div>
+
+          <div class="setting-list">
+
+            <label class="setting-row">
+              <div>
+                <strong>Require MFA</strong>
+                <span>Require multi-factor authentication for users.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                [(ngModel)]="securitySettings.requireMfa"
+              />
+            </label>
+
+            <label class="setting-row">
+              <div>
+                <strong>Single Sign-On</strong>
+                <span>Allow users to authenticate through enterprise SSO.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                [(ngModel)]="securitySettings.ssoEnabled"
+              />
+            </label>
+
+            <label class="setting-row">
+              <div>
+                <strong>IP restrictions</strong>
+                <span>Restrict access to approved network ranges.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                [(ngModel)]="securitySettings.ipRestriction"
+              />
+            </label>
+
+            <label class="setting-row">
+              <div>
+                <strong>Session timeout</strong>
+                <span>Automatically expire inactive sessions.</span>
+              </div>
+
+              <input
+                type="checkbox"
+                [(ngModel)]="securitySettings.sessionTimeoutEnabled"
+              />
+            </label>
+
+          </div>
+
+          @if (securitySettings.sessionTimeoutEnabled) {
+
+            <div class="form-group session-field">
+
+              <label>Session timeout duration</label>
+
+              <select [(ngModel)]="sessionTimeout">
+                <option>15 minutes</option>
+                <option>30 minutes</option>
+                <option>60 minutes</option>
+                <option>2 hours</option>
+                <option>4 hours</option>
+              </select>
+
+            </div>
+
+          }
+
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-header">
+            <div>
+              <h3>Audit & monitoring</h3>
+              <p>Track important platform activity.</p>
+            </div>
+
+            <span class="secure-pill">
+              Protected
+            </span>
+          </div>
+
+          <div class="audit-summary">
+
+            <div class="audit-icon">✓</div>
+
+            <div>
+              <strong>Audit logging enabled</strong>
+
+              <p>
+                Administrative, authentication, document and
+                workflow events are captured.
+              </p>
+            </div>
+
+          </div>
+
+          <label class="setting-row">
+
+            <div>
+              <strong>Audit logging</strong>
+              <span>Record security and administrative events.</span>
+            </div>
+
+            <input
+              type="checkbox"
+              [(ngModel)]="securitySettings.auditLogging"
+            />
+
+          </label>
+
+          <div class="security-events">
+
+            <div>
+              <span>Last security event</span>
+              <strong>06 Oct 2026 · 03:41 PM</strong>
+            </div>
+
+            <div>
+              <span>Audit events this month</span>
+              <strong>2,481</strong>
+            </div>
+
+            <div>
+              <span>Failed login attempts</span>
+              <strong>7</strong>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+  }
+
+  <!-- INTEGRATIONS -->
+  @if (activeTab === 'integrations') {
+
+    <section class="admin-section">
+
+      <div class="section-heading section-heading-row">
+
+        <div>
+
+          <span class="eyebrow">CONNECTED SYSTEMS</span>
+
+          <h2>Integrations</h2>
+
+          <p>
+            Connect DocuNexa with storage, business systems and external APIs.
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="saveSettings()"
+        >
+          + Add Integration
+        </button>
+
+      </div>
+
+      <div class="integration-grid">
+
+        @for (
+          integration of integrations;
+          track integration.name
+        ) {
+
+          <div class="integration-card">
+
+            <div class="integration-header">
+
+              <div class="integration-icon">
+                {{ integration.name.charAt(0) }}
+              </div>
+
+              <div>
+                <h3>{{ integration.name }}</h3>
+                <span>{{ integration.type }}</span>
+              </div>
+
+            </div>
+
+            <p>
+              {{ integration.description }}
+            </p>
+
+            <div class="integration-status">
+
+              <span
+                class="status-badge"
+                [class.connected]="integration.status === 'Connected'"
+                [class.warning]="integration.status === 'Configuration Required'"
+              >
+                {{ integration.status }}
+              </span>
+
+              <span>
+                {{ integration.lastSync }}
+              </span>
+
+            </div>
+
+            <div class="card-footer">
+
+              <span class="sync-label">
+                Last synchronization
+              </span>
+
+              <button
+                type="button"
+                class="text-button"
+                (click)="configureIntegration(integration)"
+              >
+                Configure →
+              </button>
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+  }
+
+</div>

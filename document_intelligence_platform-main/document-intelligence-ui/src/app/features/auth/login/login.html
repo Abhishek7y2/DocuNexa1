@@ -1,0 +1,266 @@
+<div class="auth-split-wrapper">
+  <!-- LEFT VISUAL SIDE (Hero Showcase) -->
+  <div class="visual-side">
+    <div class="visual-brand">
+      <div class="brand-badge">DN</div>
+      <div class="brand-title">
+        <strong>DocuNexa</strong>
+        <span>Document Intelligence Platform</span>
+      </div>
+    </div>
+
+    <div class="visual-content">
+      <span class="visual-eyebrow">AI · POWERED DOCUMENT INTELLIGENCE</span>
+      <h1 class="visual-heading">Transform Your Document <span class="highlight-purple">Processing</span> Pipeline</h1>
+      <p class="visual-description">
+        Automate intake, OCR scanning, AI classification, key-value extraction, and multi-tier approval workflows with enterprise security.
+      </p>
+
+      <!-- Hero Showcase Card -->
+      <div class="showcase-card">
+        <div class="showcase-header">
+          <span class="status-dot"></span>
+          <span class="showcase-tag">LIVE PROCESSING PIPELINE</span>
+        </div>
+
+        <div class="showcase-body">
+          <div class="pipeline-item active">
+            <div class="item-icon">📄</div>
+            <div class="item-info">
+              <strong>Supplier_Master_Agreement_2026.pdf</strong>
+              <span>Supplier Contract · 4.8 MB · Ingestion Complete</span>
+            </div>
+            <span class="badge badge-success">98.4% Confidence</span>
+          </div>
+
+          <div class="pipeline-stats">
+            <div class="stat-box">
+              <span class="stat-val">1,248</span>
+              <span class="stat-lbl">Processed Docs</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-val">96.4%</span>
+              <span class="stat-lbl">OCR Accuracy</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-val">24</span>
+              <span class="stat-lbl">Review Queue</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="visual-footer">
+      <span>© 2026 DocuNexa Inc. All rights reserved.</span>
+      <div class="footer-links">
+        <a href="javascript:void(0)">Privacy Policy</a>
+        <a href="javascript:void(0)">Security</a>
+        <a href="javascript:void(0)">Support</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT AUTH SIDE (Sign-in Form Card) -->
+  <div class="auth-side">
+    <div class="auth-card">
+      <div class="card-header">
+        <span class="eyebrow-tag">SECURE WORKSPACE</span>
+        <h2 class="card-title">Sign in</h2>
+        <p class="card-subtitle">
+          Welcome back! Enter your details to access your document intelligence workspace.
+        </p>
+      </div>
+
+      <!-- Quick Role Selector Pills -->
+      <div class="role-selector">
+        <span class="selector-label">Quick Demo Access:</span>
+        <div class="role-pills">
+          <button
+            type="button"
+            class="pill"
+            [class.active]="email === 'abhishek7y2@gmail.com'"
+            (click)="selectRole('abhishek7y2@gmail.com')"
+          >
+            Admin
+          </button>
+          <button
+            type="button"
+            class="pill"
+            [class.active]="email === 'rahul7y2@gmail.com'"
+            (click)="selectRole('rahul7y2@gmail.com')"
+          >
+            Reviewer
+          </button>
+          <button
+            type="button"
+            class="pill"
+            [class.active]="email === 'priya7y2@gmail.com'"
+            (click)="selectRole('priya7y2@gmail.com')"
+          >
+            Approver
+          </button>
+        </div>
+      </div>
+
+      <form (ngSubmit)="login()" novalidate class="auth-form">
+        <!-- EMAIL FIELD -->
+        <div class="form-group">
+          <label for="workEmail">Work Email</label>
+          <div
+            class="input-wrapper"
+            [class.has-error]="emailError && (emailTouched || isSubmitted)"
+            [class.is-valid]="emailValid && emailTouched && !emailError"
+          >
+            <span class="input-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </span>
+            <input
+              id="workEmail"
+              type="email"
+              name="email"
+              [(ngModel)]="email"
+              (input)="onEmailChange()"
+              (blur)="onEmailBlur()"
+              [attr.aria-invalid]="emailError && (emailTouched || isSubmitted) ? 'true' : 'false'"
+              [attr.aria-describedby]="emailError && (emailTouched || isSubmitted) ? 'email-error' : null"
+              placeholder="you@company.com"
+              autocomplete="email"
+              maxlength="254"
+              spellcheck="false"
+            />
+            @if (emailValid && emailTouched && !emailError) {
+              <span class="valid-icon" title="Valid email format" aria-hidden="true">✓</span>
+            }
+          </div>
+          @if (emailError && (emailTouched || isSubmitted)) {
+            <div id="email-error" class="field-error" role="alert">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>{{ emailError }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- PASSWORD FIELD -->
+        <div class="form-group">
+          <div class="label-row">
+            <label for="accountPassword">Password</label>
+            <a [routerLink]="['/verify-email']" [queryParams]="email ? { email: email } : null" class="forgot-link">Forgot password?</a>
+          </div>
+          <div
+            class="input-wrapper"
+            [class.has-error]="passwordError && (passwordTouched || isSubmitted)"
+            [class.is-valid]="passwordValid && passwordTouched && !passwordError"
+          >
+            <span class="input-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <input
+              id="accountPassword"
+              [type]="showPassword ? 'text' : 'password'"
+              name="password"
+              [(ngModel)]="password"
+              (input)="onPasswordChange()"
+              (blur)="onPasswordBlur()"
+              [attr.aria-invalid]="passwordError && (passwordTouched || isSubmitted) ? 'true' : 'false'"
+              [attr.aria-describedby]="passwordError && (passwordTouched || isSubmitted) ? 'password-error' : null"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              maxlength="128"
+            />
+            <button
+              type="button"
+              class="toggle-pass"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+          @if (passwordError && (passwordTouched || isSubmitted)) {
+            <div id="password-error" class="field-error" role="alert">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>{{ passwordError }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- REMEMBER ME -->
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [(ngModel)]="rememberMe"
+              name="rememberMe"
+            />
+            <span>Remember me for 30 days</span>
+          </label>
+        </div>
+
+        <!-- SERVER / GENERIC AUTH ERROR ALERT -->
+        @if (errorMessage) {
+          <div class="alert-error" role="alert">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>{{ errorMessage }}</span>
+          </div>
+        }
+
+        <!-- SUBMIT BUTTON -->
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="isLoading"
+        >
+          @if (isLoading) {
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Authenticating...</span>
+          } @else {
+            <span>Sign in to Workspace</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14"/>
+              <path d="m12 5 7 7-7 7"/>
+            </svg>
+          }
+        </button>
+
+        <div style="display: flex; align-items: center; margin: 16px 0; color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+          <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+          <span style="padding: 0 12px;">OR ENTERPRISE SSO</span>
+          <div style="flex: 1; height: 1px; background: #e2e8f0;"></div>
+        </div>
+
+        <button
+          type="button"
+          (click)="loginWithSso()"
+          style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; color: #1e293b; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>Sign in with Enterprise SAML / Okta SSO</span>
+        </button>
+      </form>
+
+      <div class="security-badge">
+        <span class="lock-icon" aria-hidden="true">🔒</span>
+        <span>256-Bit SSL Encryption · SOC2 Type II Certified</span>
+      </div>
+    </div>
+  </div>
+</div>

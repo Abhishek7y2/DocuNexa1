@@ -1,0 +1,198 @@
+<!-- MOBILE OVERLAY -->
+<div
+  class="sidebar-overlay"
+  [class.visible]="uiState.sidebarOpen()"
+  (click)="closeMobileSidebar()"
+></div>
+
+<!-- SIDEBAR -->
+<aside
+  class="sidebar"
+  [class.mobile-open]="uiState.sidebarOpen()"
+>
+
+  <!-- BRAND -->
+  <div class="brand">
+
+    <div class="brand-icon">
+      DN
+    </div>
+
+    <div class="brand-text">
+      <strong>DocuNexa</strong>
+      <span>Document Intelligence</span>
+    </div>
+
+    <button
+      type="button"
+      class="mobile-close"
+      (click)="closeMobileSidebar()"
+      aria-label="Close navigation"
+    >
+      ×
+    </button>
+
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav class="sidebar-nav">
+
+    <!-- WORKSPACE -->
+    <div class="nav-section">
+
+      <span class="section-title">
+        WORKSPACE
+      </span>
+
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeMobileSidebar()"
+      >
+        <span class="nav-icon">⌂</span>
+        <span>Dashboard</span>
+      </a>
+
+      <a
+        routerLink="/documents"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeMobileSidebar()"
+      >
+        <span class="nav-icon">▤</span>
+        <span>Documents</span>
+      </a>
+
+      <a
+        routerLink="/intake"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeMobileSidebar()"
+      >
+        <span class="nav-icon">↑</span>
+        <span>Intake</span>
+      </a>
+
+    </div>
+
+    <!-- WORKFLOW -->
+    <div class="nav-section">
+
+      <span class="section-title">
+        WORKFLOW
+      </span>
+
+      <a
+        routerLink="/review"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeMobileSidebar()"
+      >
+        <span class="nav-icon">✓</span>
+        <span>Review Queue</span>
+        <span class="nav-badge">24</span>
+      </a>
+
+      <a
+        routerLink="/compare"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeMobileSidebar()"
+      >
+        <span class="nav-icon">⇄</span>
+        <span>Version Compare</span>
+        <span class="nav-badge" style="background: #ede9fe; color: #7c3aed;">Diff</span>
+      </a>
+
+      <a
+        routerLink="/approvals"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeMobileSidebar()"
+      >
+        <span class="nav-icon">✓</span>
+        <span>Approvals</span>
+        <span class="nav-badge">7</span>
+      </a>
+
+      <a
+        routerLink="/tasks"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeMobileSidebar()"
+      >
+        <span class="nav-icon">□</span>
+        <span>Tasks</span>
+      </a>
+
+    </div>
+
+    <!-- INTELLIGENCE -->
+    <div class="nav-section">
+
+      <span class="section-title">
+        INTELLIGENCE
+      </span>
+
+      <a
+        routerLink="/search"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeMobileSidebar()"
+      >
+        <span class="nav-icon">⌕</span>
+        <span>Search</span>
+      </a>
+
+      <a
+        routerLink="/qa"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeMobileSidebar()"
+      >
+        <span class="nav-icon">?</span>
+        <span>AI Q&A</span>
+      </a>
+
+    </div>
+
+    <!-- MANAGEMENT -->
+    <div class="nav-section">
+
+      <span class="section-title">
+        MANAGEMENT
+      </span>
+
+      <a
+        routerLink="/admin"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeMobileSidebar()"
+      >
+        <span class="nav-icon">⚙</span>
+        <span>Admin</span>
+      </a>
+
+    </div>
+
+  </nav>
+
+  <!-- WORKSPACE CARD -->
+  <div class="workspace-card">
+
+    <span class="workspace-label">
+      WORKSPACE
+    </span>
+
+    <strong>
+      Acme Corporation
+    </strong>
+
+    <span class="workspace-status">
+      ● Active
+    </span>
+
+  </div>
+
+</aside>

@@ -1,0 +1,398 @@
+<div class="review-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-main">
+      <span class="eyebrow-badge">
+        <span class="badge-dot"></span>
+        WORKFLOW & COMPLIANCE
+      </span>
+      <h1 class="serif-title">Review Queue</h1>
+      <p class="subtitle">
+        Review AI-extracted metadata, resolve low-confidence field anomalies, and validate documents with Human-in-the-Loop oversight.
+      </p>
+    </div>
+
+    <div class="reviewer-card">
+      <div class="avatar-wrap">
+        <div class="reviewer-avatar">AY</div>
+        <span class="online-indicator" title="Active Reviewer"></span>
+      </div>
+      <div class="reviewer-details">
+        <strong class="reviewer-name">{{ reviewerName }}</strong>
+        <span class="reviewer-role">{{ reviewerRole }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI STATS CARDS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon pending">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Pending Review</span>
+        <strong class="stat-value">{{ pendingCount }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon priority">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">High Priority</span>
+        <strong class="stat-value">{{ highPriorityCount }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon confidence">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Low Confidence</span>
+        <strong class="stat-value">{{ lowConfidenceCount }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon completed">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Reviewed Today</span>
+        <strong class="stat-value">18</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTER TOOLBAR & QUICK TABS -->
+  <section class="control-section">
+    <div class="tab-pills">
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="activeTab === 'all'"
+        (click)="setTab('all')"
+      >
+        All Documents
+        <span class="count-tag">{{ totalCount }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="activeTab === 'pending'"
+        (click)="setTab('pending')"
+      >
+        Pending Review
+        <span class="count-tag amber">{{ pendingCount }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="activeTab === 'high'"
+        (click)="setTab('high')"
+      >
+        High Priority
+        <span class="count-tag red">{{ highPriorityCount }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="activeTab === 'low-confidence'"
+        (click)="setTab('low-confidence')"
+      >
+        Low AI Confidence
+        <span class="count-tag purple">{{ lowConfidenceCount }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="activeTab === 'approved'"
+        (click)="setTab('approved')"
+      >
+        Approved
+        <span class="count-tag green">{{ approvedCount }}</span>
+      </button>
+    </div>
+
+    <div class="filter-controls">
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input
+          type="text"
+          placeholder="Search by document title, ID, or reviewer..."
+          [(ngModel)]="searchTerm"
+        />
+        @if (searchTerm) {
+          <button type="button" class="clear-search" (click)="searchTerm = ''">✕</button>
+        }
+      </div>
+
+      <div class="select-group">
+        <select [(ngModel)]="selectedType">
+          <option>All Types</option>
+          <option>Supplier Contract</option>
+          <option>Purchase Invoice</option>
+          <option>Internal Policy</option>
+          <option>Financial Report</option>
+        </select>
+
+        <select [(ngModel)]="selectedPriority">
+          <option>All Priority</option>
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
+        </select>
+
+        <select [(ngModel)]="selectedStatus">
+          <option>All Status</option>
+          <option>Pending Review</option>
+          <option>In Review</option>
+          <option>Changes Requested</option>
+          <option>Approved</option>
+        </select>
+
+        <button
+          type="button"
+          class="reset-btn"
+          (click)="clearFilters()"
+          title="Reset all filters"
+        >
+          Reset Filters
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUEUE TABLE CARD -->
+  <section class="queue-card">
+    <div class="card-header">
+      <div class="header-left">
+        <span class="section-tag">AUDIT TRAIL & QUEUE</span>
+        <h2>Documents Awaiting Verification</h2>
+      </div>
+      <span class="result-count">
+        Showing {{ filteredDocuments.length }} of {{ reviewDocuments.length }} documents
+      </span>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>DOCUMENT DETAILS</th>
+            <th>DOCUMENT TYPE</th>
+            <th>PRIORITY</th>
+            <th>AI CONFIDENCE</th>
+            <th>REVIEW STATUS</th>
+            <th>SUBMITTED DATE</th>
+            <th class="text-right">ACTIONS</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (doc of filteredDocuments; track doc.id) {
+            <tr class="table-row">
+              <td>
+                <div class="doc-cell">
+                  <div class="pdf-icon-badge">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span>PDF</span>
+                  </div>
+                  <div class="doc-info">
+                    <a [routerLink]="['/documents', doc.id]" class="doc-title">
+                      {{ doc.name }}
+                    </a>
+                    <div class="doc-meta">
+                      <span class="doc-id">{{ doc.id }}</span>
+                      <span class="bullet">•</span>
+                      <span>{{ doc.pages }} pages</span>
+                      <span class="bullet">•</span>
+                      <span class="owner-name">{{ doc.owner }}</span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <span class="type-pill">{{ doc.type }}</span>
+              </td>
+
+              <td>
+                <span
+                  class="priority-tag"
+                  [class.high]="doc.priority === 'High'"
+                  [class.medium]="doc.priority === 'Medium'"
+                  [class.low]="doc.priority === 'Low'"
+                >
+                  <span class="priority-dot"></span>
+                  {{ doc.priority }}
+                </span>
+              </td>
+
+              <td>
+                <div class="confidence-cell">
+                  <div class="meter-bar">
+                    <div
+                      class="meter-fill"
+                      [style.width.%]="doc.confidence"
+                      [class.low-fill]="doc.confidence < 90"
+                    ></div>
+                  </div>
+                  <strong
+                    class="confidence-value"
+                    [class.low-value]="doc.confidence < 90"
+                  >
+                    {{ doc.confidence }}%
+                  </strong>
+                </div>
+              </td>
+
+              <td>
+                <span
+                  class="status-chip"
+                  [class.pending]="doc.status === 'Pending Review'"
+                  [class.reviewing]="doc.status === 'In Review'"
+                  [class.changes]="doc.status === 'Changes Requested'"
+                  [class.approved]="doc.status === 'Approved'"
+                >
+                  {{ doc.status }}
+                </span>
+              </td>
+
+              <td>
+                <span class="submitted-date">{{ doc.submittedAt }}</span>
+              </td>
+
+              <td class="text-right">
+                <div class="action-buttons">
+                  <a
+                    [routerLink]="['/review', doc.id]"
+                    class="btn-review"
+                  >
+                    <span>Verify (HITL Workbench)</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </a>
+
+                  <button
+                    type="button"
+                    class="btn-quick-approve"
+                    (click)="openActionPanel(doc, 'Approve')"
+                    title="Quick Approve"
+                  >
+                    ✓
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn-more"
+                    (click)="openActionPanel(doc, 'Request Changes')"
+                    title="Request Changes / Action"
+                  >
+                    •••
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (filteredDocuments.length === 0) {
+        <div class="empty-state-card">
+          <div class="empty-icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <h3>No documents match your filter criteria</h3>
+          <p>Try adjusting your search terms, document status, or priority filters.</p>
+          <button type="button" class="btn-clear-all" (click)="clearFilters()">
+            Clear All Filters
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- ACTION MODAL DIALOG -->
+  @if (showActionPanel && selectedDocument) {
+    <div class="modal-backdrop" (click)="closeActionPanel()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <span class="modal-eyebrow">VERIFICATION ACTION</span>
+            <h2>{{ actionType }} Document</h2>
+          </div>
+          <button type="button" class="btn-close" (click)="closeActionPanel()">✕</button>
+        </div>
+
+        <div class="modal-doc-summary">
+          <div class="pdf-icon-badge">
+            <span>PDF</span>
+          </div>
+          <div class="doc-summary-text">
+            <strong>{{ selectedDocument.name }}</strong>
+            <span>{{ selectedDocument.id }} • {{ selectedDocument.type }} • AI Confidence: {{ selectedDocument.confidence }}%</span>
+          </div>
+        </div>
+
+        @if (actionType === 'Request Changes') {
+          <div class="form-group">
+            <label for="reviewComment">
+              Reviewer Notes / Required Corrections
+              <span class="required">*</span>
+            </label>
+            <textarea
+              id="reviewComment"
+              rows="4"
+              placeholder="Specify fields needing correction or missing information..."
+              [(ngModel)]="actionComment"
+            ></textarea>
+          </div>
+        }
+
+        @if (actionType === 'Approve') {
+          <div class="alert-box approve-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+              <strong>Confirm Document Approval</strong>
+              <p>This document will be marked as Human-Verified and promoted to the downstream approval workflow.</p>
+            </div>
+          </div>
+        }
+
+        @if (actionType === 'Reject') {
+          <div class="alert-box reject-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <div>
+              <strong>Reject Document</strong>
+              <p>The submitter will be notified to re-upload or update source document files.</p>
+            </div>
+          </div>
+        }
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeActionPanel()">
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn-confirm"
+            [class.btn-danger]="actionType === 'Reject'"
+            [disabled]="actionType === 'Request Changes' && !actionComment.trim()"
+            (click)="confirmAction()"
+          >
+            Confirm {{ actionType }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

@@ -1,0 +1,13 @@
+# Node / Angular build outputs
+node_modules/
+dist/
+.angular/
+tmp/
+out-tsc/
+scratch/
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+*.log

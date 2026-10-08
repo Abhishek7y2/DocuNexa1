@@ -1,0 +1,730 @@
+<div class="approvals-page">
+
+  <!-- HEADER -->
+
+  <div class="page-header">
+
+    <div>
+      <span class="eyebrow">
+        WORKFLOW
+      </span>
+
+      <h1>
+        Approvals
+      </h1>
+
+      <p>
+        Review documents that have completed validation
+        and are awaiting final approval.
+      </p>
+    </div>
+
+    <div class="approver-info">
+
+      <div class="approver-avatar">
+        AY
+      </div>
+
+      <div>
+        <strong>Abhishek Yadav</strong>
+        <span>Approver</span>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- STATS -->
+
+  <div class="stats-grid">
+
+    <div class="stat-card">
+
+      <div class="stat-icon pending">
+        !
+      </div>
+
+      <div>
+        <span>Pending Approval</span>
+        <strong>{{ pendingCount }}</strong>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon priority">
+        ↑
+      </div>
+
+      <div>
+        <span>High Priority</span>
+        <strong>{{ highPriorityCount }}</strong>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon value">
+        ₹
+      </div>
+
+      <div>
+        <span>Pending Value</span>
+        <strong>{{ formattedTotalValue }}</strong>
+      </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+      <div class="stat-icon approved">
+        ✓
+      </div>
+
+      <div>
+        <span>Approved</span>
+        <strong>{{ approvedCount }}</strong>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- MULTI-TIER WORKFLOW PIPELINE STEPPER (BRD FR-013 & SCR-09) -->
+  <section class="workflow-stepper-card">
+    <div class="stepper-header">
+      <div>
+        <span class="stepper-eyebrow">GOVERNANCE & COMPLIANCE PIPELINE</span>
+        <h3>Enterprise Multi-Tier Approval Workflow</h3>
+      </div>
+      <div class="sod-banner-chip">
+        <span>🛡️ Separation of Duties (SoD) Policy Active</span>
+      </div>
+    </div>
+
+    <div class="stepper-pipeline">
+      <div class="step-node completed">
+        <div class="node-circle">✓</div>
+        <div class="node-text">
+          <strong>1. Intake Ingestion</strong>
+          <span>OCR Scanned & Classified</span>
+        </div>
+      </div>
+      <div class="connector completed"></div>
+
+      <div class="step-node completed">
+        <div class="node-circle">✓</div>
+        <div class="node-text">
+          <strong>2. HITL Review</strong>
+          <span>Fields Verified by Reviewer</span>
+        </div>
+      </div>
+      <div class="connector active"></div>
+
+      <div class="step-node active">
+        <div class="node-circle">●</div>
+        <div class="node-text">
+          <strong>3. Approval Sign-Off</strong>
+          <span>Current Department Queue</span>
+        </div>
+      </div>
+      <div class="connector"></div>
+
+      <div class="step-node">
+        <div class="node-circle">4</div>
+        <div class="node-text">
+          <strong>4. Final ERP Lock</strong>
+          <span>Exported & Compliance Sealed</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- FILTERS -->
+
+  <section class="filter-card">
+
+    <div class="search-box">
+
+      <span>⌕</span>
+
+      <input
+        type="text"
+        placeholder="Search documents, IDs or users..."
+        [(ngModel)]="searchTerm"
+      />
+
+    </div>
+
+
+    <select [(ngModel)]="selectedType">
+
+      <option>All Types</option>
+      <option>Supplier Contract</option>
+      <option>Purchase Invoice</option>
+      <option>Internal Policy</option>
+
+    </select>
+
+
+    <select [(ngModel)]="selectedPriority">
+
+      <option>All Priority</option>
+      <option>High</option>
+      <option>Medium</option>
+      <option>Low</option>
+
+    </select>
+
+
+    <select [(ngModel)]="selectedStatus">
+
+      <option>All Status</option>
+      <option>Pending Approval</option>
+      <option>In Approval</option>
+      <option>Approved</option>
+      <option>Rejected</option>
+
+    </select>
+
+
+    <button
+      type="button"
+      class="clear-button"
+      (click)="clearFilters()"
+    >
+      Clear
+    </button>
+
+  </section>
+
+
+  <!-- APPROVAL QUEUE -->
+
+  <section class="queue-card">
+
+    <div class="queue-header">
+
+      <div>
+        <span class="eyebrow">
+          APPROVAL QUEUE
+        </span>
+
+        <h2>
+          Documents Awaiting Approval
+        </h2>
+      </div>
+
+      <span class="queue-count">
+        {{ filteredDocuments.length }} results
+      </span>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>DOCUMENT</th>
+            <th>TYPE</th>
+            <th>VALUE</th>
+            <th>PRIORITY</th>
+            <th>REVIEWED BY</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          @for (
+            document of filteredDocuments;
+            track document.id
+          ) {
+
+            <tr>
+
+              <td>
+
+                <div class="document-cell">
+
+                  <div class="file-icon">
+                    PDF
+                  </div>
+
+                  <div>
+
+                    <a
+                      [routerLink]="[
+                        '/documents',
+                        document.id
+                      ]"
+                    >
+                      {{ document.name }}
+                    </a>
+
+                    <span>
+                      {{ document.id }}
+                      ·
+                      {{ document.pages }} pages
+                      ·
+                      By {{ document.submittedBy }}
+                    </span>
+
+                    @if (isSelfSubmission(document)) {
+                      <span class="sod-chip" title="Separation of Duties (SoD): You uploaded this document. Self-approval is blocked by compliance policy.">
+                        🛡️ SoD Protected
+                      </span>
+                    }
+                  </div>
+
+                </div>
+
+              </td>
+
+
+              <td>
+
+                <span class="type-label">
+                  {{ document.type }}
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <strong class="document-value">
+                  {{ document.documentValue }}
+                </strong>
+
+              </td>
+
+
+              <td>
+
+                <span
+                  class="priority-badge"
+                  [class.high]="
+                    document.priority === 'High'
+                  "
+                  [class.medium]="
+                    document.priority === 'Medium'
+                  "
+                  [class.low]="
+                    document.priority === 'Low'
+                  "
+                >
+                  {{ document.priority }}
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <div class="reviewer-cell">
+
+                  <div class="small-avatar">
+                    {{
+                      document.reviewedBy
+                        .charAt(0)
+                    }}
+                  </div>
+
+                  <span>
+                    {{ document.reviewedBy }}
+                  </span>
+
+                </div>
+
+              </td>
+
+
+              <td>
+
+                <span
+                  class="status-badge"
+                  [class.pending]="
+                    document.status ===
+                    'Pending Approval'
+                  "
+                  [class.approval]="
+                    document.status ===
+                    'In Approval'
+                  "
+                  [class.approved]="
+                    document.status ===
+                    'Approved'
+                  "
+                  [class.rejected]="
+                    document.status ===
+                    'Rejected'
+                  "
+                >
+                  {{ document.status }}
+                </span>
+
+              </td>
+
+
+              <td>
+
+                @if (
+                  document.status ===
+                    'Pending Approval' ||
+                  document.status ===
+                    'In Approval'
+                ) {
+
+                  <div class="actions">
+
+                    <button
+                      type="button"
+                      class="approve-button"
+                      [disabled]="isSelfSubmission(document)"
+                      [class.sod-disabled]="isSelfSubmission(document)"
+                      [title]="isSelfSubmission(document) ? 'Separation of Duties Policy: As the document submitter, you cannot approve your own submission.' : 'Approve Document'"
+                      (click)="
+                        openActionPanel(
+                          document,
+                          'Approve'
+                        )
+                      "
+                    >
+                      Approve
+                    </button>
+
+                    <button
+                      type="button"
+                      class="reject-button"
+                      (click)="
+                        openActionPanel(
+                          document,
+                          'Reject'
+                        )
+                      "
+                    >
+                      Reject
+                    </button>
+
+                  </div>
+
+                } @else {
+
+                  <span class="completed-label">
+                    Completed
+                  </span>
+
+                }
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+
+      @if (filteredDocuments.length === 0) {
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            ✓
+          </div>
+
+          <h3>
+            No approval requests found
+          </h3>
+
+          <p>
+            Try changing your filters or search term.
+          </p>
+
+          <button
+            type="button"
+            (click)="clearFilters()"
+          >
+            Clear Filters
+          </button>
+
+        </div>
+
+      }
+
+    </div>
+
+  </section>
+
+
+  <!-- APPROVAL HISTORY -->
+
+  <section class="history-card">
+
+    <div class="history-header">
+
+      <div>
+
+        <span class="eyebrow">
+          AUDIT TRAIL
+        </span>
+
+        <h2>
+          Recent Approval Activity
+        </h2>
+
+      </div>
+
+    </div>
+
+
+    <div class="timeline">
+
+      <div class="timeline-item">
+
+        <div class="timeline-dot approved-dot">
+          ✓
+        </div>
+
+        <div>
+
+          <strong>
+            Security Compliance Agreement approved
+          </strong>
+
+          <span>
+            Approved by Abhishek Yadav · 02 Oct 2026
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="timeline-item">
+
+        <div class="timeline-dot">
+          →
+        </div>
+
+        <div>
+
+          <strong>
+            Purchase Invoice - INV-78416 moved to approval
+          </strong>
+
+          <span>
+            Reviewed by Abhishek Yadav · 05 Oct 2026
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="timeline-item">
+
+        <div class="timeline-dot">
+          ✓
+        </div>
+
+        <div>
+
+          <strong>
+            Vendor Master Agreement review completed
+          </strong>
+
+          <span>
+            Reviewed by Rahul Sharma · 06 Oct 2026
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ACTION MODAL -->
+
+  @if (
+    showActionPanel &&
+    selectedDocument
+  ) {
+
+    <div
+      class="modal-backdrop"
+      (click)="closeActionPanel()"
+    >
+
+      <div
+        class="action-panel"
+        (click)="$event.stopPropagation()"
+      >
+
+        <div class="modal-header">
+
+          <div>
+
+            <span class="eyebrow">
+              FINAL DECISION
+            </span>
+
+            <h2>
+              {{ actionType }}
+            </h2>
+
+          </div>
+
+          <button
+            type="button"
+            class="close-button"
+            (click)="closeActionPanel()"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="modal-document">
+
+          <div class="file-icon">
+            PDF
+          </div>
+
+          <div>
+
+            <strong>
+              {{ selectedDocument.name }}
+            </strong>
+
+            <span>
+              {{ selectedDocument.id }}
+              ·
+              {{ selectedDocument.type }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        @if (actionType === 'Approve') {
+
+          <div class="confirmation-box approve">
+
+            <div class="confirmation-icon">
+              ✓
+            </div>
+
+            <div>
+
+              <strong>
+                Approve this document?
+              </strong>
+
+              <span>
+                This is the final approval decision.
+                The document will become an approved
+                record in the repository.
+              </span>
+
+            </div>
+
+          </div>
+
+        }
+
+
+        @if (actionType === 'Reject') {
+
+          <div class="comment-group" style="margin-bottom: 14px;">
+            <label for="reasonCodeSelect" style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px;">
+              Compliance Reason Code <span>*</span>
+            </label>
+            <select
+              id="reasonCodeSelect"
+              [(ngModel)]="selectedRejectionReason"
+              style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--color-border, #cbd5e1); font-size: 13px; font-weight: 600; color: #1e293b;"
+            >
+              @for (reason of rejectionReasons; track reason) {
+                <option [value]="reason">{{ reason }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="comment-group">
+
+            <label for="approvalComment">
+              Auditor Rejection Notes
+              <span>*</span>
+            </label>
+
+            <textarea
+              id="approvalComment"
+              rows="4"
+              placeholder="Provide specific notes and remediation instructions for the contributor..."
+              [(ngModel)]="actionComment"
+            ></textarea>
+
+          </div>
+
+        }
+
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeActionPanel()"
+          >
+            Cancel
+          </button>
+
+
+          <button
+            type="button"
+            class="primary-button"
+            [class.danger]="
+              actionType === 'Reject'
+            "
+            [disabled]="
+              actionType === 'Reject' &&
+              !actionComment.trim()
+            "
+            (click)="confirmAction()"
+          >
+            Confirm {{ actionType }}
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

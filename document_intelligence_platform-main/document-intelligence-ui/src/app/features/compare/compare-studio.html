@@ -1,0 +1,241 @@
+<div class="compare-studio-page">
+
+  <!-- TOP HEADER -->
+  <header class="studio-header">
+    <div class="header-left">
+      <a routerLink="/documents" class="btn-back">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Back to Documents</span>
+      </a>
+
+      <div>
+        <div class="title-row">
+          <span class="badge-studio">BRD SCR-08 · CLAUSE DIFF STUDIO</span>
+          <h1>{{ documentTitle }}</h1>
+        </div>
+        <p class="subtitle">
+          Comparing baseline version against current revision with automated clause change classification (AI-005).
+        </p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn-export" (click)="exportDiffReport()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <span>Export Diff Report</span>
+      </button>
+
+      <button type="button" class="btn-ack" (click)="acknowledgeDelta()">
+        <span>✓ Acknowledge Delta</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- KPI DIFF SUMMARY CARDS -->
+  <section class="diff-kpi-grid">
+    <div class="kpi-card added">
+      <div class="kpi-icon">+</div>
+      <div class="kpi-info">
+        <span class="kpi-lbl">Clauses Added</span>
+        <strong class="kpi-val">{{ addedCount }} New Clauses</strong>
+      </div>
+      <span class="kpi-tag green">+ Risk Added</span>
+    </div>
+
+    <div class="kpi-card removed">
+      <div class="kpi-icon">−</div>
+      <div class="kpi-info">
+        <span class="kpi-lbl">Clauses Removed</span>
+        <strong class="kpi-val">{{ removedCount }} Deleted Clauses</strong>
+      </div>
+      <span class="kpi-tag red">Exit Clause Omitted</span>
+    </div>
+
+    <div class="kpi-card modified">
+      <div class="kpi-icon">~</div>
+      <div class="kpi-info">
+        <span class="kpi-lbl">Terms Modified</span>
+        <strong class="kpi-val">{{ modifiedCount }} Altered Provisions</strong>
+      </div>
+      <span class="kpi-tag amber">Financial & Legal</span>
+    </div>
+
+    <div class="kpi-card unchanged">
+      <div class="kpi-icon">=</div>
+      <div class="kpi-info">
+        <span class="kpi-lbl">Unchanged Content</span>
+        <strong class="kpi-val">{{ unchangedCount }} Identical Clauses</strong>
+      </div>
+      <span class="kpi-tag slate">100% Match</span>
+    </div>
+  </section>
+
+  <!-- FILTER CONTROLS -->
+  <div class="filter-bar">
+    <div class="filter-pills">
+      <button 
+        type="button" 
+        class="filter-btn" 
+        [class.active]="activeFilter === 'changed'"
+        (click)="setFilter('changed')"
+      >
+        <span>Changed Clauses Only</span>
+        <span class="pill-count">{{ addedCount + removedCount + modifiedCount }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="filter-btn" 
+        [class.active]="activeFilter === 'financial'"
+        (click)="setFilter('financial')"
+      >
+        <span>Commercial & Payment Terms</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="filter-btn" 
+        [class.active]="activeFilter === 'compliance'"
+        (click)="setFilter('compliance')"
+      >
+        <span>Compliance & Legal Terms</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="filter-btn" 
+        [class.active]="activeFilter === 'all'"
+        (click)="setFilter('all')"
+      >
+        <span>All Clauses</span>
+        <span class="pill-count">{{ clauses.length }}</span>
+      </button>
+    </div>
+
+    <div class="legend-box">
+      <span class="legend-item"><span class="dot green"></span> Added</span>
+      <span class="legend-item"><span class="dot red"></span> Removed</span>
+      <span class="legend-item"><span class="dot amber"></span> Modified</span>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE / DUAL COLUMN CONTAINER -->
+  <div class="compare-container">
+
+    <!-- COLUMN HEADERS -->
+    <div class="column-headers-row">
+      <div class="col-header left">
+        <span class="version-badge v1">BASELINE</span>
+        <div>
+          <h3>{{ version1Tag }}</h3>
+          <span>Original Ingested Master Agreement</span>
+        </div>
+      </div>
+
+      <div class="col-header center">
+        <span>CHANGE ANALYSIS</span>
+      </div>
+
+      <div class="col-header right">
+        <span class="version-badge v2">CURRENT</span>
+        <div>
+          <h3>{{ version2Tag }}</h3>
+          <span>Executed Amendment Revision</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLAUSES LIST -->
+    <div class="clauses-list">
+      @for (clause of filteredClauses; track clause.id) {
+        <div 
+          class="clause-diff-card"
+          [class.diff-added]="clause.changeType === 'added'"
+          [class.diff-removed]="clause.changeType === 'removed'"
+          [class.diff-modified]="clause.changeType === 'modified'"
+          [class.diff-unchanged]="clause.changeType === 'unchanged'"
+        >
+          <!-- CARD HEADER -->
+          <div class="card-meta-bar">
+            <div class="meta-left">
+              <span class="sec-num">§ {{ clause.sectionNumber }}</span>
+              <strong class="clause-name">{{ clause.title }}</strong>
+              <span class="cat-badge">{{ clause.category | uppercase }}</span>
+            </div>
+
+            <div class="meta-right">
+              @if (clause.riskImpact !== 'None') {
+                <span 
+                  class="risk-badge"
+                  [class.high]="clause.riskImpact === 'High'"
+                  [class.med]="clause.riskImpact === 'Medium'"
+                >
+                  {{ clause.riskImpact }} Risk Impact
+                </span>
+              }
+
+              <span 
+                class="type-badge"
+                [class.added]="clause.changeType === 'added'"
+                [class.removed]="clause.changeType === 'removed'"
+                [class.modified]="clause.changeType === 'modified'"
+                [class.unchanged]="clause.changeType === 'unchanged'"
+              >
+                ● {{ clause.changeType | uppercase }}
+              </span>
+            </div>
+          </div>
+
+          <!-- DUAL CONTENT COLUMNS -->
+          <div class="columns-grid">
+
+            <!-- LEFT: VERSION 1 TEXT -->
+            <div class="text-pane v1-pane" [class.strike]="clause.changeType === 'removed'">
+              <p class="pane-content">{{ clause.version1Text }}</p>
+              @if (clause.pageCitationV1 && clause.pageCitationV1 !== 'N/A') {
+                <span class="citation-pill">📍 {{ clause.pageCitationV1 }}</span>
+              }
+            </div>
+
+            <!-- CENTER: DELTA SUMMARY CHIP -->
+            <div class="diff-center-rail">
+              <div class="rail-icon">
+                @if (clause.changeType === 'added') { <span>+</span> }
+                @else if (clause.changeType === 'removed') { <span>−</span> }
+                @else if (clause.changeType === 'modified') { <span>⇄</span> }
+                @else { <span>=</span> }
+              </div>
+            </div>
+
+            <!-- RIGHT: VERSION 2 TEXT -->
+            <div class="text-pane v2-pane" [class.highlight-add]="clause.changeType === 'added'">
+              <p class="pane-content">{{ clause.version2Text }}</p>
+              @if (clause.pageCitationV2) {
+                <span class="citation-pill highlight">📍 {{ clause.pageCitationV2 }}</span>
+              }
+            </div>
+
+          </div>
+
+          <!-- DELTA RATIONALE CALLOUT (IF CHANGED) -->
+          @if (clause.summaryDelta) {
+            <div class="delta-callout-bar">
+              <span class="callout-lbl">AI CLAUSE DELTA SUMMARY:</span>
+              <p class="callout-text">{{ clause.summaryDelta }}</p>
+            </div>
+          }
+
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- TOAST POPUP -->
+  @if (toastMessage) {
+    <div class="toast-popup">
+      <span>{{ toastMessage }}</span>
+    </div>
+  }
+
+</div>

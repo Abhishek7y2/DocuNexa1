@@ -1,0 +1,446 @@
+<div class="search-page">
+
+  <!-- HEADER -->
+
+  <div class="page-header">
+
+    <div>
+      <span class="eyebrow">INTELLIGENCE</span>
+
+      <h1>Document Search</h1>
+
+      <p>
+        Search across your organization's documents,
+        extracted content and metadata.
+      </p>
+    </div>
+
+    <div class="repository-info">
+      <span class="repository-dot"></span>
+      <span>Repository indexed</span>
+    </div>
+
+  </div>
+
+
+  <!-- SEARCH -->
+
+  <section class="search-hero">
+
+    <div class="search-input-wrapper">
+
+      <span class="search-icon">⌕</span>
+
+      <input
+        type="text"
+        placeholder="Search documents, contract terms, invoice numbers, policies..."
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="search()"
+      />
+
+      @if (searchTerm) {
+        <button
+          type="button"
+          class="clear-search"
+          (click)="searchTerm = ''"
+        >
+          ×
+        </button>
+      }
+
+      <button
+        type="button"
+        class="search-button"
+        (click)="search()"
+      >
+        Search
+      </button>
+
+    </div>
+
+    <div class="search-hints">
+
+      <span>Try searching:</span>
+
+      <button
+        type="button"
+        (click)="searchTerm = 'contract'"
+      >
+        contract
+      </button>
+
+      <button
+        type="button"
+        (click)="searchTerm = 'invoice'"
+      >
+        invoice
+      </button>
+
+      <button
+        type="button"
+        (click)="searchTerm = 'security'"
+      >
+        security
+      </button>
+
+      <button
+        type="button"
+        (click)="searchTerm = 'GST'"
+      >
+        GST
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- MAIN -->
+
+  <div class="search-layout">
+
+    <!-- FILTERS -->
+
+    <aside class="filters-panel">
+
+      <div class="filters-header">
+
+        <div>
+          <span class="eyebrow">FILTERS</span>
+          <h2>Refine Results</h2>
+        </div>
+
+        <button
+          type="button"
+          (click)="clearSearch()"
+        >
+          Reset
+        </button>
+
+      </div>
+
+
+      <div class="filter-group">
+
+        <label>Document Type</label>
+
+        <select [(ngModel)]="selectedType">
+
+          <option>All Types</option>
+          <option>Supplier Contract</option>
+          <option>Purchase Invoice</option>
+          <option>Internal Policy</option>
+
+        </select>
+
+      </div>
+
+
+      <div class="filter-group">
+
+        <label>Category</label>
+
+        <select [(ngModel)]="selectedCategory">
+
+          <option>All Categories</option>
+          <option>Contract</option>
+          <option>Invoice</option>
+          <option>Policy</option>
+
+        </select>
+
+      </div>
+
+
+      <div class="filter-group">
+
+        <label>Status</label>
+
+        <select [(ngModel)]="selectedStatus">
+
+          <option>All Status</option>
+          <option>Approved</option>
+          <option>Pending Review</option>
+          <option>Under Review</option>
+          <option>Processing</option>
+          <option>Draft</option>
+          <option>In Approval</option>
+          <option>Pending Approval</option>
+
+        </select>
+
+      </div>
+
+
+      <div class="filter-group">
+
+        <label>Owner</label>
+
+        <select [(ngModel)]="selectedOwner">
+
+          <option>All Owners</option>
+          <option>Abhishek Yadav</option>
+          <option>Rahul Sharma</option>
+          <option>Priya Mehta</option>
+          <option>Neha Verma</option>
+
+        </select>
+
+      </div>
+
+
+      <div class="filter-divider"></div>
+
+
+      <div class="index-info">
+
+        <div class="index-icon">
+          ✓
+        </div>
+
+        <div>
+
+          <strong>
+            AI Search Enabled
+          </strong>
+
+          <span>
+            Search includes OCR text,
+            extracted fields and metadata.
+          </span>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+
+    <!-- RESULTS -->
+
+    <main class="results-panel">
+
+      <div class="results-header">
+
+        <div>
+
+          <span class="eyebrow">
+            SEARCH RESULTS
+          </span>
+
+          <h2>
+            @if (searchTerm) {
+              Results for "{{ searchTerm }}"
+            } @else {
+              All Documents
+            }
+          </h2>
+
+        </div>
+
+        <span class="result-count">
+          {{ resultCount }} documents
+        </span>
+
+      </div>
+
+
+      @if (filteredDocuments.length > 0) {
+
+        <div class="results-list">
+
+          @for (
+            document of filteredDocuments;
+            track document.id
+          ) {
+
+            <article class="result-card">
+
+              <div class="result-top">
+
+                <div class="document-info">
+
+                  <div class="file-icon">
+                    PDF
+                  </div>
+
+                  <div>
+
+                    <a
+                      class="document-title"
+                      [routerLink]="[
+                        '/documents',
+                        document.id
+                      ]"
+                    >
+                      {{ document.name }}
+                    </a>
+
+                    <span class="document-id">
+                      {{ document.id }}
+                    </span>
+
+                  </div>
+
+                </div>
+
+
+                <span
+                  class="status-badge"
+                  [class.approved]="
+                    document.status === 'Approved'
+                  "
+                  [class.pending]="
+                    document.status === 'Pending Review' ||
+                    document.status === 'Pending Approval'
+                  "
+                  [class.review]="
+                    document.status === 'Under Review' ||
+                    document.status === 'In Approval'
+                  "
+                  [class.draft]="
+                    document.status === 'Draft'
+                  "
+                >
+                  {{ document.status }}
+                </span>
+
+              </div>
+
+
+              <p class="snippet">
+                {{ document.snippet }}
+              </p>
+
+
+              <div class="tags">
+
+                @for (tag of document.tags; track tag) {
+
+                  <span>
+                    {{ tag }}
+                  </span>
+
+                }
+
+              </div>
+
+
+              <div class="result-meta">
+
+                <div class="meta-item">
+
+                  <span>TYPE</span>
+
+                  <strong>
+                    {{ document.type }}
+                  </strong>
+
+                </div>
+
+
+                <div class="meta-item">
+
+                  <span>OWNER</span>
+
+                  <strong>
+                    {{ document.owner }}
+                  </strong>
+
+                </div>
+
+
+                <div class="meta-item">
+
+                  <span>UPDATED</span>
+
+                  <strong>
+                    {{ document.updatedAt }}
+                  </strong>
+
+                </div>
+
+
+                <div class="meta-item">
+
+                  <span>PAGES</span>
+
+                  <strong>
+                    {{ document.pages }}
+                  </strong>
+
+                </div>
+
+
+                <div class="meta-item confidence">
+
+                  <span>AI CONFIDENCE</span>
+
+                  <strong>
+                    {{ document.confidence }}%
+                  </strong>
+
+                  <div class="confidence-track">
+                    <div
+                      class="confidence-fill"
+                      [style.width.%]="
+                        document.confidence
+                      "
+                    ></div>
+                  </div>
+
+                </div>
+
+
+                <a
+                  class="open-button"
+                  [routerLink]="[
+                    '/documents',
+                    document.id
+                  ]"
+                >
+                  Open
+                  <span>→</span>
+                </a>
+
+              </div>
+
+            </article>
+
+          }
+
+        </div>
+
+      } @else {
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            ⌕
+          </div>
+
+          <h3>
+            No documents found
+          </h3>
+
+          <p>
+            We couldn't find documents matching
+            your search and filters.
+          </p>
+
+          <button
+            type="button"
+            (click)="clearSearch()"
+          >
+            Clear Search
+          </button>
+
+        </div>
+
+      }
+
+    </main>
+
+  </div>
+
+</div>
