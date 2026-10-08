@@ -6,7 +6,20 @@ Welcome to the central documentation index for **DocuNexa (Document Intelligence
 
 ## 📑 Master Documentation Index
 
-### 1. Executive & Requirements Baseline
+### 1. Core Enterprise Blueprints & Governance Compendium
+* [Project Master Encyclopedia](PROJECT_EVERYTHING_EXPLAINED.md) — Comprehensive guide explaining every file, module, and engine in DocuNexa.
+* [System Architecture](ARCHITECTURE.md) — Multi-tiered technical architecture, data pipelines, and compliance models.
+* [Enterprise Design System](DESIGN.md) — Visual tokens, WCAG 2.1 AA palette, 46px compact metric strip, and layout rules.
+* [Engineering Memory](MEMORY.md) — Institutional knowledge, Angular standalone conventions, SSR hydration, and budgets.
+* [Project Graphify (Mermaid Diagrams)](PROJECT_GRAPHIFY.md) — 8 standard Mermaid lifecycle, routing, diffing, and SoD graphs.
+* [Whole UI Screen Catalog](WHOLE_UI.md) — Comprehensive specifications and layout anatomy for all 14 screens.
+* [BRD Gap Analysis](DOCUMENT_INTELLIGENCE_PLATFORM_BRD_ANALYSIS.md) — Audit against 11-page BRD v1.0 specifications.
+* [Daily Work Report](TODAYS_WORK_REPORT.md) — Technical deliverable audit, bug fixes, and verification summary.
+* [Executive Audit Report](DocNexaReport.md) — Stakeholder deliverable and enterprise verification report.
+
+---
+
+### 2. Executive & Requirements Baseline
 * [01. Project Overview](01-project-overview.md) — Mission, problem statement, business value, and end-to-end lifecycle.
 * [02. Product Overview](02-product-overview.md) — Target personas, document classes, and core feature suites.
 * [03. Business Requirements (BRD Traceability)](03-business-requirements.md) — Formal BRD v1.0 mapping, SLA mandates, and commercial goals.
