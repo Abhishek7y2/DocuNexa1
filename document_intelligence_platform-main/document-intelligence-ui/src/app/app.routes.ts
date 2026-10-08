@@ -168,6 +168,104 @@ export const routes: Routes = [
         data: { roles: ROLE_ROUTE_ACCESS['/admin'] },
         loadComponent: () =>
           import('./features/admin/admin').then((m) => m.Admin),
+        children: [
+          {
+            path: '',
+            redirectTo: 'overview',
+            pathMatch: 'full',
+          },
+          {
+            path: 'overview',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/overview'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-overview/admin-overview').then((m) => m.AdminOverview),
+          },
+          {
+            path: 'users',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/users'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-users/admin-users').then((m) => m.AdminUsers),
+          },
+          {
+            path: 'document-types',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/document-types'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-document-types/admin-document-types').then((m) => m.AdminDocumentTypes),
+          },
+          {
+            path: 'document-types/:id',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/document-types/:id'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-schema-builder/admin-schema-builder').then((m) => m.AdminSchemaBuilder),
+          },
+          {
+            path: 'workflow',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/workflow'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-workflow/admin-workflow').then((m) => m.AdminWorkflow),
+          },
+          {
+            path: 'retention',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/retention'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-retention/admin-retention').then((m) => m.AdminRetention),
+          },
+          {
+            path: 'security',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/security'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-security/admin-security').then((m) => m.AdminSecurity),
+          },
+          {
+            path: 'integrations',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/integrations'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-integrations/admin-integrations').then((m) => m.AdminIntegrations),
+          },
+          {
+            path: 'notifications',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/notifications'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-notifications/admin-notifications').then((m) => m.AdminNotifications),
+          },
+          {
+            path: 'ai-quality',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/ai-quality'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-ai-quality/admin-ai-quality').then((m) => m.AdminAiQuality),
+          },
+          {
+            path: 'audit',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/audit'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-audit/admin-audit').then((m) => m.AdminAudit),
+          },
+          {
+            path: 'reports',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/reports'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-reports/admin-reports').then((m) => m.AdminReports),
+          },
+          {
+            path: 'operations',
+            canActivate: [roleGuard],
+            data: { roles: ROLE_ROUTE_ACCESS['/admin/operations'] },
+            loadComponent: () =>
+              import('./features/admin/sub-pages/admin-operations/admin-operations').then((m) => m.AdminOperations),
+          },
+        ],
       },
     ],
   },
