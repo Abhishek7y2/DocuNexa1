@@ -86,17 +86,23 @@ On **07 October 2026**, the web frontend implementation for the **DocNexa / DocI
   - **Discrepancy Engine:** If the calculated line-item sum differs from the OCR extracted grand total, an alert banner appears with a one-click "Reconcile Total" action.
   - **Duplicate Prevention:** Flags duplicate invoice numbers against historical records within an 18-month rolling window.
 
-### 3.3 Side-by-Side Clause & Version Diff Studio (`SCR-08`)
+### 3.3 Enterprise Version Comparison & Clause Diff Studio (`SCR-08`)
 * **Component Location:** `src/app/features/compare/`
 * **Files:** `compare-studio.ts`, `compare-studio.html`, `compare-studio.scss`
-* **Architectural Highlights:**
-  - **Side-by-Side Comparison:** Baseline contract (v1.0) and amended contract (v2.0) are rendered in synchronized dual view.
-  - **Clause Diff Classification (AI-005):**
-    - 🟢 **Added Clauses:** Rendered with green borders and `+ Added` badge (e.g. EU GDPR Data Processing Clause 4.2).
-    - 🔴 **Removed Clauses:** Rendered with red strikethrough and `- Removed` badge (e.g. Convenience Termination Clause 9.3).
-    - 🟡 **Modified Clauses:** Highlighted in amber showing commercial alterations (e.g. Net 30 ➔ Net 60 days, Liability Cap ₹10L ➔ ₹25L).
-    - ⚪ **Unchanged Clauses:** Slate tags validating 100% text match.
-  - **Risk Rating & Citations:** High/Medium/Low risk scoring alongside paragraph and page numbers (`📍 Page 2, Para 4`).
+* **Architectural & Design System Highlights:**
+  - **Light Enterprise & IndiHire Design Alignment:** Converted dark background palette to high-contrast enterprise design (`#f8fafc` canvas, `#ffffff` cards, `#e2e8f0` borders, `#4f46e5` primary indigo accents).
+  - **Dynamic Interactive Version Selector:** Full bidirectional comparison bar comparing Baseline (`v1.0`) against Amendment (`v2.0` or draft `v1.1`) with instant version swap (`⇄`) and author attribution chips.
+  - **4 Compact IndiHire-Style KPI Stat Cards:**
+    - 🟡 **Total Deltas (Amber Border-Top):** `7 Changes` (3 Clauses · 4 Fields)
+    - 🟣 **Modified Clauses (Indigo Border-Top):** `2 Clauses` (Delivery SLA & Liability Limits)
+    - 🔴 **High Risk Shifts (Red Border-Top):** `1 Critical Flag` (Uncapped Gross Negligence)
+    - 🟢 **Commercial Variance (Emerald Border-Top):** `+₹ 3,50,000` (Net 30d vs Net 45d Baseline)
+  - **Task 7D Item 1 — Inline Word-Level Diff Renderer:** Real-time semantic word diff identifying deletions (`diff-del` strikethrough) and insertions (`diff-add` green highlight).
+  - **Task 7D Item 2 — Uncertain Alignment Warning:** AI heuristic alignment flag `⚠️ Uncertain Alignment · Reviewer Verification Required` for low-confidence semantic matches.
+  - **Task 7D Item 3 — Clickable Dual Source Citations:** Direct viewer deep links (`v1.0 Page 2, Para 4` ➔ `v2.0 Page 2, Para 3`) navigating to the exact PDF page in Document Viewer.
+  - **Task 7D Item 4 — Export Redline Report (PDF & DOCX):** One-click export for tamper-evident PDF reports and Microsoft Word Track Changes.
+  - **Task 7D Item 5 — Non-Authoritative Legal Disclaimer:** Enterprise reading aid warning banner with SOC2 & ISO 27001 audit compliance badge.
+  - **Multi-View Segmented Switcher:** Seamless switching between Clause-Level Redline, Field-Level Differences table, Full Document Track Changes manuscript, and Cryptographic Audit Trail.
 
 ### 3.4 Approvals: 4-Stage Stepper & Separation of Duties (SoD) (`SCR-09`)
 * **Component Location:** `src/app/features/approvals/`
