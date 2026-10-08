@@ -1,4 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { INotificationService, NOTIFICATION_SERVICE_TOKEN } from './api-services';
+import { MockSettingsService } from './mock-settings.service';
 
 export type NotificationType =
   | 'receipt'
@@ -29,13 +31,18 @@ export interface NotificationPreference {
   label: string;
   email: boolean;
   inApp: boolean;
+  requiredInApp?: boolean;
 }
 
 @Injectable({
   providedIn: 'root',
 })
-export class NotificationService {
+export class NotificationService implements INotificationService {
+  private readonly mockSettings = inject(MockSettingsService, { optional: true });
+
   readonly isDrawerOpen = signal(false);
+  readonly isLoading = signal(false);
+  readonly hasError = signal(false);
 
   readonly notifications = signal<NotificationItem[]>([
     {
@@ -126,17 +133,25 @@ export class NotificationService {
 
   readonly preferences = signal<NotificationPreference[]>([
     { type: 'receipt', label: 'Document Intake Receipt', email: true, inApp: true },
-    { type: 'processing_exception', label: 'OCR & Processing Exceptions', email: true, inApp: true },
+    { type: 'processing_exception', label: 'OCR & Processing Exceptions', email: true, inApp: true, requiredInApp: true },
     { type: 'review_assignment', label: 'Review Task Assignments', email: true, inApp: true },
     { type: 'returned_for_changes', label: 'Returned for Changes', email: true, inApp: true },
     { type: 'approval_decision', label: 'Approval & Rejection Decisions', email: true, inApp: true },
     { type: 'retention_expiry', label: 'Retention Policy Expiry Alerts', email: false, inApp: true },
-    { type: 'sla_breach', label: 'SLA Breach Warnings', email: true, inApp: true },
+    { type: 'sla_breach', label: 'SLA Breach Warnings', email: true, inApp: true, requiredInApp: true },
   ]);
 
   readonly unreadCount = computed(() => {
     return this.notifications().filter((item) => !item.read).length;
   });
+
+  loadNotifications(): void {
+    this.isLoading.set(true);
+    this.hasError.set(false);
+    setTimeout(() => {
+      this.isLoading.set(false);
+    }, 400);
+  }
 
   toggleDrawer(): void {
     this.isDrawerOpen.set(!this.isDrawerOpen());
@@ -168,10 +183,6 @@ export class NotificationService {
     );
   }
 
-  updatePreferences(prefList: NotificationPreference[]): void {
-    this.preferences.set(prefList);
-  }
-
   toggleEmailPref(type: NotificationType): void {
     this.preferences.update((list) =>
       list.map((p) => (p.type === type ? { ...p, email: !p.email } : p)),
@@ -180,7 +191,28 @@ export class NotificationService {
 
   toggleInAppPref(type: NotificationType): void {
     this.preferences.update((list) =>
-      list.map((p) => (p.type === type ? { ...p, inApp: !p.inApp } : p)),
+      list.map((p) => {
+        if (p.type === type) {
+          if (p.requiredInApp || type === 'processing_exception' || type === 'sla_breach') {
+            return p; // Non-disableable for critical types
+          }
+          return { ...p, inApp: !p.inApp };
+        }
+        return p;
+      }),
     );
   }
+
+  getNotificationTypeLabel(type: NotificationType): string {
+    switch (type) {
+      case 'receipt': return 'Intake Receipt';
+      case 'processing_exception': return 'Processing Exception';
+      case 'review_assignment': return 'Review Assignment';
+      case 'returned_for_changes': return 'Returned for Changes';
+      case 'approval_decision': return 'Approval Decision';
+      case 'retention_expiry': return 'Retention Expiry';
+      case 'sla_breach': return 'SLA Breach';
+    }
+  }
 }
+

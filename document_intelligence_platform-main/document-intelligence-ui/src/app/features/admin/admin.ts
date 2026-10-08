@@ -6,6 +6,7 @@ import { LoadingState } from '../../shared/ui/loading-state/loading-state';
 import { ErrorState } from '../../shared/ui/error-state/error-state';
 import { EmptyState } from '../../shared/ui/empty-state/empty-state';
 import { ADMIN_SERVICE_TOKEN, MockAdminService } from '../../core/services/api-services';
+import { AuthService } from '../../core/services/auth.service';
 
 type AdminTab =
   | 'overview'
@@ -67,6 +68,8 @@ export interface NotificationDeliveryLog {
   channel: 'Email' | 'In-App' | 'SMS';
   state: 'Queued' | 'Sent' | 'Failed' | 'Retrying';
   attempts: number;
+  maxAttempts?: number;
+  isRetrying?: boolean;
   lastError: string;
   timestamp: string;
   attemptHistory: DeliveryAttempt[];
@@ -82,6 +85,7 @@ export interface WebhookDeliveryLog {
   idempotencyKey: string;
   finalFailure: string;
   timestamp: string;
+  isResending?: boolean;
 }
 
 @Component({
@@ -94,6 +98,7 @@ export interface WebhookDeliveryLog {
 })
 export class Admin implements OnInit {
   private readonly adminService = inject(ADMIN_SERVICE_TOKEN);
+  private readonly authService = inject(AuthService);
 
   activeTab: AdminTab = 'overview';
   organizationName = 'Acme Corporation';
@@ -106,6 +111,14 @@ export class Admin implements OnInit {
   hasUnsavedChanges = signal(false);
   saveSuccessToast: string | null = null;
   testWebhookToast: string | null = null;
+
+  // Delivery & Webhook Loading/Error Signals
+  isDeliveryLoading = signal(false);
+  hasDeliveryError = signal(false);
+  isWebhookLoading = signal(false);
+  hasWebhookError = signal(false);
+  isHistoryLoading = signal(false);
+  hasHistoryError = signal(false);
 
   searchUser = '';
   selectedUserRole = 'All Roles';
@@ -172,6 +185,7 @@ export class Admin implements OnInit {
 
   selectedDeliveryLog: NotificationDeliveryLog | null = null;
   showAttemptHistoryModal = false;
+  private previousActiveElement: HTMLElement | null = null;
 
   notificationLogs: NotificationDeliveryLog[] = [
     {
@@ -182,6 +196,7 @@ export class Admin implements OnInit {
       channel: 'Email',
       state: 'Failed',
       attempts: 3,
+      maxAttempts: 5,
       lastError: '550 5.1.1 SMTP relay timeout: MX host unreachable',
       timestamp: '06 Oct 2026 · 11:32 AM',
       attemptHistory: [
@@ -198,6 +213,7 @@ export class Admin implements OnInit {
       channel: 'Email',
       state: 'Sent',
       attempts: 1,
+      maxAttempts: 5,
       lastError: '—',
       timestamp: '06 Oct 2026 · 11:15 AM',
       attemptHistory: [
@@ -212,6 +228,7 @@ export class Admin implements OnInit {
       channel: 'In-App',
       state: 'Sent',
       attempts: 1,
+      maxAttempts: 5,
       lastError: '—',
       timestamp: '06 Oct 2026 · 10:45 AM',
       attemptHistory: [
@@ -226,6 +243,7 @@ export class Admin implements OnInit {
       channel: 'Email',
       state: 'Retrying',
       attempts: 2,
+      maxAttempts: 5,
       lastError: '421 4.7.0 Temporary rate limit exceeded',
       timestamp: '06 Oct 2026 · 09:50 AM',
       attemptHistory: [
@@ -271,6 +289,11 @@ export class Admin implements OnInit {
     },
   ];
 
+  get canAccessDeliveryTab(): boolean {
+    const role = this.authService.currentUser()?.role;
+    return role === 'org_admin' || role === 'platform_operator';
+  }
+
   get filteredNotificationLogs(): NotificationDeliveryLog[] {
     if (this.deliveryFilterState === 'All') return this.notificationLogs;
     return this.notificationLogs.filter((log) => log.state === this.deliveryFilterState);
@@ -282,6 +305,15 @@ export class Admin implements OnInit {
       $event.returnValue = 'You have unsaved administration setting changes.';
     }
   }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  handleModalEscape(event: any): void {
+    if (this.showAttemptHistoryModal) {
+      event.preventDefault();
+      this.closeAttemptHistory();
+    }
+  }
+
 
   ngOnInit(): void {
     this.loadAdminSettings();
@@ -313,6 +345,11 @@ export class Admin implements OnInit {
   }
 
   setTab(tab: AdminTab): void {
+    if (tab === 'delivery' && !this.canAccessDeliveryTab) {
+      alert('Access Denied: Only Organization Admins and Platform Operators can access Notification Delivery.');
+      return;
+    }
+
     if (this.hasUnsavedChanges()) {
       const confirmSwitch = confirm('You have unsaved changes. Are you sure you want to switch tabs?');
       if (!confirmSwitch) return;
@@ -396,39 +433,88 @@ export class Admin implements OnInit {
 
   // --- NOTIFICATION DELIVERY ACTIONS ---
   openAttemptHistory(log: NotificationDeliveryLog): void {
+    if (typeof document !== 'undefined') {
+      this.previousActiveElement = document.activeElement as HTMLElement;
+    }
     this.selectedDeliveryLog = log;
     this.showAttemptHistoryModal = true;
+    this.isHistoryLoading.set(true);
+    this.hasHistoryError.set(false);
+    setTimeout(() => {
+      this.isHistoryLoading.set(false);
+    }, 300);
   }
 
   closeAttemptHistory(): void {
     this.showAttemptHistoryModal = false;
     this.selectedDeliveryLog = null;
+    if (this.previousActiveElement && typeof this.previousActiveElement.focus === 'function') {
+      this.previousActiveElement.focus();
+    }
+  }
+
+  retryHistoryLoad(): void {
+    this.isHistoryLoading.set(true);
+    this.hasHistoryError.set(false);
+    setTimeout(() => {
+      this.isHistoryLoading.set(false);
+    }, 400);
+  }
+
+  loadDeliveryLogs(): void {
+    this.isDeliveryLoading.set(true);
+    this.hasDeliveryError.set(false);
+    setTimeout(() => {
+      this.isDeliveryLoading.set(false);
+    }, 400);
+  }
+
+  loadWebhookLogs(): void {
+    this.isWebhookLoading.set(true);
+    this.hasWebhookError.set(false);
+    setTimeout(() => {
+      this.isWebhookLoading.set(false);
+    }, 400);
   }
 
   retryNotificationDelivery(log: NotificationDeliveryLog): void {
+    const maxAttempts = log.maxAttempts ?? 5;
+    if (log.state === 'Sent' || log.isRetrying || log.attempts >= maxAttempts) {
+      return; // Idempotency guard & limit check
+    }
+
+    log.isRetrying = true;
     log.state = 'Retrying';
     log.attempts++;
-    log.attemptHistory.push({
-      attemptNumber: log.attempts,
-      timestamp: 'Just now',
-      channel: log.channel,
-      responseStatus: '250 2.0.0 OK',
-      responseMessage: 'Manual retry succeeded via SMTP relay',
-      status: 'Success',
-    });
+
     setTimeout(() => {
+      log.isRetrying = false;
       log.state = 'Sent';
       log.lastError = '—';
+      log.attemptHistory.push({
+        attemptNumber: log.attempts,
+        timestamp: 'Just now',
+        channel: log.channel,
+        responseStatus: '250 2.0.0 OK',
+        responseMessage: 'Manual retry succeeded via SMTP relay',
+        status: 'Success',
+      });
     }, 1200);
   }
 
   resendWebhook(webhook: WebhookDeliveryLog): void {
-    webhook.httpStatus = '200 OK (Resent)';
-    webhook.finalFailure = '—';
-    this.testWebhookToast = `Resent webhook payload [${webhook.event}] to ${webhook.endpointUrl}`;
+    if (webhook.isResending) return;
+
+    webhook.isResending = true;
     setTimeout(() => {
-      this.testWebhookToast = null;
-    }, 3500);
+      webhook.isResending = false;
+      webhook.httpStatus = '200 OK (Resent)';
+      webhook.finalFailure = '—';
+      this.testWebhookToast = `Resent webhook payload [${webhook.event}] to ${webhook.endpointUrl}`;
+      setTimeout(() => {
+        this.testWebhookToast = null;
+      }, 3500);
+    }, 800);
   }
 
   sendTestWebhook(): void {

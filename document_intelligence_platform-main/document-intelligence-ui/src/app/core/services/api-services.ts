@@ -1,6 +1,9 @@
-import { Injectable, inject, InjectionToken } from '@angular/core';
+import { Injectable, inject, InjectionToken, Signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { MockSettingsService } from './mock-settings.service';
+import type { NotificationItem, NotificationPreference, NotificationType } from './notification.service';
+
+
 
 /* =========================================
    1. DOCUMENT SERVICE
@@ -344,37 +347,27 @@ export class MockCompareService implements ICompareService {
 /* =========================================
    8. NOTIFICATION SERVICE
    ========================================= */
-export interface INotificationItem {
-  id: string;
-  title: string;
-  message: string;
-  timestamp: string;
-  unread: boolean;
-  type: 'info' | 'warning' | 'alert';
-}
-
 export interface INotificationService {
-  getNotifications(): Observable<INotificationItem[]>;
-  markAsRead(id: string): Observable<boolean>;
+  isDrawerOpen: Signal<boolean>;
+  notifications: Signal<NotificationItem[]>;
+  unreadCount: Signal<number>;
+  preferences: Signal<NotificationPreference[]>;
+  isLoading: Signal<boolean>;
+  hasError: Signal<boolean>;
+  toggleDrawer(): void;
+  openDrawer(): void;
+  closeDrawer(): void;
+  markAsRead(id: string): void;
+  markAllAsRead(): void;
+  toggleRead(id: string): void;
+  toggleEmailPref(type: NotificationType): void;
+  toggleInAppPref(type: NotificationType): void;
+  getNotificationTypeLabel(type: NotificationType): string;
+  loadNotifications(): void;
 }
 
 export const NOTIFICATION_SERVICE_TOKEN = new InjectionToken<INotificationService>('NOTIFICATION_SERVICE');
 
-@Injectable({ providedIn: 'root' })
-export class MockNotificationService implements INotificationService {
-  private mockSettings = inject(MockSettingsService);
-
-  getNotifications(): Observable<INotificationItem[]> {
-    return this.mockSettings.simulateDelay([
-      { id: 'N-1', title: 'SLA Breach Warning', message: 'Document DOC-10247 review SLA expires in 1.2 hours.', timestamp: '10 mins ago', unread: true, type: 'warning' },
-      { id: 'N-2', title: 'Approval Required', message: 'Invoice DOC-10248 ready for your final sign-off.', timestamp: '45 mins ago', unread: true, type: 'alert' },
-    ]);
-  }
-
-  markAsRead(_id: string): Observable<boolean> {
-    return this.mockSettings.simulateDelay(true);
-  }
-}
 
 /* =========================================
    9. ADMIN SERVICE
